@@ -56,7 +56,6 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
   });
 
   describe("Scénarios imposés par CyberSafe_Online_Ajout_VirusTotal (Section 7)", () => {
-    // Cas 1 : SMS avec URL malveillante
     it("Scénario 1 : Un SMS contenant une URL malveillante connue élève le risque global à ÉLEVÉ", () => {
       const mockGemma: GemmaAnalysisResponse = {
         level: "FAIBLE",
@@ -109,7 +108,6 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
       expect(combined.recommendations.some((r) => r.includes("sans détection ne signifie pas"))).toBe(true);
     });
 
-    // Cas 2 : SMS contenant une URL sans rapport disponible (404)
     it("Scénario 2 : Un SMS contenant une URL sans rapport disponible indique un lien non répertorié sans inventer de faux rapport", () => {
       const mockGemma: GemmaAnalysisResponse = {
         level: "SUSPECT",
@@ -152,7 +150,6 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
       expect(combined.recommendations.some((r) => r.includes("sans détection ne signifie pas"))).toBe(true);
     });
 
-    // Cas 3 : SMS sans URL
     it("Scénario 3 : Un SMS sans URL n'appelle pas VirusTotal et conserve l'analyse textuelle", async () => {
       const smsWithoutUrl = "Votre code de réinitialisation Moov est 4488. Ne le communiquez à personne.";
       const vtResult = await analyzeUrlsWithVirusTotal(smsWithoutUrl);
@@ -162,7 +159,6 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
       expect(vtResult.summary.totalUrls).toBe(0);
     });
 
-    // Cas 4 : Quota dépassé (429)
     it("Scénario 4 : Une erreur de quota VirusTotal affiche 'Quota atteint' sans bloquer l'application", () => {
       const mockGemma: GemmaAnalysisResponse = {
         level: "SUSPECT",
@@ -205,7 +201,6 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
       expect(combined.recommendations.some((r) => r.includes("Vérification VirusTotal indisponible"))).toBe(true);
     });
 
-    // Cas 5 : Indisponibilité de VirusTotal
     it("Scénario 5 : Une indisponibilité de VirusTotal affiche 'Vérification VirusTotal indisponible'", () => {
       const mockGemma: GemmaAnalysisResponse = {
         level: "FAIBLE",
@@ -235,7 +230,6 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
       expect(combined.recommendations.some((r) => r.includes("Vérification VirusTotal indisponible"))).toBe(true);
     });
 
-    // Cas 6 : SMS frauduleux sans lien (détectable par Gemma uniquement)
     it("Scénario 6 : Un SMS frauduleux sans lien est détecté comme ÉLEVÉ par Gemma uniquement", () => {
       const mockGemma: GemmaAnalysisResponse = {
         level: "ÉLEVÉ",
@@ -279,10 +273,15 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
       expect(report.url).toBe("https://google.com/");
       expect(report.domain).toBe("google.com");
       expect(["analyzed", "unavailable"]).toContain(report.status);
-      expect(report.stats).toBeDefined();
-      expect(typeof report.stats?.harmless).toBe("number");
-      expect(typeof report.stats?.undetected).toBe("number");
-      expect(report.reputation).toBeDefined();
+      if (report.status === "analyzed") {
+        expect(report.stats).toBeDefined();
+        expect(typeof report.stats?.harmless).toBe("number");
+        expect(typeof report.stats?.undetected).toBe("number");
+        expect(report.reputation).toBeDefined();
+      } else {
+        expect(report.status).toBe("unavailable");
+      }
     }, 15000);
   });
 });
+

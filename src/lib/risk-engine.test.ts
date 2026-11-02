@@ -10,12 +10,12 @@ describe("risk engine", () => {
   });
 
   it("legit demo SMS is low risk in French", () => {
-    expect(analyzeSms(DEMO_SMS[0].text, "fr").level).toBe("FAIBLE");
+    expect(analyzeSms(DEMO_SMS[0]!.text, "fr").level).toBe("FAIBLE");
   });
 
   it("fake bonus and OTP requests are high risk", () => {
-    expect(analyzeSms(DEMO_SMS[1].text, "fr").level).toBe("ÉLEVÉ");
-    expect(analyzeSms(DEMO_SMS[2].text, "fr").level).toBe("ÉLEVÉ");
+    expect(analyzeSms(DEMO_SMS[1]!.text, "fr").level).toBe("ÉLEVÉ");
+    expect(analyzeSms(DEMO_SMS[2]!.text, "fr").level).toBe("ÉLEVÉ");
     expect(analyzeSms(DEMO_TRANSCRIPT, "fr").level).toBe("ÉLEVÉ");
   });
 
@@ -24,7 +24,7 @@ describe("risk engine", () => {
   });
 
   it("detects threats in Éwé (Eʋegbe)", () => {
-    const eweOtp = MULTILINGUAL_DEMO_SMS.ee[2].text;
+    const eweOtp = MULTILINGUAL_DEMO_SMS.ee[2]!.text;
     const resultEe = analyzeSms(eweOtp, "ee");
     expect(resultEe.level).toBe("ÉLEVÉ");
     expect(resultEe.summary).toContain("SMS sia");
@@ -32,7 +32,7 @@ describe("risk engine", () => {
   });
 
   it("detects threats in English", () => {
-    const enOtp = MULTILINGUAL_DEMO_SMS.en[2].text;
+    const enOtp = MULTILINGUAL_DEMO_SMS.en[2]!.text;
     const resultEn = analyzeSms(enOtp, "en");
     expect(resultEn.level).toBe("ÉLEVÉ");
     expect(resultEn.summary).toContain("This SMS");

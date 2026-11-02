@@ -1,0 +1,70 @@
+{
+  "name": "CyberSafe Online - Sécurité Mobile Money Togo",
+  "short_name": "CyberSafe",
+  "description": "Protection citoyenne et IA contre les arnaques Mobile Money (T-Money & Moov Flooz) au Togo.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020617",
+  "theme_color": "#0a1024",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": [
+    "security",
+    "utilities",
+    "education",
+    "finance"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vérifier un SMS",
+      "short_name": "SMS",
+      "description": "Analyser un SMS suspect T-Money ou Flooz",
+      "url": "/sms",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Assistant CyberSafe",
+      "short_name": "Assistant",
+      "description": "Poser une question à l'assistant de sécurité",
+      "url": "/assistant",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Scanner un QR Code",
+      "short_name": "QR Code",
+      "description": "Analyser un QR code marchand suspect",
+      "url": "/qr",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Apprendre & Flashcards",
+      "short_name": "Apprendre",
+      "description": "Tester vos réflexes anti-fraude en QCM",
+      "url": "/apprendre",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+

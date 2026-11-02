@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <!-- Dark Mode Gradients -->
+    <linearGradient id="shieldGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1024" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="knotGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+
+    <!-- Light Mode Gradients -->
+    <linearGradient id="shieldGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#e2e8f0" />
+    </linearGradient>
+    <linearGradient id="knotGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Arm & Hand Gradients -->
+    <linearGradient id="armFillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#122a54" />
+      <stop offset="100%" stop-color="#091832" />
+    </linearGradient>
+    <linearGradient id="handFillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c2040" />
+      <stop offset="100%" stop-color="#07152c" />
+    </linearGradient>
+
+    <!-- LAYER 1: Canonical Forearm Shaft -->
+    <g id="canonical-forearm">
+      <path
+        d="M -2.6 -16.5 L -2.8 -3.5 L 2.8 -3.5 L 2.6 -16.5 Z"
+        class="arm-shaft"
+        stroke-width="1.6"
+        stroke-linejoin="round"
+      />
+      <line
+        x1="-2.6"
+        y1="-13.5"
+        x2="2.6"
+        y2="-13.5"
+        class="cuff-accent"
+        stroke-width="1.2"
+        stroke-linecap="round"
+      />
+      <circle cx="0" cy="-15" r="0.8" class="cuff-dot" />
+      <line
+        x1="0"
+        y1="-13"
+        x2="0"
+        y2="-6.5"
+        class="arm-ridge"
+        stroke-width="1.0"
+        stroke-linecap="round"
+        opacity="0.65"
+      />
+    </g>
+
+    <!-- LAYER 2: Canonical Clasping Hand (Opaque) -->
+    <g id="canonical-hand">
+      <!-- Sculpted Hand Silhouette -->
+      <path
+        d="M -6.29 -3.87 C -3.34 -4.83 0.63 -5.31 4.04 -4.70 C 4.90 -2.60 3.39 0.08 0.77 1.63 C -0.22 2.21 -0.58 2.37 -0.73 2.15 C -0.87 1.94 -0.66 1.57 -0.19 1.12 C -0.54 1.34 -0.83 1.37 -0.89 1.13 C -0.96 0.88 -0.72 0.54 -0.25 0.17 C -0.61 0.40 -0.88 0.41 -0.94 0.16 C -1.00 -0.09 -0.73 -0.44 -0.27 -0.80 C -0.63 -0.58 -0.83 -0.67 -0.81 -0.92 C -0.80 -1.16 -0.54 -1.43 -0.12 -1.72 C -1.89 -0.70 -3.42 -0.26 -4.89 -0.26 C -2.39 -1.80 -2.86 -2.49 -2.81 -3.22 C -2.08 -5.04 -3.96 -6.01 -5.18 -6.32 Z"
+        class="hand-body"
+        stroke-width="1.6"
+        stroke-linejoin="round"
+      />
+      <!-- 3 Finger Separation Grooves -->
+      <line x1="4.23" y1="-2.42" x2="-0.73" y2="2.15" class="finger-groove" stroke-width="1.3" stroke-linecap="round" />
+      <line x1="3.61" y1="-3.23" x2="-0.89" y2="1.13" class="finger-groove" stroke-width="1.3" stroke-linecap="round" />
+      <line x1="3.00" y1="-4.03" x2="-0.94" y2="0.16" class="finger-groove" stroke-width="1.3" stroke-linecap="round" />
+      <!-- Knuckle Ridge Arc & Knuckle Accents -->
+      <path d="M 4.52 -1.77 L 4.09 -2.53 L 3.48 -3.33 L 2.87 -4.14" fill="none" class="knuckle-ridge" stroke-width="0.8" opacity="0.8" />
+      <circle cx="4.52" cy="-1.77" r="0.6" class="knuckle-dot" />
+      <circle cx="4.09" cy="-2.53" r="0.6" class="knuckle-dot" />
+      <circle cx="3.48" cy="-3.33" r="0.6" class="knuckle-dot" />
+      <circle cx="2.87" cy="-4.14" r="0.6" class="knuckle-dot" />
+      <!-- Metacarpal Dorsal Tendon Lines -->
+      <line x1="4.09" y1="-2.53" x2="-1.10" y2="-4.91" class="tendon-line" stroke-width="0.9" stroke-linecap="round" opacity="0.75" />
+      <line x1="3.48" y1="-3.33" x2="-1.77" y2="-4.06" class="tendon-line" stroke-width="0.9" stroke-linecap="round" opacity="0.75" />
+      <line x1="2.87" y1="-4.14" x2="-2.43" y2="-3.21" class="tendon-line" stroke-width="0.9" stroke-linecap="round" opacity="0.75" />
+      <!-- Thumb Counter-Grip -->
+      <path d="M -2.22 -2.21 Q -3.16 -1.23 -2.47 -0.21" fill="none" class="thumb-grip" stroke-width="1.2" stroke-linecap="round" />
+      <!-- Cyber Biometric Sensor Accent -->
+      <circle cx="-0.07" cy="-5.29" r="0.8" class="sensor-dot" />
+      <line x1="-0.07" y1="-5.29" x2="-2.07" y2="-4.58" class="sensor-trace" stroke-width="0.8" stroke-dasharray="0.8 0.8" stroke-linecap="round" />
+    </g>
+  </defs>
+
+  <style>
+    .shield-bg { fill: url(#shieldGradDark); stroke: #06b6d4; }
+    .shield-bevel { stroke: #38bdf8; }
+    .arm-shaft { fill: url(#armFillGrad); stroke: #38bdf8; }
+    .arm-ridge { stroke: #38bdf8; }
+    .cuff-accent { stroke: #00f0ff; }
+    .cuff-dot { fill: #38bdf8; }
+    .hand-body { fill: url(#handFillGrad); stroke: #38bdf8; }
+    .finger-groove { stroke: #38bdf8; }
+    .knuckle-ridge { stroke: #00f0ff; }
+    .knuckle-dot { fill: #00f0ff; }
+    .tendon-line { stroke: #06b6d4; }
+    .thumb-grip { stroke: #38bdf8; }
+    .sensor-dot { fill: #00f0ff; }
+    .sensor-trace { stroke: #00f0ff; }
+    .core-node { fill: #10b981; stroke: #10b981; }
+    .center-aperture { fill: #06b6d4; stroke: #38bdf8; }
+    .circuit-node { fill: #38bdf8; }
+    .circuit-trace { stroke: #06b6d4; }
+
+    @media (prefers-color-scheme: light) {
+      .shield-bg { fill: url(#shieldGradLight); stroke: #0f172a; }
+      .shield-bevel { stroke: #2563eb; }
+      .arm-shaft { fill: #e2e8f0; stroke: #2563eb; }
+      .arm-ridge { stroke: #2563eb; }
+      .cuff-accent { stroke: #0284c7; }
+      .cuff-dot { fill: #0284c7; }
+      .hand-body { fill: #f1f5f9; stroke: #2563eb; }
+      .finger-groove { stroke: #2563eb; }
+      .knuckle-ridge { stroke: #0284c7; }
+      .knuckle-dot { fill: #0284c7; }
+      .tendon-line { stroke: #0284c7; }
+      .thumb-grip { stroke: #2563eb; }
+      .sensor-dot { fill: #0284c7; }
+      .sensor-trace { stroke: #0284c7; }
+      .core-node { fill: #059669; stroke: #059669; }
+      .center-aperture { fill: #0284c7; stroke: #2563eb; }
+      .circuit-node { fill: #0284c7; }
+      .circuit-trace { stroke: #2563eb; }
+    }
+  </style>
+
+  <!-- Neo-brutalist Outer Hex-Shield Badge Frame -->
+  <path
+    class="shield-bg"
+    d="M 24 3.5 L 42 9.5 V 25 C 42 35.8 34 43.5 24 46 C 14 43.5 6 35.8 6 25 V 9.5 Z"
+    stroke-width="2.2"
+    stroke-linejoin="round"
+  />
+
+  <!-- Subtle Shield Inner Bevel -->
+  <path
+    class="shield-bevel"
+    d="M 24 5.5 L 40 11 V 24.5 C 40 34.2 33 41.5 24 43.8 C 15 41.5 8 34.2 8 24.5 V 11 Z"
+    fill="none"
+    stroke-width="0.6"
+    opacity="0.35"
+  />
+
+  <!-- Central Security Matrix (Triangular Aperture & Pulsing Core Node) -->
+  <polygon
+    class="center-aperture"
+    points="24,20.2 27.8,26.5 20.2,26.5"
+    fill-opacity="0.2"
+    stroke-width="1.1"
+  />
+  <circle cx="24" cy="24.4" r="1.6" class="core-node" />
+  <circle
+    cx="24"
+    cy="24.4"
+    r="2.6"
+    fill="none"
+    class="core-node"
+    stroke-width="0.6"
+    stroke-dasharray="1 1"
+    opacity="0.8"
+  />
+
+  <!-- Continuous 3-Hand Mutual Wrist Clasp with C3 Symmetry -->
+  <g transform="translate(24, 24.5)">
+    <!-- Layer 1: The 3 Radial Forearms -->
+    <use href="#canonical-forearm" transform="rotate(0)" />
+    <use href="#canonical-forearm" transform="rotate(120)" />
+    <use href="#canonical-forearm" transform="rotate(240)" />
+
+    <!-- Layer 2: The 3 Foreground Gripping Hands -->
+    <use href="#canonical-hand" transform="rotate(0)" />
+    <use href="#canonical-hand" transform="rotate(120)" />
+    <use href="#canonical-hand" transform="rotate(240)" />
+  </g>
+
+  <!-- Peripheral Cyber Circuit Nodes -->
+  <circle cx="12" cy="14" r="1.1" class="circuit-node" opacity="0.85" />
+  <line
+    x1="12"
+    y1="14"
+    x2="16"
+    y2="18"
+    class="circuit-trace"
+    stroke-width="0.8"
+    stroke-dasharray="1 1"
+    opacity="0.6"
+  />
+
+  <circle cx="36" cy="14" r="1.1" class="circuit-node" opacity="0.85" />
+  <line
+    x1="36"
+    y1="14"
+    x2="32"
+    y2="18"
+    class="circuit-trace"
+    stroke-width="0.8"
+    stroke-dasharray="1 1"
+    opacity="0.6"
+  />
+
+  <circle cx="24" cy="41" r="1.1" class="core-node" opacity="0.85" />
+  <line
+    x1="24"
+    y1="41"
+    x2="24"
+    y2="37"
+    class="core-node"
+    stroke-width="0.8"
+    stroke-dasharray="1 1"
+    opacity="0.6"
+  />
+</svg>

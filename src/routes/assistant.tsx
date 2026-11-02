@@ -23,22 +23,56 @@ import {
   Paperclip,
   Loader2,
   FileCheck2,
+  ImageUp,
+  RefreshCw,
+  Copy,
+  CheckCheck,
+  Lock,
+  ArrowRight,
+  Sparkle,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AiStatusBanner, PageHeader, Panel } from "@/components/cs/ui";
+import {
+  CyberSticker,
+  WavyCyberGrid,
+  MemphisDoodle,
+} from "@/components/cs/CyberDecorations";
 import { useI18n, type Language } from "@/lib/i18n";
-import { askGemmaAssistantApi, GemmaApiError } from "@/lib/gemma-client";
-import { extractTextFromPdf } from "@/lib/pdf-parser";
+import {
+  askGemmaAssistantApi,
+  extractCourseImageApi,
+  generateStudyPlanApi,
+  generateStudyQuizApi,
+  GemmaApiError,
+} from "@/lib/gemma-client";
+import { extractTextFromDocument } from "@/lib/document-parser";
+import { DEMO_COURSES, type DemoCourse } from "@/lib/demo";
 import { cn } from "@/lib/utils";
 
+export interface AssistantSearch {
+  cmd?: string;
+}
+
 export const Route = createFileRoute("/assistant")({
+  validateSearch: (search: Record<string, unknown>): AssistantSearch => {
+    const cmdVal = search["cmd"];
+    if (typeof cmdVal === "string") {
+      return { cmd: cmdVal };
+    }
+    return {};
+  },
   head: () => ({
     meta: [
-      { title: "Assistant CyberSafe — CyberSafe Online" },
-      { name: "description", content: "Posez vos questions de cybersécurité ou révisez tous vos cours (PDF, TXT) en Français, Anglais et Éwé (Eʋegbe) avec l'IA CyberSafe." },
+      { title: "Assistant IA & Tuteur d'Étude (Gemma 4) — CyberSafe Online" },
+      {
+        name: "description",
+        content:
+          "Assistant intelligent propulsé par Google Gemma 4 : analyse d'arnaques Mobile Money et tuteur d'étude sur mesure avec quiz adaptatifs et plans de révision.",
+      },
     ],
   }),
   component: AssistantPage,
@@ -68,6 +102,7 @@ interface Message {
   quiz?: QuizQuestion[];
   plan?: PlanItem[];
   isStudent?: boolean;
+  proactiveActions?: boolean;
 }
 
 interface StoredCourse {
@@ -76,7 +111,7 @@ interface StoredCourse {
   content: string;
   examDate: string;
   savedAt: string;
-  fileType?: "pdf" | "text" | "manual";
+  fileType?: "pdf" | "photo" | "text" | "txt" | "manual" | "docx" | "pptx";
 }
 
 const STORAGE_KEY = "cybersafe_student_course";
@@ -88,63 +123,354 @@ const SUBJECT_CATEGORIES = [
   { id: "droit", name: "Droit & Sciences Juridiques", emoji: "⚖️" },
   { id: "eco", name: "Économie, Finance & Gestion", emoji: "📊" },
   { id: "sciences", name: "Physique, Chimie & SVT", emoji: "🔬" },
-  { id: "philo", name: "Philosophie & Littérature", emoji: "📚" },
+  { id: "philo", name: "Philosophie & Lettérature", emoji: "📚" },
   { id: "langues", name: "Langues Vivantes (FR/EN/EE)", emoji: "🌍" },
 ];
 
-const SUGGESTIONS: Record<Language, string[]> = {
+interface PromptSuggestion {
+  category: "security" | "study";
+  label: string;
+  query: string;
+  badge: string;
+}
+
+const SUGGESTIONS: Record<Language, PromptSuggestion[]> = {
   fr: [
-    "Un agent me demande mon code OTP pour débloquer mon compte, que faire ?",
-    "Quelqu'un m'a transféré 25 000 FCFA par erreur et me harcèle, que faire ?",
-    "Comment reconnaître un vrai SMS de Moov ou Togocom ?",
+    {
+      category: "security",
+      label: "Code OTP réclamé au téléphone",
+      query:
+        "Un soi-disant agent m'appelle et me demande mon code OTP reçu par SMS pour 'débloquer' mon compte T-Money / Moov Money. Que dois-je faire ?",
+      badge: "Mobile Money",
+    },
+    {
+      category: "security",
+      label: "Faux transfert de 25 000 FCFA",
+      query:
+        "Quelqu'un m'a envoyé un SMS disant qu'il m'a transféré 25 000 FCFA par erreur et exige que je lui renvoie l'argent tout de suite. Comment vérifier mon solde réel ?",
+      badge: "Arnaque Transfert",
+    },
+    {
+      category: "security",
+      label: "Vérifier un SMS officiel opérateur",
+      query:
+        "Comment reconnaître avec certitude un véritable SMS officiel de Togocom (T-Money) ou Moov Africa face à un faux expéditeur usurpé ?",
+      badge: "Détection SMS",
+    },
+    {
+      category: "study",
+      label: "Quiz interactif sur la cybersécurité",
+      query: "/quiz",
+      badge: "Volet Apprendre",
+    },
+    {
+      category: "study",
+      label: "Planifier mes révisions d'examen",
+      query: "/plan dans 5 jours",
+      badge: "Planning",
+    },
   ],
   en: [
-    "An agent calls asking for my SMS code to prevent account suspension, what should I do?",
-    "Someone sent money by mistake and asks for immediate refund, how to verify?",
-    "How to detect a fake Moov Money or T-Money notification?",
+    {
+      category: "security",
+      label: "Suspicious OTP Request",
+      query:
+        "A caller claiming to be support asks for my SMS verification code to prevent account suspension. What should I do?",
+      badge: "Mobile Money",
+    },
+    {
+      category: "security",
+      label: "Wrong Transfer Scam",
+      query:
+        "Someone claims they sent 25,000 FCFA by mistake and pressures me for an immediate refund. How can I safely check?",
+      badge: "Transfer Scam",
+    },
+    {
+      category: "security",
+      label: "Detect Spoofed Operator SMS",
+      query:
+        "How can I tell a genuine Moov Money or T-Money notification from a spoofed sender name?",
+      badge: "SMS Security",
+    },
+    {
+      category: "study",
+      label: "Interactive Knowledge Quiz",
+      query: "/quiz",
+      badge: "Learning Mode",
+    },
+    {
+      category: "study",
+      label: "Generate 5-Day Study Plan",
+      query: "/plan in 5 days",
+      badge: "Planning",
+    },
   ],
   ee: [
-    "Dɔwɔla aɖe le nye OTP kɔdi biam be yeadzra nye akɔnta ɖo, nukae mawɔ ?",
-    "Ame aɖe be yeɖo 25 000 F nam le vodada me eye wòle kaba wɔm nam, nukae mawɔ ?",
-    "Aleke mawɔ anya Moov alo Togocom ƒe SMS nyateƒetɔ ?",
+    {
+      category: "security",
+      label: "OTP Kɔdi Biabia",
+      query:
+        "Dɔwɔla aɖe le nye OTP kɔdi biam le ka dzi be yeadzra nye T-Money akɔnta ɖo, nukae mawɔ ?",
+      badge: "Mobile Money",
+    },
+    {
+      category: "security",
+      label: "Vodada Gaɖoɖo 25 000 F",
+      query:
+        "Ame aɖe be yeɖo 25 000 F nam le vodada me eye wòle kaba wɔm nam be matrɔe nɛ, aleke mawɔ akpɔ nye ga teƒetɔ ?",
+      badge: "Gaɖoɖo Vɔ̃ɖi",
+    },
+    {
+      category: "security",
+      label: "Moov kple T-Money SMS Nyateƒetɔ",
+      query: "Aleke mawɔ anya Moov alo Togocom ƒe SMS nyateƒetɔ le bebletɔwo dome ?",
+      badge: "SMS Dedienɔnɔ",
+    },
+    {
+      category: "study",
+      label: "Quiz Kpuie (Nusrɔ̃la)",
+      query: "/quiz",
+      badge: "Nusrɔ̃la",
+    },
+    {
+      category: "study",
+      label: "Nusrɔ̃gbe 5 Ɖoɖo",
+      query: "/plan le ŋkeke 5 me",
+      badge: "Ɖoɖowɔwɔ",
+    },
   ],
 };
 
 const SLASH_COMMANDS = [
   {
     cmd: "/apprendre",
-    label: "Mode Étudiant",
-    desc: "Téléverser un cours (PDF / TXT) ou choisir un sujet",
+    label: "Mode Apprentissage",
+    desc: "Active le tuteur d'étude et ouvre l'import de cours (PDF, photo ou texte)",
     icon: GraduationCap,
+    badgeColor: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30",
   },
   {
     cmd: "/plan",
-    label: "Plan d'Examen",
-    desc: "Rétro-planning méthodique adapté à votre date d'examen",
+    label: "Plan d'Apprentissage",
+    desc: "Génère un rétro-planning méthodique sur mesure selon la date d'examen",
     icon: Calendar,
+    badgeColor: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
   },
   {
     cmd: "/quiz",
-    label: "Quiz Interactif",
-    desc: "QCM d'évaluation interactif basé sur votre cours ou sujet",
+    label: "Quiz & Correction",
+    desc: "Pose des questions ciblées, évalue et réexplique adaptativement les erreurs",
     icon: HelpCircle,
+    badgeColor: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
   },
   {
     cmd: "/resume",
-    label: "Fiche Synthèse",
-    desc: "Notions essentielles, formules, définitions et pièges",
+    label: "Fiches & Synthèse",
+    desc: "Synthétise les notions clés, formules et pièges fréquents à l'examen",
     icon: FileText,
+    badgeColor: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
   },
   {
     cmd: "/stop",
-    label: "Quitter le Mode",
-    desc: "Revenir à l'assistant de sécurité standard",
+    label: "Quitter le Mode Étude",
+    desc: "Revient instantanément au scanner d'arnaques Mobile Money",
     icon: XCircle,
+    badgeColor: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30",
   },
 ];
 
-export function AssistantPage() {
+const OPTION_LETTERS = ["A", "B", "C", "D", "E"];
+
+/**
+ * Bouton de copie avec feedback instantané
+ */
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success("Message copié dans le presse-papier !");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Impossible de copier le texte");
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title="Copier le message"
+      className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-muted/40 px-2 py-1 text-[11px] font-semibold text-muted-foreground transition hover:border-foreground/30 hover:bg-muted hover:text-foreground"
+    >
+      {copied ? <CheckCheck className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+      <span>{copied ? "Copié" : "Copier"}</span>
+    </button>
+  );
+}
+
+/**
+ * Rendu markdown propre et stylisé pour le chat SaaS (sans dépendance externe lourde)
+ */
+function FormattedChatMessage({ content }: { content: string }) {
+  // Découpage en blocs (paragraphes, titres, listes)
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+  let currentList: { type: "ul" | "ol"; items: string[] } | null = null;
+
+  const flushList = () => {
+    if (!currentList) return;
+    if (currentList.type === "ul") {
+      elements.push(
+        <ul key={`ul-${elements.length}`} className="my-2 space-y-1.5 pl-1">
+          {currentList.items.map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm leading-relaxed">
+              <span className="mt-1.5 size-1.5 rounded-full bg-electric shrink-0" />
+              <div className="flex-1">{renderInline(item)}</div>
+            </li>
+          ))}
+        </ul>,
+      );
+    } else {
+      elements.push(
+        <ol key={`ol-${elements.length}`} className="my-2 space-y-1.5 pl-1">
+          {currentList.items.map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm leading-relaxed">
+              <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                {idx + 1}
+              </span>
+              <div className="flex-1">{renderInline(item)}</div>
+            </li>
+          ))}
+        </ol>,
+      );
+    }
+    currentList = null;
+  };
+
+  const renderInline = (str: string): React.ReactNode => {
+    // Regex pour découper les inline code, gras et italique
+    const parts = str.split(/(\*\*.*?\*\*|`.*?`|\*.*?\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
+        return (
+          <strong key={i} className="font-bold text-foreground">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      if (part.startsWith("`") && part.endsWith("`") && part.length >= 2) {
+        return (
+          <code
+            key={i}
+            className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-electric border border-border/40 font-semibold"
+          >
+            {part.slice(1, -1)}
+          </code>
+        );
+      }
+      if (part.startsWith("*") && part.endsWith("*") && part.length >= 2) {
+        return (
+          <em key={i} className="italic text-foreground/90">
+            {part.slice(1, -1)}
+          </em>
+        );
+      }
+      return part;
+    });
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const rawLine = lines[i] ?? "";
+    const trimmed = rawLine.trim();
+
+    if (!trimmed) {
+      flushList();
+      continue;
+    }
+
+    // Détection titres ###
+    if (trimmed.startsWith("### ")) {
+      flushList();
+      elements.push(
+        <h4
+          key={`h4-${i}`}
+          className="font-bold text-sm sm:text-base text-foreground mt-3 mb-1.5 flex items-center gap-1.5 font-display"
+        >
+          <Sparkle className="size-3.5 text-electric shrink-0" />
+          <span>{renderInline(trimmed.slice(4))}</span>
+        </h4>,
+      );
+      continue;
+    }
+
+    if (trimmed.startsWith("## ")) {
+      flushList();
+      elements.push(
+        <h3
+          key={`h3-${i}`}
+          className="font-bold text-base sm:text-lg text-foreground mt-4 mb-2 flex items-center gap-2 font-display"
+        >
+          <span>{renderInline(trimmed.slice(3))}</span>
+        </h3>,
+      );
+      continue;
+    }
+
+    // Détection puces - ou *
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      if (!currentList || currentList.type !== "ul") {
+        flushList();
+        currentList = { type: "ul", items: [] };
+      }
+      currentList.items.push(trimmed.slice(2));
+      continue;
+    }
+
+    // Détection liste ordonnée 1. 2.
+    const orderedMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+    if (orderedMatch) {
+      if (!currentList || currentList.type !== "ol") {
+        flushList();
+        currentList = { type: "ol", items: [] };
+      }
+      currentList.items.push(orderedMatch[2] ?? "");
+      continue;
+    }
+
+    // Détection citation >
+    if (trimmed.startsWith("> ")) {
+      flushList();
+      elements.push(
+        <blockquote
+          key={`quote-${i}`}
+          className="my-2 border-l-4 border-electric/60 bg-electric/5 py-1.5 px-3 rounded-r-xl italic text-xs text-muted-foreground"
+        >
+          {renderInline(trimmed.slice(2))}
+        </blockquote>,
+      );
+      continue;
+    }
+
+    // Paragraphe normal
+    flushList();
+    elements.push(
+      <p key={`p-${i}`} className="text-sm leading-relaxed mb-2 last:mb-0">
+        {renderInline(trimmed)}
+      </p>,
+    );
+  }
+
+  flushList();
+
+  return <div className="space-y-1">{elements}</div>;
+}
+
+function AssistantPage() {
   const { t, lang } = useI18n();
+  const search = Route.useSearch();
   const [input, setInput] = useState("");
   const [apiError, setApiError] = useState<{ message: string; quota: boolean } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -152,7 +478,6 @@ export function AssistantPage() {
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [showCourseEditor, setShowCourseEditor] = useState(false);
 
-  // État du cours & Mode étudiant universel
   const [isStudentMode, setIsStudentMode] = useState(false);
   const [course, setCourse] = useState<StoredCourse>({
     title: "",
@@ -170,7 +495,6 @@ export function AssistantPage() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Charger le cours persistant depuis localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -182,7 +506,6 @@ export function AssistantPage() {
           setCourseInputSubject(parsed.subject || "Cybersécurité & Réseaux");
           setCourseInputText(parsed.content || "");
           setCourseExamDate(parsed.examDate || "");
-          setIsStudentMode(true);
         }
       }
     } catch (e) {
@@ -196,10 +519,10 @@ export function AssistantPage() {
       role: "assistant",
       content:
         lang === "ee"
-          ? "Woezɔ ! Nye CyberSafe Nunyanyenye (IA) Kpekpedenutɔ. Bia wò dedienɔnɔ biabiawo le Eʋegbe, Fransegbe alo Eŋlisigbe me. Nàte ŋu aɖo PDF alo agbalẽ ɖesiaɖe ɖa hena nusrɔ̃ƒe (Maths, Droit, Code, Cybersécurité) kple /apprendre, /plan, /quiz, /resume."
+          ? "Woezɔ na wò **CyberSafe Assistant** si Google Gemma 4 kplɔna !\n\n🛡️ **Dedienɔnɔ & Mobile Money Fiafia** : Collez wò SMS vɔ̃ɖiwo (T-Money / Moov Money) alo bia biabia le securite ŋuti.\n🎓 **Nusrɔ̃la ƒe Tuteur** : Ŋlɔ `/apprendre` be nàde wò agbalẽ me nyawo (PDF, foto alo nuŋɔŋlɔ), eye nàwɔ quiz (`/quiz`), nusrɔ̃gbe ɖoɖo (`/plan`) kple nyatakaka kpuiwo (`/resume`).\n\nNukae mate ŋu awɔ na wò egbe ?"
           : lang === "en"
-            ? "Welcome! I am your CyberSafe AI Assistant. Ask any security questions or upload your courses (PDF / TXT in any subject: Math, Law, Code, Physics, etc.) using /apprendre, /plan, /quiz, /resume."
-            : "Bienvenue ! Je suis votre assistant CyberSafe propulsé par l'IA CyberSafe. Posez vos questions de cybersécurité ou déposez vos cours (PDF, TXT) dans n'importe quelle matière (Maths, Droit, Informatique, Sciences, etc.) avec /apprendre, /plan, /quiz, /resume.",
+            ? "Welcome to your **CyberSafe AI Assistant**, powered by **Google Gemma 4 (`gemma-4-26b-a4b-it`)**.\n\n🛡️ **Cyber & Mobile Money Defense** : Paste any suspicious SMS (T-Money / Moov Money), report scam attempts, or ask security questions.\n🎓 **Intelligent Study Tutor** : Type `/apprendre` to upload your course notes (PDF, handwritten notes photo, or text), then generate personalized study schedules (`/plan`), adaptive quizzes (`/quiz`), or quick summary sheets (`/resume`).\n\nHow can I help you today?"
+            : "Bienvenue sur votre **Assistant IA CyberSafe**, propulsé par **Google Gemma 4 (`gemma-4-26b-a4b-it`)**.\n\n🛡️ **Protection Cyber & Mobile Money** : Collez un SMS suspect (T-Money, Moov Money), signalez un appel douteux ou posez vos questions de sécurité.\n🎓 **Tuteur d'Apprentissage Intelligent** : Utilisez la commande `/apprendre` pour téléverser votre cours (PDF, photo de vos notes ou texte), puis générez un planning de révision (`/plan`), des quiz adaptatifs (`/quiz`) ou des fiches synthétiques (`/resume`).\n\nComment puis-je vous accompagner aujourd'hui ?",
       lang,
     },
   ]);
@@ -212,8 +535,13 @@ export function AssistantPage() {
     scrollToBottom();
   }, [messages, loading]);
 
-  // Sauvegarder le cours
-  const saveCourseData = (title: string, text: string, exam: string, subject: string, fileType: "pdf" | "text" | "manual" = "manual") => {
+  const saveCourseData = (
+    title: string,
+    text: string,
+    exam: string,
+    subject: string,
+    fileType: "pdf" | "photo" | "text" | "txt" | "manual" | "docx" | "pptx" = "manual",
+  ) => {
     const updated: StoredCourse = {
       title: title.trim() || subject || "Cours d'étude",
       subject: subject.trim() || "Matière générale",
@@ -231,16 +559,17 @@ export function AssistantPage() {
     setIsStudentMode(true);
     setShowCourseEditor(false);
 
-    toast.success("Cours enregistré dans votre espace étudiant !");
+    toast.success("Cours analysé et prêt pour l'apprentissage !");
 
     const wordCount = updated.content ? updated.content.split(/\s+/).filter(Boolean).length : 0;
-    const examNotice = exam ? ` (Examen programmé : ${exam})` : "";
-    const typeNotice = fileType === "pdf" ? " [Document PDF extrait]" : "";
-    const msg = `🎓 **Cours chargé : "${updated.title}"** (~${wordCount} mots)${typeNotice} — Matière : **${updated.subject}**${examNotice}.\n\nVous pouvez désormais utiliser :
-- \`/plan\` : Générer votre calendrier de révision jour par jour
-- \`/quiz\` : Lancer un test d'auto-évaluation interactif sur ce cours
-- \`/resume\` : Obtenir la fiche synthétique des formules, définitions et pièges
-- \`/stop\` : Revenir au mode cybersécurité standard`;
+    const examNotice = exam ? ` · 📅 Examen : **${exam}**` : "";
+    const typeNotice =
+      fileType === "pdf"
+        ? " [Document PDF extrait]"
+        : fileType === "photo"
+          ? " [Photo analysée par Gemma 4 Vision]"
+          : "";
+    const msg = `🎓 **Cours chargé avec succès : "${updated.title}"** (~${wordCount} mots)${typeNotice}\n📚 Matière : **${updated.subject}**${examNotice}\n\n💡 **Recommandation de votre Tuteur Gemma 4** : Votre contenu d'étude est parfaitement assimilé. Pour aborder sereinement vos révisions, vous pouvez générer votre planning d'ici l'épreuve avec \`/plan\`, lancer un test de connaissances avec \`/quiz\`, ou me poser directement n'importe quelle question sur ce cours !`;
 
     setMessages((prev) => [
       ...prev,
@@ -250,63 +579,118 @@ export function AssistantPage() {
         content: msg,
         lang,
         isStudent: true,
+        proactiveActions: true,
       },
     ]);
   };
 
-  // Traitement d'un fichier (PDF, TXT, MD)
+  const loadDemoCourse = (demo: DemoCourse) => {
+    setCourseInputTitle(demo.title);
+    setCourseInputSubject(demo.subject);
+    setCourseInputText(demo.content);
+    setCourseExamDate(demo.examDate);
+    saveCourseData(demo.title, demo.content, demo.examDate, demo.subject, "manual");
+  };
+
   const processIncomingFile = async (file: File) => {
-    const isPdf = file.name.toLowerCase().endsWith(".pdf") || file.type === "application/pdf";
+    const isImage = file.type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(file.name);
     const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
 
-    if (isPdf) {
+    if (isImage) {
       setParsingPdf(true);
-      toast.loading("Extraction du texte du document PDF en cours...", { id: "pdf-parse" });
+      toast.loading("Lecture de la photo par Google Gemma 4 Vision...", { id: "img-parse" });
       try {
-        const text = await extractTextFromPdf(file);
-        if (!text || text.length < 20) {
-          toast.dismiss("pdf-parse");
-          toast.error("Le document PDF ne contient pas suffisamment de texte extractible.");
-          setParsingPdf(false);
-          return;
-        }
-
-        toast.dismiss("pdf-parse");
-        toast.success(`PDF "${file.name}" extrait avec succès (${text.split(/\s+/).filter(Boolean).length} mots) !`);
-
-        setCourseInputTitle(cleanTitle);
-        setCourseInputText(text);
-
-        // Détection automatique de la matière
-        let detectedSubject = courseInputSubject;
-        const lowerText = (cleanTitle + " " + text.slice(0, 1000)).toLowerCase();
-        if (lowerText.includes("math") || lowerText.includes("algèbre") || lowerText.includes("équation")) detectedSubject = "Mathématiques & Algèbre";
-        else if (lowerText.includes("droit") || lowerText.includes("juridique") || lowerText.includes("article") || lowerText.includes("loi")) detectedSubject = "Droit & Sciences Juridiques";
-        else if (lowerText.includes("code") || lowerText.includes("python") || lowerText.includes("java") || lowerText.includes("programmation") || lowerText.includes("algorithme")) detectedSubject = "Informatique & Programmation";
-        else if (lowerText.includes("physique") || lowerText.includes("chimie") || lowerText.includes("biologie")) detectedSubject = "Physique, Chimie & SVT";
-        else if (lowerText.includes("gestion") || lowerText.includes("finance") || lowerText.includes("comptabilité") || lowerText.includes("marketing")) detectedSubject = "Économie, Finance & Gestion";
-
-        setCourseInputSubject(detectedSubject);
-        saveCourseData(cleanTitle, text, courseExamDate, detectedSubject, "pdf");
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = (ev) => resolve(String(ev.target?.result || ""));
+          r.onerror = () => reject(new Error("Erreur lecture image"));
+          r.readAsDataURL(file);
+        });
+        const extracted = await extractCourseImageApi(base64, file.type || "image/jpeg", lang);
+        toast.dismiss("img-parse");
+        toast.success("Photo de cours transcrite avec succès par Gemma 4 Vision !");
+        const finalTitle = extracted.suggestedTitle || cleanTitle;
+        const finalSubject = extracted.suggestedSubject || courseInputSubject;
+        setCourseInputTitle(finalTitle);
+        setCourseInputSubject(finalSubject);
+        setCourseInputText(extracted.text);
+        saveCourseData(finalTitle, extracted.text, courseExamDate || "2026-11-07", finalSubject, "photo");
       } catch (err: any) {
         console.error(err);
-        toast.dismiss("pdf-parse");
-        toast.error("Erreur lors de la lecture du fichier PDF. Assurez-vous qu'il contient du texte numérique.");
+        toast.dismiss("img-parse");
+        toast.error(err.message || "Erreur lors de la lecture de la photo.");
       } finally {
         setParsingPdf(false);
       }
       return;
     }
 
-    // Fichier texte classique (.txt, .md)
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = String(event.target?.result || "");
+    setParsingPdf(true);
+    toast.loading(`Lecture du document "${file.name}"...`, { id: "doc-parse" });
+    try {
+      const parsedDoc = await extractTextFromDocument(file, file.name);
+      const text = parsedDoc.text;
+      if (!text || text.length < 20) {
+        toast.dismiss("doc-parse");
+        toast.error("Le document ne contient pas suffisamment de texte extractible.");
+        setParsingPdf(false);
+        return;
+      }
+
+      toast.dismiss("doc-parse");
+      toast.success(
+        `Document [${parsedDoc.format.toUpperCase()}] "${file.name}" extrait avec succès (${parsedDoc.wordCount} mots) !`,
+      );
+
       setCourseInputTitle(cleanTitle);
-      setCourseInputText(content);
-      saveCourseData(cleanTitle, content, courseExamDate, courseInputSubject, "text");
-    };
-    reader.readAsText(file);
+      setCourseInputText(text);
+
+      let detectedSubject = courseInputSubject;
+      const lowerText = (cleanTitle + " " + text.slice(0, 1000)).toLowerCase();
+      if (lowerText.includes("math") || lowerText.includes("algèbre") || lowerText.includes("équation")) {
+        detectedSubject = "Mathématiques & Algèbre";
+      } else if (
+        lowerText.includes("droit") ||
+        lowerText.includes("juridique") ||
+        lowerText.includes("article") ||
+        lowerText.includes("loi")
+      ) {
+        detectedSubject = "Droit & Sciences Juridiques";
+      } else if (
+        lowerText.includes("code") ||
+        lowerText.includes("python") ||
+        lowerText.includes("java") ||
+        lowerText.includes("programmation") ||
+        lowerText.includes("algorithme")
+      ) {
+        detectedSubject = "Informatique & Programmation";
+      } else if (
+        lowerText.includes("physique") ||
+        lowerText.includes("chimie") ||
+        lowerText.includes("biologie")
+      ) {
+        detectedSubject = "Physique, Chimie & SVT";
+      } else if (
+        lowerText.includes("gestion") ||
+        lowerText.includes("finance") ||
+        lowerText.includes("comptabilité") ||
+        lowerText.includes("marketing")
+      ) {
+        detectedSubject = "Économie, Finance & Gestion";
+      }
+
+      setCourseInputSubject(detectedSubject);
+      saveCourseData(cleanTitle, text, courseExamDate || "2026-11-07", detectedSubject, parsedDoc.format);
+    } catch (err: any) {
+      console.error(err);
+      toast.dismiss("doc-parse");
+      toast.error(
+        err.message ||
+          "Erreur lors de la lecture du fichier. Assurez-vous qu'il s'agit d'un format valide (PDF, DOCX, PPTX, TXT).",
+      );
+    } finally {
+      setParsingPdf(false);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -317,7 +701,6 @@ export function AssistantPage() {
     }
   };
 
-  // Traiter les réponses aux Quiz
   const handleSelectQuizAnswer = (messageId: string, questionId: number, optionIdx: number) => {
     setMessages((prev) =>
       prev.map((msg) => {
@@ -329,11 +712,10 @@ export function AssistantPage() {
           return q;
         });
         return { ...msg, quiz: updatedQuiz };
-      })
+      }),
     );
   };
 
-  // Basculer un jalon du plan
   const handleTogglePlanItem = (messageId: string, itemId: number) => {
     setMessages((prev) =>
       prev.map((msg) => {
@@ -345,174 +727,178 @@ export function AssistantPage() {
           return item;
         });
         return { ...msg, plan: updatedPlan };
-      })
+      }),
     );
   };
 
-  // Génération de quiz interactif universel (selon la matière et le cours)
   const buildUniversalQuiz = (topic: string, subject: string): QuizQuestion[] => {
     const lower = (topic + " " + subject).toLowerCase();
 
-    // 1. Mathématiques
-    if (lower.includes("math") || lower.includes("algèbre") || lower.includes("géométrie") || lower.includes("analyse")) {
+    if (
+      lower.includes("math") ||
+      lower.includes("algèbre") ||
+      lower.includes("géométrie") ||
+      lower.includes("analyse")
+    ) {
       return [
         {
           id: 1,
           question: "Quelle est la dérivée de la fonction f(x) = ln(x) pour tout réel x > 0 ?",
           options: ["f'(x) = 1/x", "f'(x) = e^x", "f'(x) = x", "f'(x) = 1/(x^2)"],
           answerIndex: 0,
-          explanation: "Par définition, la dérivée de la fonction logarithme népérien ln(x) sur ]0, +∞[ est 1/x.",
+          explanation:
+            "Par définition fondamentale, la dérivée du logarithme népérien ln(x) sur ]0, +∞[ est égale à 1/x.",
         },
         {
           id: 2,
           question: "Dans un triangle rectangle, quel théorème permet de calculer la longueur de l'hypoténuse ?",
-          options: ["Le théorème de Thalès", "Le théorème de Pythagore", "La loi des grands nombres", "Le théorème d'Euler"],
+          options: [
+            "Le théorème de Thalès",
+            "Le théorème de Pythagore",
+            "La loi des grands nombres",
+            "Le théorème d'Euler",
+          ],
           answerIndex: 1,
-          explanation: "Le théorème de Pythagore stipule que le carré de l'hypoténuse est égal à la somme des carrés des côtés adjacents.",
+          explanation:
+            "Le théorème de Pythagore stipule que dans tout triangle rectangle, le carré de l'hypoténuse égale la somme des carrés des côtés adjacents.",
         },
         {
           id: 3,
           question: "Que vaut la probabilité de l'événement certain dans un espace probabilisé ?",
           options: ["0", "0.5", "1", "+∞"],
           answerIndex: 2,
-          explanation: "Dans les axiomes de Kolmogorov, la mesure de probabilité de l'univers tout entier Ω est égale à 1.",
+          explanation:
+            "Selon les axiomes de probabilité de Kolmogorov, la mesure de probabilité de l'univers tout entier Ω vaut exactement 1.",
         },
       ];
     }
 
-    // 2. Informatique & Code
-    if (lower.includes("code") || lower.includes("informatique") || lower.includes("python") || lower.includes("programmation") || lower.includes("algo")) {
+    if (
+      lower.includes("code") ||
+      lower.includes("informatique") ||
+      lower.includes("python") ||
+      lower.includes("programmation") ||
+      lower.includes("algo")
+    ) {
       return [
         {
           id: 1,
-          question: "En algorithmique, quelle est la complexité temporelle optimale d'une recherche dichotomique dans un tableau déjà trié de taille N ?",
+          question:
+            "En algorithmique, quelle est la complexité temporelle optimale d'une recherche dichotomique dans un tableau trié de taille N ?",
           options: ["O(1)", "O(log N)", "O(N)", "O(N^2)"],
           answerIndex: 1,
-          explanation: "La recherche dichotomique divise l'intervalle de recherche par 2 à chaque itération, ce qui donne une complexité logarithmique O(log N).",
+          explanation:
+            "La recherche dichotomique divise l'intervalle de recherche par 2 à chaque étape, garantissant une complexité logarithmique O(log N).",
         },
         {
           id: 2,
-          question: "En Python, quel type de structure de données est immuable (non modifiable après création) ?",
+          question: "En Python, quel type de structure de données est immuable (non modifiable après instanciation) ?",
           options: ["list (liste)", "dict (dictionnaire)", "tuple (uplet)", "set (ensemble)"],
           answerIndex: 2,
-          explanation: "Les tuples sont des séquences immuables, contrairement aux listes ou dictionnaires qui sont mutables.",
+          explanation:
+            "Les tuples sont immuables en Python, ce qui garantit leur intégrité et permet de les utiliser comme clés de dictionnaires.",
         },
         {
           id: 3,
           question: "Quel protocole réseau sécurisé chiffre les échanges web entre le navigateur et le serveur ?",
-          options: ["HTTP", "HTTPS (avec TLS)", "FTP", "Telnet"],
+          options: ["HTTP", "HTTPS (avec protocole TLS)", "FTP", "Telnet non chiffré"],
           answerIndex: 1,
-          explanation: "HTTPS s'appuie sur le protocole cryptographique TLS pour garantir la confidentialité et l'intégrité des données transmises.",
+          explanation:
+            "HTTPS utilise le protocole cryptographique TLS pour garantir la confidentialité et l'authenticité des échanges web.",
         },
       ];
     }
 
-    // 3. Droit & Législation
-    if (lower.includes("droit") || lower.includes("loi") || lower.includes("juridique") || lower.includes("justice")) {
+    if (
+      lower.includes("droit") ||
+      lower.includes("loi") ||
+      lower.includes("juridique") ||
+      lower.includes("justice")
+    ) {
       return [
         {
           id: 1,
-          question: "Selon la hiérarchie des normes (Pyramide de Kelsen), quelle norme juridique prime sur toutes les autres dans un État ?",
+          question:
+            "Selon la hiérarchie des normes (Pyramide de Kelsen), quelle norme juridique prime sur toutes les autres au sein de l'État ?",
           options: ["Le décret ministériel", "La loi ordinaire", "La Constitution", "Le règlement intérieur"],
           answerIndex: 2,
-          explanation: "La Constitution est la norme suprême au sommet de l'ordre juridique étatique.",
+          explanation:
+            "La Constitution est la norme suprême au sommet de l'ordre juridique de l'État de droit.",
         },
         {
           id: 2,
           question: "Quelles sont les trois conditions cumulatives pour engager la responsabilité civile délictuelle ?",
           options: [
-            "Une faute, un dommage et un lien de causalité direct",
-            "Un contrat signé, un paiement et une preuve écrite",
+            "Une faute, un dommage certain et un lien de causalité direct",
+            "Un contrat signé, un paiement bancaire et une quittance",
             "Une décision de justice, un avocat et un huissier",
             "Une infraction pénale, une garde à vue et un procès",
           ],
           answerIndex: 0,
-          explanation: "La responsabilité extracontractuelle exige la réunion prouvée d'une faute, d'un préjudice certain (dommage) et du lien de cause à effet direct entre les deux.",
+          explanation:
+            "La responsabilité extracontractuelle requiert la conjonction avérée d'un fait générateur (faute), d'un préjudice (dommage) et d'un lien causal direct.",
         },
         {
           id: 3,
-          question: "Dans l'espace OHADA, quel texte régit de manière unifiée le droit commercial général et les sociétés commerciales ?",
-          options: ["Le Code civil français", "Les Actes Uniformes de l'OHADA", "Le traité de Rome", "La convention de Genève"],
-          answerIndex: 1,
-          explanation: "Les Actes Uniformes adoptés par l'OHADA s'appliquent directement et obligatoirement dans tous les États membres.",
-        },
-      ];
-    }
-
-    // 4. Économie & Gestion
-    if (lower.includes("éco") || lower.includes("eco") || lower.includes("gestion") || lower.includes("finance") || lower.includes("compta")) {
-      return [
-        {
-          id: 1,
-          question: "En économie de marché, que se produit-il généralement lorsque la demande d'un bien augmente alors que l'offre reste constante ?",
+          question: "Dans l'espace OHADA, quel instrument régit de manière uniforme le droit commercial général ?",
           options: [
-            "Le prix d'équilibre a tendance à augmenter.",
-            "Le prix d'équilibre s'effondre immédiatement.",
-            "L'inflation globale devient nulle.",
-            "L'offre diminue automatiquement de moitié.",
+            "Le Code civil français",
+            "Les Actes Uniformes de l'OHADA",
+            "Le traité de Rome",
+            "La convention de Genève",
           ],
-          answerIndex: 0,
-          explanation: "Une hausse de la demande sans variation de l'offre crée une rareté relative qui pousse le prix d'équilibre à la hausse.",
-        },
-        {
-          id: 2,
-          question: "En comptabilité, quel document de synthèse présente le patrimoine de l'entreprise (Actif et Passif) à une date donnée ?",
-          options: ["Le compte de résultat", "Le bilan comptable", "Le tableau des flux de trésorerie", "La balance générale"],
           answerIndex: 1,
-          explanation: "Le bilan est la photographie patrimoniale de l'entreprise : ce qu'elle possède (Actif) et ce qu'elle doit (Passif).",
-        },
-        {
-          id: 3,
-          question: "Quel indicateur mesure la richesse totale produite sur le territoire national durant une année ?",
-          options: ["Le PNB", "Le PIB (Produit Intérieur Brut)", "Le taux de refinancement", "L'indice CAC 40"],
-          answerIndex: 1,
-          explanation: "Le PIB mesure la valeur monétaire totale des biens et services finaux produits dans un pays au cours d'une période.",
+          explanation:
+            "Les Actes Uniformes adoptés par l'OHADA sont d'application directe et obligatoire dans l'ensemble des pays membres.",
         },
       ];
     }
 
-    // 5. Par défaut / Cybersécurité & Technologies
     return [
       {
         id: 1,
-        question: `Dans l'étude de "${topic || "Cybersécurité & Technologies"}", quelle est la règle d'or concernant les codes secrets OTP et PIN ?`,
+        question: `Dans l'étude de "${topic || "Cybersécurité & Technologies"}", quelle est la règle d'or absolue concernant les codes secrets OTP et PIN ?`,
         options: [
-          "Les partager uniquement avec les agents officiels se présentant au téléphone.",
-          "Ne JAMAIS les divulguer, aucun agent légitime ne les réclamera.",
+          "Les partager uniquement avec les agents qui se présentent au téléphone.",
+          "Ne JAMAIS les divulguer : aucun service officiel légitime ne vous les réclamera.",
           "Les envoyer par retour de SMS si le nom de l'opérateur s'affiche.",
-          "Les écrire sur un papier collé au dos de son téléphone.",
+          "Les écrire sur une feuille collée au dos de son téléphone.",
         ],
         answerIndex: 1,
-        explanation: "Un code OTP est un secret d'authentification personnel. Les services officiels ont déjà les droits d'administration et n'ont jamais besoin de votre code.",
+        explanation:
+          "Un code OTP est un secret d'authentification strictement personnel. Les opérateurs disposent déjà des droits d'administration et n'ont jamais besoin de votre code.",
       },
       {
         id: 2,
-        question: "Devant un message affirmant qu'une somme vous a été transférée par erreur, comment s'assurer de la réalité du transfert ?",
+        question:
+          "Devant un SMS affirmant qu'une somme vous a été transférée par erreur, comment s'assurer avec certitude de la réalité du transfert ?",
         options: [
           "Faire confiance au SMS reçu et renvoyer la somme immédiatement.",
-          "Consulter son solde réel via la syntaxe officielle (*155# ou *145#).",
-          "Demander à l'appelant une photo de sa pièce d'identité.",
-          "Attendre 2 jours sans consulter son téléphone.",
+          "Consulter son solde réel via le menu USSD officiel sécurisé (*155# ou *145#).",
+          "Demander à l'appelant une photo de sa carte d'identité.",
+          "Éteindre son téléphone pendant deux jours.",
         ],
         answerIndex: 1,
-        explanation: "Les faux SMS de transfert imitent parfaitement la mise en page officielle. Seule l'interrogation du solde via le menu USSD sécurisé de l'opérateur fait foi.",
+        explanation:
+          "Les faux SMS de transfert imitent parfaitement la typographie officielle. Seule l'interrogation du solde via le menu USSD de l'opérateur (*145# ou *155#) est infalsifiable.",
       },
       {
         id: 3,
-        question: "Quel mécanisme de sécurité associe un mot de passe et une validation par code SMS ou application mobile ?",
+        question:
+          "Quel mécanisme de protection associe un mot de passe et une validation par code éphémère (SMS ou application) ?",
         options: [
           "L'authentification à deux facteurs (2FA / MFA)",
           "Le hachage MD5",
-          "Le phishing contextuel",
-          "Le protocole Telnet non sécurisé",
+          "Le hameçonnage contextuel",
+          "Le protocole Telnet",
         ],
         answerIndex: 0,
-        explanation: "L'authentification à deux facteurs (2FA) exige deux preuves distinctes de l'identité de l'utilisateur pour autoriser l'accès.",
+        explanation:
+          "L'authentification multifactorielle (MFA) exige deux facteurs distincts de vérification, bloquant la majorité des tentatives d'usurpation.",
       },
     ];
   };
 
-  // Génération de plan de révision universel
   const buildUniversalPlan = (examDateStr: string, topic: string, subject: string): PlanItem[] => {
     return [
       {
@@ -523,8 +909,8 @@ export function AssistantPage() {
       },
       {
         id: 2,
-        day: "Jour 2 — Approfondissement & Analyse Pratique",
-        topic: `Résolution d'exercices d'application, études de cas et démonstrations méthodologiques en ${subject}.`,
+        day: "Jour 2 — Approfondissement & Exercices d'Application",
+        topic: `Résolution d'exercices d'application, études de cas et méthodes d'analyse en ${subject}.`,
         completed: false,
       },
       {
@@ -536,7 +922,7 @@ export function AssistantPage() {
       {
         id: 4,
         day: `Jour 4 — Mise en Situation d'Examen${examDateStr ? ` (Objectif : ${examDateStr})` : ""}`,
-        topic: "Auto-évaluation chronométrée sur annales ou sujets types et analyse des erreurs.",
+        topic: "Auto-évaluation chronométrée sur annales ou sujets types et analyse approfondie des erreurs.",
         completed: false,
       },
       {
@@ -550,13 +936,15 @@ export function AssistantPage() {
 
   const executeCommand = async (cmdString: string) => {
     const parts = cmdString.trim().split(" ");
-    const cmd = parts[0].toLowerCase();
+    const cmd = (parts[0] ?? "").toLowerCase();
     const rest = parts.slice(1).join(" ");
 
     setShowSlashMenu(false);
+    setApiError(null);
 
     if (cmd === "/stop") {
       setIsStudentMode(false);
+      setShowCourseEditor(false);
       setMessages((prev) => [
         ...prev,
         {
@@ -568,12 +956,13 @@ export function AssistantPage() {
         {
           id: `cmd-resp-${Date.now()}`,
           role: "assistant",
-          content: "✅ **Mode Étudiant clôturé avec succès.**\n\nVous êtes de retour dans l'**Assistant de Sécurité CyberSafe**. Posez vos questions de protection Mobile Money, fraudes ou vérifications techniques quand vous le souhaitez !",
+          content:
+            "🛑 **Mode Apprentissage désactivé (`/stop`).**\n\nVous êtes de retour en **Mode Scanner d'Arnaques & Sécurité Mobile Money**. Collez un SMS suspect (T-Money / Moov) ou posez votre question de sécurité dès que vous le souhaitez !",
           lang,
           isStudent: false,
         },
       ]);
-      toast.info("Mode étudiant désactivé. Retour au mode standard.");
+      toast.info("Mode apprentissage quitté. Retour au scanner d'arnaques.");
       return;
     }
 
@@ -583,7 +972,7 @@ export function AssistantPage() {
       const textToLoad = rest.trim();
       if (textToLoad) {
         setCourseInputTitle(textToLoad);
-        saveCourseData(textToLoad, "", course.examDate, textToLoad, "manual");
+        saveCourseData(textToLoad, course.content, course.examDate, textToLoad, "manual");
       } else {
         setMessages((prev) => [
           ...prev,
@@ -596,7 +985,8 @@ export function AssistantPage() {
           {
             id: `cmd-resp-${Date.now()}`,
             role: "assistant",
-            content: "🎓 **Mode Étudiant Universel Activé !**\n\nVous pouvez réviser **n'importe quelle matière** (Cybersécurité, Mathématiques, Informatique, Droit, Économie, Sciences, etc.) :\n1. Déposez votre cours au format **PDF** ou **TXT** avec le bouton ci-dessus ou le trombone 📎.\n2. Ou sélectionnez une matière et collez vos leçons pour commencer.",
+            content:
+              "🎓 **Mode Apprentissage activé (`/apprendre`) !**\n\nTéléversez votre support d'étude (**document PDF, photo de cours ou notes brutes**) dans le panneau ci-dessus, ou chargez l'un des **Cours d'exemple Démo** en un clic.\n\nUne fois le cours chargé, **Google Gemma 4** se transforme en tuteur privé : planifiez vos révisions (`/plan`), testez vos réflexes avec des quiz adaptatifs (`/quiz`), ou obtenez une synthèse claire (`/resume`). Tapez `/stop` à tout instant pour revenir au scanner.",
             lang,
             isStudent: true,
           },
@@ -607,7 +997,7 @@ export function AssistantPage() {
 
     if (cmd === "/quiz") {
       setIsStudentMode(true);
-      const quizItems = buildUniversalQuiz(course.title, course.subject);
+      setLoading(true);
       setMessages((prev) => [
         ...prev,
         {
@@ -616,22 +1006,57 @@ export function AssistantPage() {
           content: "/quiz",
           lang,
         },
-        {
-          id: `cmd-resp-${Date.now()}`,
-          role: "assistant",
-          content: `🎯 **Quiz d'Évaluation Interactif : "${course.title || course.subject}"**\n\nTestez vos connaissances en cliquant sur vos réponses ci-dessous :`,
-          lang,
-          quiz: quizItems,
-          isStudent: true,
-        },
       ]);
+
+      try {
+        const res = await generateStudyQuizApi(
+          course.title || course.subject,
+          course.subject,
+          course.content,
+          lang,
+        );
+        const quizItems =
+          res.quiz && res.quiz.length > 0
+            ? res.quiz
+            : buildUniversalQuiz(course.title, course.subject);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `cmd-resp-${Date.now()}`,
+            role: "assistant",
+            content:
+              res.reply ||
+              `🎯 **Quiz d'Évaluation Adaptatif : "${course.title || course.subject}"**\n\nRépondez aux questions ci-dessous pour valider vos acquis. Si une notion vous échappe, je vous proposerai un approfondissement immédiat :`,
+            lang,
+            quiz: quizItems,
+            isStudent: true,
+          },
+        ]);
+      } catch (err: any) {
+        console.warn("Fallback quiz local suite erreur API:", err);
+        const quizItems = buildUniversalQuiz(course.title, course.subject);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `cmd-resp-${Date.now()}`,
+            role: "assistant",
+            content: `🎯 **Quiz d'Évaluation Interactif : "${course.title || course.subject}"**\n\nTestez vos connaissances en cliquant sur vos réponses ci-dessous :`,
+            lang,
+            quiz: quizItems,
+            isStudent: true,
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
     if (cmd === "/plan") {
       setIsStudentMode(true);
-      const targetDate = course.examDate || rest || "Dans 1 semaine";
-      const planItems = buildUniversalPlan(targetDate, course.title, course.subject);
+      setLoading(true);
+      const targetDate = rest || course.examDate || "Dans 5 jours";
       setMessages((prev) => [
         ...prev,
         {
@@ -640,15 +1065,51 @@ export function AssistantPage() {
           content: `/plan ${rest}`.trim(),
           lang,
         },
-        {
-          id: `cmd-resp-${Date.now()}`,
-          role: "assistant",
-          content: `📅 **Rétro-planning d'étude méthodique : "${course.title || course.subject}"**\nDate cible d'examen : **${targetDate}**\n\nCochez vos étapes au fur et à mesure de vos révisions :`,
-          lang,
-          plan: planItems,
-          isStudent: true,
-        },
       ]);
+
+      try {
+        const res = await generateStudyPlanApi(
+          course.title || course.subject,
+          course.subject,
+          course.content,
+          targetDate,
+          lang,
+        );
+        const planItems =
+          res.plan && res.plan.length > 0
+            ? res.plan
+            : buildUniversalPlan(targetDate, course.title, course.subject);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `cmd-resp-${Date.now()}`,
+            role: "assistant",
+            content:
+              res.reply ||
+              `📅 **Plan d'Apprentissage Structuré : "${course.title || course.subject}"**\nDate cible d'examen : **${targetDate}**\n\nCochez vos étapes au fur et à mesure pour mesurer votre progression :`,
+            lang,
+            plan: planItems,
+            isStudent: true,
+          },
+        ]);
+      } catch (err: any) {
+        console.warn("Fallback plan local suite erreur API:", err);
+        const planItems = buildUniversalPlan(targetDate, course.title, course.subject);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `cmd-resp-${Date.now()}`,
+            role: "assistant",
+            content: `📅 **Rétro-planning d'étude méthodique : "${course.title || course.subject}"**\nDate cible d'examen : **${targetDate}**\n\nCochez vos étapes au fur et à mesure de vos révisions :`,
+            lang,
+            plan: planItems,
+            isStudent: true,
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -675,7 +1136,7 @@ export function AssistantPage() {
           [],
           lang,
           course.content,
-          "student"
+          "student",
         );
 
         setMessages((prev) => [
@@ -683,7 +1144,7 @@ export function AssistantPage() {
           {
             id: `cmd-resp-${Date.now()}`,
             role: "assistant",
-            content: `📑 **Fiche de Synthèse — ${course.title || course.subject}**\n\n${res.reply}`,
+            content: `📑 **Fiche de Synthèse Clé — ${course.title || course.subject}**\n\n${res.reply}`,
             lang,
             isStudent: true,
           },
@@ -700,6 +1161,21 @@ export function AssistantPage() {
     }
 
     send(cmdString);
+  };
+
+  const triggeredCmdRef = useRef(false);
+  useEffect(() => {
+    if (search.cmd && !triggeredCmdRef.current) {
+      triggeredCmdRef.current = true;
+      executeCommand(search.cmd);
+    }
+  }, [search.cmd]);
+
+  const handleExplainQuizMistake = (q: QuizQuestion) => {
+    const chosen = q.userSelectedIndex !== undefined ? q.options[q.userSelectedIndex] : "";
+    const correct = q.options[q.answerIndex];
+    const adaptivePrompt = `Je me suis trompé à la question : "${q.question}". J'ai sélectionné "${chosen}" alors que la bonne réponse est "${correct}". Peux-tu réexpliquer cette notion simplement avec un exemple pratique pour que je ne refasse plus cette erreur ?`;
+    send(adaptivePrompt);
   };
 
   const send = async (userText: string) => {
@@ -738,8 +1214,8 @@ export function AssistantPage() {
         text,
         hist,
         lang,
-        course.content,
-        isStudentMode ? "student" : "standard"
+        isStudentMode ? course.content : undefined,
+        isStudentMode ? "student" : "standard",
       );
 
       setMessages([
@@ -755,9 +1231,9 @@ export function AssistantPage() {
     } catch (err: any) {
       console.error(err);
       const isQuota = err instanceof GemmaApiError ? err.quotaExceeded : false;
-      const msg = err.message || "Erreur de communication avec l'IA CyberSafe.";
+      const msg = err.message || "Erreur de communication avec Google Gemma 4.";
       setApiError({ message: msg, quota: isQuota });
-      toast.error(isQuota ? "Quota API IA CyberSafe dépassé" : "Erreur IA CyberSafe");
+      toast.error(isQuota ? "Quota API Gemma 4 dépassé" : "Erreur Gemma 4");
     } finally {
       setLoading(false);
     }
@@ -765,21 +1241,62 @@ export function AssistantPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header avec switch tactile des 2 modes principaux */}
       <PageHeader
         icon={Bot}
         title={t("assistant.title")}
-        subtitle={t("assistant.subtitle")}
+        subtitle={
+          isStudentMode
+            ? "Tuteur d'étude interactif propulsé par Gemma 4 : révisions, quiz adaptatifs et rétro-planning d'examen."
+            : "Assistant de sécurité Mobile Money & détection de fraudes, propulsé par Google Gemma 4."
+        }
       >
         <div className="flex flex-wrap items-center gap-2">
-          {isStudentMode ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-electric/40 bg-electric/15 px-3 py-1 text-xs font-bold text-electric">
-              <GraduationCap className="size-3.5" /> Mode Étudiant Universel Actif
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              <Sparkles className="size-3.5" /> IA CyberSafe Active
-            </span>
-          )}
+          {/* Sélecteur de Mode en 1 clic */}
+          <div className="inline-flex rounded-xl border-2 border-foreground/80 bg-card p-1 shadow-neo-sm">
+            <button
+              type="button"
+              onClick={() => {
+                if (isStudentMode) executeCommand("/stop");
+              }}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-black transition-all",
+                !isStudentMode
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <ShieldCheck className="size-3.5 stroke-[2.5]" />
+              <span>Scanner d'Arnaques</span>
+              {!isStudentMode && (
+                <span className="size-1.5 rounded-full bg-emerald-300 animate-pulse" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!isStudentMode) executeCommand("/apprendre");
+                else setShowCourseEditor(true);
+              }}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-black transition-all",
+                isStudentMode
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <GraduationCap className="size-3.5 stroke-[2.5]" />
+              <span>Mode Apprendre</span>
+              {isStudentMode && (
+                <span className="size-1.5 rounded-full bg-amber-300 animate-pulse" />
+              )}
+            </button>
+          </div>
+
+          <CyberSticker tone="lime" icon={Sparkles} rotate="none">
+            Gemma 4 (26B IT)
+          </CyberSticker>
         </div>
       </PageHeader>
 
@@ -789,18 +1306,19 @@ export function AssistantPage() {
         </div>
       )}
 
-      {/* Bandeau d'état du cours actif */}
+      {/* Bannière Tactile du Cours Actif (Mode Apprendre) */}
       {isStudentMode && (
-        <div className="rounded-2xl border border-electric/30 bg-electric/5 p-4 text-xs transition-all animate-rise">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="relative overflow-hidden rounded-2xl border-2 border-purple-500/40 bg-gradient-to-r from-purple-500/10 via-card to-purple-500/5 p-4 text-xs transition-all animate-rise shadow-neo-sm">
+          <WavyCyberGrid opacity={0.12} className="text-purple-600" />
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-electric text-night shadow-glow">
-                <BookOpen className="size-4" />
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-purple-600 text-white shadow-neo-sm border-2 border-foreground/80">
+                <BookOpen className="size-5" />
               </div>
               <div>
-                <div className="font-bold text-foreground text-sm flex flex-wrap items-center gap-2">
-                  <span>{course.title || "Cours en cours d'étude"}</span>
-                  <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                <div className="font-bold text-foreground text-sm flex flex-wrap items-center gap-2 font-display">
+                  <span>{course.title || "Cours d'étude actif"}</span>
+                  <span className="rounded-md bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 text-[11px] font-bold text-purple-600 dark:text-purple-300">
                     {course.subject || "Général"}
                   </span>
                   {course.fileType === "pdf" && (
@@ -808,61 +1326,119 @@ export function AssistantPage() {
                       <FileCheck2 className="size-3" /> PDF Actif
                     </span>
                   )}
+                  {course.fileType === "photo" && (
+                    <span className="rounded-md bg-primary/15 border border-primary/30 px-2 py-0.5 text-[11px] font-bold text-primary flex items-center gap-1">
+                      <ImageUp className="size-3" /> Photo Gemma Vision
+                    </span>
+                  )}
                   {course.examDate && (
-                    <span className="rounded-md bg-electric/20 px-2 py-0.5 text-[11px] font-semibold text-electric">
+                    <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-300">
                       Examen : {course.examDate}
                     </span>
                   )}
                 </div>
-                <p className="text-muted-foreground text-xs mt-0.5">
+                <p className="text-muted-foreground text-xs mt-0.5 font-medium">
                   {course.content
-                    ? `${course.content.split(/\s+/).filter(Boolean).length} mots analysés · Commandes /plan, /quiz, /resume actives`
-                    : "Aucun texte ou document n'a encore été déposé. Cliquez sur 'Modifier le cours' ou joignez un PDF."}
+                    ? `${course.content.split(/\s+/).filter(Boolean).length} mots analysés · Actions rapides disponibles ci-dessous`
+                    : "Aucun cours chargé. Téléversez un PDF ou choisissez un cours démo."}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => executeCommand("/plan")}
+                disabled={loading}
+                className="gap-1 text-xs h-8 border-foreground/60 shadow-neo-sm"
+              >
+                <Calendar className="size-3.5 text-blue-500" /> Plan
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => executeCommand("/quiz")}
+                disabled={loading}
+                className="gap-1 text-xs h-8 border-foreground/60 shadow-neo-sm"
+              >
+                <HelpCircle className="size-3.5 text-amber-500" /> Quiz
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => executeCommand("/resume")}
+                disabled={loading}
+                className="gap-1 text-xs h-8 border-foreground/60 shadow-neo-sm"
+              >
+                <FileText className="size-3.5 text-emerald-500" /> Synthèse
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowCourseEditor(!showCourseEditor)}
-                className="gap-1.5 text-xs h-8"
+                className="gap-1 text-xs h-8 border-foreground/60 shadow-neo-sm"
               >
                 {showCourseEditor ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
-                {showCourseEditor ? "Fermer" : "Modifier / Changer de matière"}
+                {showCourseEditor ? "Fermer" : "Gérer cours"}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => executeCommand("/stop")}
-                className="text-xs h-8 text-destructive hover:text-destructive"
+                className="text-xs h-8 text-destructive hover:bg-destructive/10"
               >
-                <XCircle className="size-3.5 mr-1" /> Quitter
+                <XCircle className="size-3.5 mr-1" /> /stop
               </Button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Éditeur / Zone de téléversement du cours (Tous sujets + PDF) */}
-      {showCourseEditor && (
-        <Panel className="border-electric/30 bg-card p-5 animate-rise space-y-4">
-          <div className="flex items-center justify-between border-b pb-3">
+      {/* Tiroir d'Édition et d'Import de Cours */}
+      {isStudentMode && showCourseEditor && (
+        <Panel className="border-2 border-purple-500/40 bg-card p-5 animate-rise space-y-4 shadow-neo">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3">
             <div>
-              <h3 className="font-bold text-sm flex items-center gap-2 text-foreground">
-                <GraduationCap className="size-4 text-electric" /> Espace Étudiant — Tous Sujets d'Étude & Documents PDF
+              <h3 className="font-bold text-sm sm:text-base flex items-center gap-2 text-foreground font-display">
+                <GraduationCap className="size-4 text-purple-600" /> Volet « Apprendre » — Téléversez votre support d'étude
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Étudiez n'importe quelle matière : déposez un polycopié PDF ou collez vos cours.
+                Formats acceptés : PDF polycopiés, photos de cours/cahiers (transcription Gemma Vision), documents Word ou texte brut.
               </p>
             </div>
-            <span className="text-[11px] text-muted-foreground hidden sm:inline">Persistance automatique</span>
+            <CyberSticker tone="purple" icon={Sparkles} rotate="none">
+              Gemma 4 Tuteur
+            </CyberSticker>
           </div>
 
-          {/* Sélection rapide de discipline / matière */}
+          {/* Cours Démo 1-clic */}
+          <div className="rounded-xl border-2 border-primary/25 bg-primary/5 p-3.5 space-y-2.5">
+            <div className="text-xs font-black text-primary flex items-center gap-1.5 uppercase tracking-wider">
+              <Sparkles className="size-3.5 text-electric" /> Cours prêts pour la démo (Chargement en 1 clic) :
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {DEMO_COURSES.map((dc) => (
+                <button
+                  key={dc.id}
+                  type="button"
+                  onClick={() => loadDemoCourse(dc)}
+                  className="rounded-xl border-2 border-border/80 bg-card p-2.5 text-left text-xs transition-all hover:border-primary hover:shadow-neo-sm hover:-translate-y-0.5"
+                >
+                  <div className="font-bold text-foreground line-clamp-1">{dc.title}</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground font-medium">
+                    {dc.subject} · Examen : {dc.examDate}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Choix Discipline */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground">Matière ou Discipline d'étude :</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              Discipline / Matière :
+            </label>
             <div className="flex flex-wrap gap-1.5 mt-1.5">
               {SUBJECT_CATEGORIES.map((cat) => (
                 <button
@@ -870,15 +1446,15 @@ export function AssistantPage() {
                   type="button"
                   onClick={() => {
                     setCourseInputSubject(cat.name);
-                    if (!courseInputTitle || SUBJECT_CATEGORIES.some(c => c.name === courseInputTitle)) {
+                    if (!courseInputTitle || SUBJECT_CATEGORIES.some((c) => c.name === courseInputTitle)) {
                       setCourseInputTitle(cat.name);
                     }
                   }}
                   className={cn(
-                    "rounded-xl border px-2.5 py-1 text-xs transition flex items-center gap-1.5",
+                    "rounded-xl border-2 px-3 py-1.5 text-xs transition flex items-center gap-1.5 font-semibold",
                     courseInputSubject === cat.name
-                      ? "border-electric bg-electric/20 text-electric font-bold shadow-sm"
-                      : "border-border/60 bg-muted/40 hover:bg-muted text-foreground/80"
+                      ? "border-purple-600 bg-purple-500/20 text-purple-700 dark:text-purple-300 font-bold shadow-neo-sm"
+                      : "border-border/60 bg-muted/40 hover:bg-muted text-foreground/80",
                   )}
                 >
                   <span>{cat.emoji}</span>
@@ -890,61 +1466,63 @@ export function AssistantPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-semibold text-muted-foreground">Titre du cours ou Thématique précise</label>
+              <label className="text-xs font-bold text-muted-foreground">Titre précis du cours :</label>
               <input
                 type="text"
                 value={courseInputTitle}
                 onChange={(e) => setCourseInputTitle(e.target.value)}
-                placeholder="Ex: Algèbre Linéaire, Droit des Sociétés, Génie Logiciel..."
-                className="mt-1.5 w-full rounded-xl border bg-background px-3 py-2 text-xs focus:ring-1 focus:ring-electric outline-none"
+                placeholder="Ex: Sécurité Mobile Money, Algèbre Linéaire, Droit des Affaires..."
+                className="mt-1.5 w-full rounded-xl border-2 border-border/80 bg-background px-3 py-2 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted-foreground">Date de l'examen (pour le planning)</label>
+              <label className="text-xs font-bold text-muted-foreground">Date de l'examen (pour /plan) :</label>
               <input
                 type="date"
                 value={courseExamDate}
                 onChange={(e) => setCourseExamDate(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border bg-background px-3 py-2 text-xs focus:ring-1 focus:ring-electric outline-none"
+                className="mt-1.5 w-full rounded-xl border-2 border-border/80 bg-background px-3 py-2 text-xs focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-muted-foreground">
-                Contenu du cours (ou texte extrait du PDF)
+              <label className="text-xs font-bold text-muted-foreground">
+                Contenu du cours (texte saisi, extrait de PDF ou photo) :
               </label>
               {parsingPdf && (
-                <span className="flex items-center gap-1.5 text-xs text-electric font-semibold animate-pulse">
-                  <Loader2 className="size-3.5 animate-spin" /> Extraction du PDF...
+                <span className="flex items-center gap-1.5 text-xs text-purple-600 font-bold animate-pulse">
+                  <Loader2 className="size-3.5 animate-spin" /> Analyse du document en cours...
                 </span>
               )}
             </div>
             <Textarea
               value={courseInputText}
               onChange={(e) => setCourseInputText(e.target.value)}
-              placeholder="Collez ici les leçons, théorèmes, lois, chapitres ou résumés de votre cours à étudier..."
+              placeholder="Collez ici vos notes de cours ou utilisez le bouton de téléversement ci-dessous..."
               rows={5}
-              className="mt-1.5 resize-none rounded-xl text-xs"
+              className="mt-1.5 resize-none rounded-xl text-xs border-2"
             />
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-primary/40 bg-muted/40 px-3.5 py-2 text-xs font-semibold hover:bg-muted transition text-foreground">
-                <Upload className="size-3.5 text-primary" />
-                <span>Téléverser un cours (PDF, TXT, MD)</span>
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-purple-500/60 bg-purple-500/10 px-3.5 py-2 text-xs font-bold hover:bg-purple-500/20 transition text-foreground">
+                <Upload className="size-3.5 text-purple-600" />
+                <span>Téléverser (PDF, Photo ou TXT)</span>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".pdf,.txt,.md,.text,application/pdf"
+                  accept=".pdf,.txt,.md,.text,application/pdf,image/png,image/jpeg,image/webp"
                   className="hidden"
                   onChange={handleFileUpload}
                   disabled={parsingPdf}
                 />
               </label>
-              <span className="text-[11px] text-muted-foreground">PDFs avec texte numérique acceptés</span>
+              <span className="text-[11px] text-muted-foreground">
+                PDF polycopiés, captures et photos de cahier acceptés
+              </span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -954,82 +1532,154 @@ export function AssistantPage() {
                 onClick={() => setShowCourseEditor(false)}
                 className="text-xs"
               >
-                Annuler
+                Fermer
               </Button>
               <Button
                 variant="hero"
                 size="sm"
-                onClick={() => saveCourseData(courseInputTitle, courseInputText, courseExamDate, courseInputSubject)}
+                onClick={() =>
+                  saveCourseData(courseInputTitle, courseInputText, courseExamDate, courseInputSubject)
+                }
                 disabled={(!courseInputText.trim() && !courseInputTitle.trim()) || parsingPdf}
-                className="text-xs gap-1.5"
+                className="text-xs gap-1.5 shadow-neo-sm"
               >
-                <Check className="size-3.5" /> Enregistrer le cours
+                <Check className="size-3.5" /> Enregistrer ce cours
               </Button>
             </div>
           </div>
         </Panel>
       )}
 
+      {/* Zone Principale de Chat + Volet Latéral */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Fenêtre de discussion principale */}
+        {/* Colonne Chat */}
         <div className="lg:col-span-2 space-y-4">
-          <Panel className="min-h-[500px] flex flex-col justify-between p-4 sm:p-6 bg-card/80 backdrop-blur-md">
-            <div className="space-y-4 overflow-y-auto max-h-[550px] pr-2">
+          <Panel className="min-h-[520px] flex flex-col justify-between p-4 sm:p-6 bg-card/90 backdrop-blur-md border-2 border-border shadow-neo relative overflow-hidden">
+            {/* Décoration de fond subtile */}
+            <WavyCyberGrid opacity={0.06} className="text-foreground pointer-events-none" />
+
+            {/* Flux de messages */}
+            <div className="space-y-5 overflow-y-auto max-h-[560px] pr-2 relative z-10">
               {messages.map((m) => (
                 <div
                   key={m.id}
                   className={`flex gap-3 ${m.role === "user" ? "justify-end" : "justify-start"} animate-rise`}
                 >
+                  {/* Avatar Assistant */}
                   {m.role === "assistant" && (
-                    <div className="grid size-8 shrink-0 place-items-center rounded-xl bg-electric text-primary-foreground shadow-glow">
+                    <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-electric text-night font-bold shadow-neo-sm border-2 border-foreground/80 mt-1">
                       {m.isStudent ? <GraduationCap className="size-4" /> : <Bot className="size-4" />}
                     </div>
                   )}
 
-                  <div className="max-w-[86%] space-y-3">
+                  <div className="max-w-[88%] space-y-3">
+                    {/* Bulle de message */}
                     <div
-                      className={`rounded-2xl p-4 text-sm leading-relaxed whitespace-pre-wrap ${
+                      className={cn(
+                        "rounded-2xl p-4 text-sm leading-relaxed transition-all",
                         m.role === "user"
-                          ? "bg-primary text-primary-foreground font-medium shadow-sm ml-auto"
-                          : "bg-muted/70 text-foreground border border-border/50 shadow-sm"
-                      }`}
+                          ? "bg-primary text-primary-foreground font-medium shadow-neo-sm ml-auto border-2 border-foreground/60 rounded-tr-xs"
+                          : "bg-card text-foreground border-2 border-border/90 shadow-neo-sm rounded-tl-xs",
+                      )}
                     >
-                      {m.content}
+                      {/* Entête dans la bulle assistant */}
+                      {m.role === "assistant" && (
+                        <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-foreground font-display">
+                              {m.isStudent ? "Tuteur Gemma 4" : "Assistant CyberSafe"}
+                            </span>
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                              Gemma 4 IT
+                            </span>
+                          </div>
+                          <CopyButton text={m.content} />
+                        </div>
+                      )}
+
+                      {/* Rendu markdown enrichi */}
+                      {m.role === "assistant" ? (
+                        <FormattedChatMessage content={m.content} />
+                      ) : (
+                        <div className="whitespace-pre-wrap">{m.content}</div>
+                      )}
                     </div>
 
-                    {/* Rendu interactif des Quiz */}
+                    {/* Actions proactives suggérées */}
+                    {m.proactiveActions && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <Button
+                          type="button"
+                          variant="neo"
+                          size="sm"
+                          onClick={() => executeCommand("/plan")}
+                          disabled={loading}
+                          className="h-8 gap-1.5 rounded-xl text-xs font-bold"
+                        >
+                          <Calendar className="size-3.5 text-blue-500" /> Générer mon plan (/plan)
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="neo"
+                          size="sm"
+                          onClick={() => executeCommand("/quiz")}
+                          disabled={loading}
+                          className="h-8 gap-1.5 rounded-xl text-xs font-bold"
+                        >
+                          <HelpCircle className="size-3.5 text-amber-500" /> Quiz du jour (/quiz)
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="neo"
+                          size="sm"
+                          onClick={() => executeCommand("/resume")}
+                          disabled={loading}
+                          className="h-8 gap-1.5 rounded-xl text-xs font-bold"
+                        >
+                          <FileText className="size-3.5 text-emerald-500" /> Fiche de révision (/resume)
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Quiz Interactif Intégré */}
                     {m.quiz && m.quiz.length > 0 && (
-                      <div className="space-y-3 rounded-2xl border border-electric/30 bg-background/80 p-4">
-                        <div className="flex items-center justify-between border-b pb-2">
-                          <span className="text-xs font-bold text-electric uppercase tracking-wider flex items-center gap-1.5">
-                            <HelpCircle className="size-3.5" /> Questions d'Auto-Évaluation
+                      <div className="space-y-4 rounded-2xl border-2 border-amber-500/40 bg-card p-4 shadow-neo">
+                        <div className="flex items-center justify-between border-b pb-2.5">
+                          <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <HelpCircle className="size-4" /> Quiz Interactif & Adaptatif (Gemma 4)
                           </span>
-                          <span className="text-xs font-semibold text-muted-foreground">
+                          <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300">
                             Score : {m.quiz.filter((q) => q.userSelectedIndex === q.answerIndex).length} / {m.quiz.length}
                           </span>
                         </div>
 
-                        {m.quiz.map((q) => {
+                        {m.quiz.map((q, qIndex) => {
                           const hasAnswered = q.userSelectedIndex !== undefined;
                           const isCorrect = q.userSelectedIndex === q.answerIndex;
 
                           return (
-                            <div key={q.id} className="rounded-xl border bg-muted/30 p-3 text-xs space-y-2.5">
-                              <p className="font-semibold text-foreground">{q.id}. {q.question}</p>
+                            <div key={q.id} className="rounded-xl border-2 border-border/80 bg-muted/20 p-3.5 text-xs space-y-3">
+                              <div className="flex items-start gap-2">
+                                <span className="grid size-5 shrink-0 place-items-center rounded-md bg-amber-500/20 font-bold text-amber-700 dark:text-amber-300 text-[11px]">
+                                  {qIndex + 1}
+                                </span>
+                                <p className="font-bold text-sm text-foreground leading-snug">{q.question}</p>
+                              </div>
 
-                              <div className="space-y-1.5">
+                              <div className="space-y-2">
                                 {q.options.map((opt, optIdx) => {
                                   const isSelected = q.userSelectedIndex === optIdx;
                                   const isTheCorrectOne = optIdx === q.answerIndex;
+                                  const letter = OPTION_LETTERS[optIdx] ?? `${optIdx + 1}`;
 
-                                  let btnStyle = "border-border bg-background hover:border-primary/50 text-foreground";
+                                  let btnStyle = "border-border/80 bg-card hover:border-foreground/60 text-foreground";
                                   if (hasAnswered) {
                                     if (isTheCorrectOne) {
-                                      btnStyle = "border-success bg-success/15 text-success font-semibold";
+                                      btnStyle = "border-emerald-500 bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 font-bold shadow-sm";
                                     } else if (isSelected && !isCorrect) {
-                                      btnStyle = "border-destructive bg-destructive/15 text-destructive";
+                                      btnStyle = "border-destructive bg-destructive/15 text-destructive font-bold";
                                     } else {
-                                      btnStyle = "opacity-60 border-transparent bg-muted/40";
+                                      btnStyle = "opacity-50 border-transparent bg-muted/40";
                                     }
                                   }
 
@@ -1039,13 +1689,18 @@ export function AssistantPage() {
                                       onClick={() => handleSelectQuizAnswer(m.id, q.id, optIdx)}
                                       disabled={hasAnswered}
                                       className={cn(
-                                        "w-full text-left rounded-lg border p-2.5 text-xs transition flex items-center justify-between gap-2",
-                                        btnStyle
+                                        "w-full text-left rounded-xl border-2 p-2.5 text-xs transition flex items-center justify-between gap-3 shadow-neo-sm",
+                                        btnStyle,
                                       )}
                                     >
-                                      <span>{opt}</span>
+                                      <div className="flex items-center gap-2.5">
+                                        <span className="grid size-5 shrink-0 place-items-center rounded-md border border-foreground/30 bg-muted font-mono font-bold text-[11px]">
+                                          {letter}
+                                        </span>
+                                        <span>{opt}</span>
+                                      </div>
                                       {hasAnswered && isTheCorrectOne && (
-                                        <Check className="size-4 shrink-0 text-success" />
+                                        <Check className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                                       )}
                                       {hasAnswered && isSelected && !isCorrect && (
                                         <X className="size-4 shrink-0 text-destructive" />
@@ -1056,12 +1711,28 @@ export function AssistantPage() {
                               </div>
 
                               {hasAnswered && (
-                                <div className={cn(
-                                  "rounded-lg p-2.5 text-[11px] leading-relaxed border mt-2",
-                                  isCorrect ? "bg-success/10 border-success/30 text-success-foreground" : "bg-destructive/10 border-destructive/30 text-destructive-foreground"
-                                )}>
-                                  <strong>{isCorrect ? "Excellente réponse ! " : "Explication : "}</strong>
-                                  {q.explanation}
+                                <div
+                                  className={cn(
+                                    "rounded-xl p-3 text-xs leading-relaxed border-2 mt-2 space-y-2 animate-rise",
+                                    isCorrect
+                                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-900 dark:text-emerald-200"
+                                      : "bg-destructive/10 border-destructive/30 text-destructive-foreground",
+                                  )}
+                                >
+                                  <div>
+                                    <strong>{isCorrect ? "✓ Excellente analyse ! " : "✗ Correction pédagogique : "}</strong>
+                                    {q.explanation}
+                                  </div>
+                                  {!isCorrect && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleExplainQuizMistake(q)}
+                                      disabled={loading}
+                                      className="inline-flex items-center gap-1.5 rounded-lg border-2 border-foreground/60 bg-card px-2.5 py-1 text-[11px] font-bold text-foreground transition hover:bg-accent shadow-neo-sm"
+                                    >
+                                      <RefreshCw className="size-3 text-electric" /> Notion mal comprise ? Réexpliquer avec Gemma 4
+                                    </button>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -1070,16 +1741,28 @@ export function AssistantPage() {
                       </div>
                     )}
 
-                    {/* Rendu interactif du Plan de Révision */}
+                    {/* Plan d'Étude Interactif Intégré */}
                     {m.plan && m.plan.length > 0 && (
-                      <div className="space-y-3 rounded-2xl border border-primary/30 bg-background/80 p-4">
-                        <div className="flex items-center justify-between border-b pb-2">
-                          <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
-                            <Calendar className="size-3.5" /> Jalons de Révision Méthodique
+                      <div className="space-y-3 rounded-2xl border-2 border-blue-500/40 bg-card p-4 shadow-neo">
+                        <div className="flex items-center justify-between border-b pb-2.5">
+                          <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Calendar className="size-4" /> Plan d'Étude Méthodique (Gemma 4)
                           </span>
-                          <span className="text-xs font-semibold text-muted-foreground">
-                            {m.plan.filter((p) => p.completed).length} / {m.plan.length} terminés
+                          <span className="rounded-full bg-blue-500/15 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300">
+                            {m.plan.filter((p) => p.completed).length} / {m.plan.length} étapes validées
                           </span>
+                        </div>
+
+                        {/* Barre de Progression */}
+                        <div className="w-full bg-muted rounded-full h-2 overflow-hidden border">
+                          <div
+                            className="bg-blue-600 h-full transition-all duration-300"
+                            style={{
+                              width: `${Math.round(
+                                (m.plan.filter((p) => p.completed).length / m.plan.length) * 100,
+                              )}%`,
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -1088,15 +1771,15 @@ export function AssistantPage() {
                               key={item.id}
                               onClick={() => handleTogglePlanItem(m.id, item.id)}
                               className={cn(
-                                "w-full text-left rounded-xl border p-3 text-xs transition flex items-start gap-3",
+                                "w-full text-left rounded-xl border-2 p-3 text-xs transition-all flex items-start gap-3",
                                 item.completed
-                                  ? "bg-success/5 border-success/30 line-through text-muted-foreground"
-                                  : "bg-muted/30 border-border hover:border-primary/40 text-foreground"
+                                  ? "bg-emerald-500/10 border-emerald-500/40 line-through text-muted-foreground shadow-none"
+                                  : "bg-card border-border/80 hover:border-foreground/50 text-foreground shadow-neo-sm hover:translate-x-0.5",
                               )}
                             >
                               <div className="mt-0.5">
                                 {item.completed ? (
-                                  <CheckSquare className="size-4 text-success" />
+                                  <CheckSquare className="size-4 text-emerald-600 dark:text-emerald-400" />
                                 ) : (
                                   <Square className="size-4 text-muted-foreground" />
                                 )}
@@ -1105,7 +1788,7 @@ export function AssistantPage() {
                                 <div className="font-bold text-[11px] uppercase tracking-wider text-primary">
                                   {item.day}
                                 </div>
-                                <div className="mt-0.5 font-medium">{item.topic}</div>
+                                <div className="mt-0.5 font-medium leading-relaxed">{item.topic}</div>
                               </div>
                             </button>
                           ))}
@@ -1114,30 +1797,36 @@ export function AssistantPage() {
                     )}
                   </div>
 
+                  {/* Avatar Utilisateur */}
                   {m.role === "user" && (
-                    <div className="grid size-8 shrink-0 place-items-center rounded-xl bg-accent text-primary">
+                    <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-primary font-bold shadow-neo-sm border-2 border-foreground/60 mt-1">
                       <User className="size-4" />
                     </div>
                   )}
                 </div>
               ))}
 
+              {/* Indicateur de Réflexion */}
               {loading && (
-                <div className="flex items-center gap-2 text-xs font-semibold text-primary animate-pulse py-2">
-                  <Sparkles className="size-4 animate-spin text-electric" />
-                  <span>L'IA CyberSafe réfléchit en {lang === "ee" ? "Eʋegbe" : lang === "en" ? "English" : "Français"}...</span>
+                <div className="flex items-center gap-2.5 text-xs font-bold text-primary animate-pulse py-2">
+                  <div className="grid size-6 place-items-center rounded-lg bg-electric text-night">
+                    <Sparkles className="size-3.5 animate-spin" />
+                  </div>
+                  <span>
+                    Google Gemma 4 génère la réponse en {lang === "ee" ? "Eʋegbe" : lang === "en" ? "English" : "Français"}...
+                  </span>
                 </div>
               )}
               <div ref={chatEndRef} />
             </div>
 
-            {/* Zone de saisie, trombone PDF et commandes slash */}
-            <div className="mt-4 pt-3 border-t space-y-2 relative">
-              {/* Menu surgissant des commandes slash */}
+            {/* Zone de Saisie & Commandes */}
+            <div className="mt-4 pt-3 border-t-2 border-border/80 space-y-2.5 relative z-20">
+              {/* Menu Popup Slash */}
               {showSlashMenu && (
-                <div className="absolute bottom-full mb-2 left-0 right-0 rounded-2xl border border-electric/30 bg-card p-2 shadow-2xl backdrop-blur-xl animate-rise z-20 space-y-1">
-                  <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Commandes Mode Étudiant Universel
+                <div className="absolute bottom-full mb-2 left-0 right-0 rounded-2xl border-2 border-foreground bg-card/95 p-2.5 shadow-neo-lg backdrop-blur-xl animate-rise z-30 space-y-1">
+                  <div className="px-2 py-1 text-[11px] font-black uppercase tracking-wider text-muted-foreground">
+                    Commandes Disponibles (Google Gemma 4)
                   </div>
                   {SLASH_COMMANDS.map((item) => {
                     const Icon = item.icon;
@@ -1145,10 +1834,10 @@ export function AssistantPage() {
                       <button
                         key={item.cmd}
                         onClick={() => executeCommand(item.cmd)}
-                        className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium hover:bg-electric/10 hover:text-electric transition text-left"
+                        className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold hover:bg-accent transition text-left"
                       >
-                        <span className="flex items-center gap-2">
-                          <Icon className="size-4 text-electric" />
+                        <span className="flex items-center gap-2.5">
+                          <Icon className="size-4 text-electric shrink-0" />
                           <strong className="font-mono text-primary">{item.cmd}</strong>
                           <span className="text-muted-foreground">— {item.label}</span>
                         </span>
@@ -1159,10 +1848,10 @@ export function AssistantPage() {
                 </div>
               )}
 
-              {/* Barre de pilules de raccourcis rapides */}
+              {/* Raccourcis de Commandes `/` Tactiles */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 mr-1">
-                  Commandes :
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider shrink-0 mr-1">
+                  Actions `/` :
                 </span>
                 {SLASH_COMMANDS.map((item) => {
                   const Icon = item.icon;
@@ -1170,7 +1859,7 @@ export function AssistantPage() {
                     <button
                       key={item.cmd}
                       onClick={() => executeCommand(item.cmd)}
-                      className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-muted/60 px-2.5 py-1 text-[11px] font-semibold text-foreground transition hover:border-electric hover:bg-electric/15 hover:text-electric shrink-0"
+                      className="inline-flex items-center gap-1 rounded-full border-2 border-foreground/60 bg-card px-2.5 py-1 text-[11px] font-bold text-foreground transition hover:border-foreground hover:bg-accent shadow-neo-sm shrink-0 active:translate-y-0.5"
                     >
                       <Icon className="size-3 text-electric" />
                       {item.cmd}
@@ -1179,13 +1868,13 @@ export function AssistantPage() {
                 })}
               </div>
 
+              {/* Champ Textarea & Boutons */}
               <div className="flex items-end gap-2">
-                {/* Bouton trombone direct pour upload rapide de PDF */}
                 <label
-                  title="Téléverser un cours en PDF ou texte"
+                  title="Téléverser un cours (PDF, photo ou document)"
                   className={cn(
-                    "grid size-10 shrink-0 cursor-pointer place-items-center rounded-xl border border-border bg-muted/50 text-foreground transition hover:border-electric hover:bg-electric/10 hover:text-electric",
-                    parsingPdf && "animate-pulse pointer-events-none opacity-60"
+                    "grid size-11 shrink-0 cursor-pointer place-items-center rounded-xl border-2 border-foreground/70 bg-card text-foreground transition hover:border-foreground hover:bg-accent shadow-neo-sm active:translate-y-0.5",
+                    parsingPdf && "animate-pulse pointer-events-none opacity-60",
                   )}
                 >
                   {parsingPdf ? (
@@ -1195,7 +1884,7 @@ export function AssistantPage() {
                   )}
                   <input
                     type="file"
-                    accept=".pdf,.txt,.md,.text,application/pdf"
+                    accept=".pdf,.txt,.md,.text,application/pdf,image/png,image/jpeg,image/webp"
                     className="hidden"
                     onChange={handleFileUpload}
                     disabled={loading || parsingPdf}
@@ -1228,17 +1917,17 @@ export function AssistantPage() {
                     rows={2}
                     placeholder={
                       isStudentMode
-                        ? `Posez une question sur "${course.title || course.subject}" ou tapez /plan, /quiz, /resume...`
-                        : t("assistant.placeholder")
+                        ? `Posez une question sur "${course.title || course.subject}" ou tapez /plan, /quiz, /resume, /stop...`
+                        : "Collez un SMS suspect (T-Money/Moov), posez une question de sécurité, ou cliquez sur /apprendre..."
                     }
-                    className="resize-none rounded-xl"
+                    className="resize-none rounded-xl border-2 text-xs focus:ring-2 focus:ring-primary"
                     disabled={loading || parsingPdf}
                   />
                 </div>
 
                 <Button
                   variant="hero"
-                  className="shrink-0 h-10 px-4"
+                  className="shrink-0 h-11 px-4 shadow-neo-sm"
                   onClick={() => {
                     if (input.startsWith("/")) {
                       executeCommand(input);
@@ -1253,10 +1942,12 @@ export function AssistantPage() {
                 </Button>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5 font-medium">
+              {/* Barre d'état inférieure */}
+              <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+                <span className="flex items-center gap-1.5 font-medium text-[11px]">
                   <Sparkles className="size-3 text-electric" />
-                  Moteur actif : <strong>IA CyberSafe</strong> {isStudentMode ? `· ${course.subject}` : ""}
+                  Moteur : <strong>Google Gemma 4 (26B IT)</strong>
+                  {isStudentMode ? ` · Tuteur (${course.subject})` : " · Scanner Mobile Money"}
                 </span>
                 <button
                   onClick={() =>
@@ -1269,7 +1960,7 @@ export function AssistantPage() {
                       },
                     ])
                   }
-                  className="hover:underline inline-flex items-center gap-1"
+                  className="hover:underline inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
                 >
                   <RotateCcw className="size-3" /> {t("assistant.clearChat")}
                 </button>
@@ -1278,85 +1969,112 @@ export function AssistantPage() {
           </Panel>
         </div>
 
-        {/* Barre latérale droite : Suggestions & Guide universel */}
+        {/* Volet Latéral Droite : Suggestions & Informations */}
         <div className="space-y-4">
-          {/* Bloc Suggestions */}
-          <Panel>
-            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-              <Sparkles className="size-4 text-primary" />
-              {t("assistant.suggested")}
+          {/* Suggestions Pratiques par Catégorie */}
+          <Panel className="border-2 border-border shadow-neo-sm">
+            <h3 className="font-bold text-sm mb-3 flex items-center justify-between font-display text-foreground">
+              <span className="flex items-center gap-2">
+                <Sparkles className="size-4 text-electric" />
+                {t("assistant.suggested")}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                1 Clic
+              </span>
             </h3>
-            <div className="space-y-2">
-              {(SUGGESTIONS[lang] || SUGGESTIONS.fr).map((q, idx) => (
+
+            <div className="space-y-2.5">
+              {(SUGGESTIONS[lang] || SUGGESTIONS.fr).map((item, idx) => (
                 <button
                   key={idx}
-                  onClick={() => send(q)}
-                  className="w-full text-left rounded-xl border bg-muted/40 p-3 text-xs font-medium text-foreground transition hover:border-primary/40 hover:bg-accent"
+                  onClick={() => {
+                    if (item.query.startsWith("/")) {
+                      executeCommand(item.query);
+                    } else {
+                      send(item.query);
+                    }
+                  }}
+                  className="w-full text-left rounded-xl border-2 border-border/80 bg-card p-3 text-xs transition-all hover:border-foreground hover:shadow-neo-sm hover:-translate-y-0.5 group"
                 >
-                  {q}
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-electric">
+                      {item.badge}
+                    </span>
+                    <ArrowRight className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <div className="font-bold text-foreground leading-snug">{item.label}</div>
+                  <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">
+                    {item.query}
+                  </p>
                 </button>
               ))}
             </div>
           </Panel>
 
-          {/* Guide Mode Étudiant Universel & PDF */}
-          <Panel className="border-electric/30 bg-gradient-to-b from-card to-background space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-electric flex items-center gap-1.5">
-              <GraduationCap className="size-4" />
-              Mode Étudiant Universel
-            </h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              L'IA CyberSafe s'adapte à <strong>toutes vos matières</strong> académiques (Maths, Droit, Code, Sciences, Éco, etc.) :
-            </p>
-
-            <div className="rounded-xl border border-dashed border-electric/40 bg-electric/5 p-2.5 text-xs text-foreground space-y-1">
-              <div className="font-semibold text-electric flex items-center gap-1.5">
-                <Paperclip className="size-3.5" /> Support des fichiers PDF
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Déposez vos polycopiés de cours en PDF. Le texte est extrait et analysé pour vos quiz et fiches.
-              </p>
+          {/* Guide Rapide des Commandes / */}
+          <Panel className="border-2 border-purple-500/40 bg-card shadow-neo-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5 font-display">
+                <GraduationCap className="size-4" />
+                Commandes `/` (Tuteur Gemma 4)
+              </h4>
+              <MemphisDoodle variant="spark" className="size-4 text-purple-600 opacity-60" />
             </div>
 
-            <div className="space-y-1.5 text-xs text-foreground/80">
-              <div className="flex items-start gap-2">
-                <code className="bg-muted px-1.5 py-0.5 rounded text-electric font-mono text-[11px]">/apprendre</code>
-                <span>Ouvrir l'éditeur ou charger un cours PDF/TXT.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <code className="bg-muted px-1.5 py-0.5 rounded text-electric font-mono text-[11px]">/plan</code>
-                <span>Créer un rétro-planning d'examen adapté.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <code className="bg-muted px-1.5 py-0.5 rounded text-electric font-mono text-[11px]">/quiz</code>
-                <span>Générer des questions interactives sur la matière.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <code className="bg-muted px-1.5 py-0.5 rounded text-electric font-mono text-[11px]">/resume</code>
-                <span>Synthétiser les notions et pièges d'examen.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <code className="bg-muted px-1.5 py-0.5 rounded text-destructive font-mono text-[11px]">/stop</code>
-                <span>Quitter et revenir à l'assistant standard.</span>
-              </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Activez des super-pouvoirs d'apprentissage instantanément en tapant <code>/</code> :
+            </p>
+
+            <div className="space-y-2 text-xs">
+              {SLASH_COMMANDS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.cmd}
+                    onClick={() => executeCommand(item.cmd)}
+                    className="w-full text-left flex items-start gap-2.5 p-2 rounded-lg hover:bg-muted/60 transition group border border-transparent hover:border-border/60"
+                  >
+                    <Icon className="size-3.5 text-purple-600 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <code className="font-mono font-bold text-primary text-[11px]">
+                          {item.cmd}
+                        </code>
+                        <span className="text-[11px] font-bold text-foreground">
+                          {item.label}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </Panel>
 
-          {/* Panneau Sécurité & Confidentialité */}
-          <Panel className="border-sidebar-border bg-night text-night-foreground space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-electric flex items-center gap-1.5">
+          {/* Carte de Sécurité & Confidentialité Certifiée */}
+          <Panel className="border-2 border-foreground/60 bg-night text-night-foreground shadow-neo space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-electric flex items-center gap-1.5 font-display">
               <ShieldCheck className="size-4" />
-              IA CyberSafe — Sécurité Server-Side
+              Confidentialité & Sécurité
             </h4>
-            <p className="text-xs text-night-muted leading-relaxed">
+            <p className="text-xs text-night-muted leading-relaxed font-medium">
               {t("assistant.eweWarning")}
             </p>
-            <div className="rounded-lg bg-night-foreground/10 p-2.5 text-[11px] text-night-muted space-y-1.5">
-              <div className="flex items-center gap-1.5 text-night-foreground font-semibold">
-                <CheckCircle2 className="size-3.5 text-success" />
-                Confidentialité & Données
+
+            <div className="rounded-xl bg-night-foreground/10 p-3 text-[11px] text-night-muted space-y-2 border border-white/10">
+              <div className="flex items-center gap-2 text-night-foreground font-bold">
+                <Lock className="size-3.5 text-emerald-400 shrink-0" />
+                Zéro conservation de données personnelles
               </div>
-              <p>Vos cours et documents PDF restent privés et traités sur le serveur sans persistance externe non sollicitée.</p>
+              <p className="leading-relaxed">
+                Vos SMS et documents d'étude sont analysés en mémoire vive pour générer les réponses. Aucune donnée bancaire ni aucun numéro de téléphone n'est enregistré.
+              </p>
+              <div className="flex items-center gap-1.5 text-emerald-400 font-bold pt-1 text-[10px]">
+                <CheckCircle2 className="size-3" /> Clés API protégées côté serveur
+              </div>
             </div>
           </Panel>
         </div>

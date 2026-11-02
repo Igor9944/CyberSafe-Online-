@@ -36,10 +36,13 @@
     "audio": "Audio Scanner",
     "guide": "Record a Call",
     "assistant": "CyberSafe Assistant",
+    "student": "Student Space",
     "learn": "Learning Space",
     "history": "History",
     "about": "About",
     "settings": "Settings",
+    "mainNavigation": "Main navigation",
+    "mobileNavigation": "Mobile navigation",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
@@ -55,7 +58,8 @@
       "analyses": "Scans Completed",
       "threats": "Threats Detected",
       "safe": "Safe Messages",
-      "storedData": "Raw Data Stored"
+      "storedData": "Scans saved locally",
+      "localHistory": "Local history"
     },
     "scanners": {
       "sms": {
@@ -117,7 +121,8 @@
     "phones": "Phone Numbers",
     "tooShort": "Message is too short to be analyzed.",
     "tooLong": "Message exceeds 2000 characters limit.",
-    "completed": "Analysis completed"
+    "completed": "Analysis completed",
+    "privacyDisclosure": "Your message is sent to the AI analysis service. If VirusTotal checks are enabled, only extracted URLs are sent for scanning. Never include a PIN or OTP code."
   },
   "qr": {
     "title": "QR Code Scanner",
@@ -223,7 +228,7 @@
     "multilingualTitle": "Multilingual Commitment",
     "multilingualDesc": "In full alignment with the CyberSafe Online specification, the platform natively supports French, English, and Éwé (Eʋegbe). The CyberSafe AI analysis engine is calibrated for local linguistic nuances, including code-switching and indigenous terms.",
     "safetyTitle": "Security & Privacy Guarantee",
-    "safetyDesc": "Your sensitive data stays under your control. No passive listening, no covert logging, and no untrusted links are ever loaded onto servers."
+    "safetyDesc": "No passive listening or background recording. Submitted content is processed to provide the requested analysis; extracted URLs may be sent to VirusTotal when enabled. Never submit a PIN or OTP code."
   },
   "settings": {
     "title": "Settings",
@@ -234,7 +239,9 @@
     "gemmaHelp": "CyberSafe AI is configured to process multilingual content (FR, EN, EE) and formulate advice in your preferred language.",
     "verificationSection": "Human Linguistic Verification",
     "verificationDesc": "All critical security warnings regarding PINs, OTP codes, and funds transfers in Éwé are submitted to human linguistic verification.",
-    "savedSuccess": "Settings saved"
+    "savedSuccess": "Settings saved",
+    "privacyTitle": "Data and privacy",
+    "privacyDescription": "Your language, theme, and history are saved in this browser. Text or documents you submit for analysis are sent to the CyberSafe server and may be processed by the AI provider; extracted URLs may be checked by VirusTotal when enabled. Never include a PIN or OTP code."
   },
   "risk": {
     "riskLevel": "Risk Level",

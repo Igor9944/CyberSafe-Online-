@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 import type { AnalysisResult, RiskLevel } from "./risk-engine";
 
-/** Historique local : seules les métadonnées sont gardées (jamais le SMS, l'image ou l'audio brut). */
+export type ScanType = "SMS" | "QR" | "Audio";
+
+export interface HistoryFinding {
+  label: string;
+  detail?: string;
+}
+
 export interface HistoryEntry {
   id: string;
-  type: "SMS" | "QR" | "Audio";
+  type: ScanType;
   date: string;
   level: RiskLevel;
   score: number;
   summary: string;
-  findings: string[];
+  findings: HistoryFinding[];
   recommendations: string[];
 }
 
@@ -19,14 +25,23 @@ const EVT = "cybersafe-history";
 export function readHistory(): HistoryEntry[] {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const raw = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw.map((entry: any) => ({
+      ...entry,
+      findings: Array.isArray(entry.findings)
+        ? entry.findings.map((f: any) =>
+            typeof f === "string" ? { label: f, detail: "" } : { label: f?.label || "", detail: f?.detail || "" },
+          )
+        : [],
+    }));
   } catch {
     return [];
   }
 }
 
-export function saveAnalysis(type: HistoryEntry["type"], r: AnalysisResult) {
-  if (localStorage.getItem("cybersafe.saveHistory") === "off") return;
+export function saveAnalysis(type: ScanType, r: AnalysisResult) {
+  if (typeof window === "undefined" || localStorage.getItem("cybersafe.saveHistory") === "off") return;
   const entry: HistoryEntry = {
     id: crypto.randomUUID(),
     type,
@@ -34,7 +49,10 @@ export function saveAnalysis(type: HistoryEntry["type"], r: AnalysisResult) {
     level: r.level,
     score: r.score,
     summary: r.summary,
-    findings: r.findings.map((f) => f.label),
+    findings: r.findings.map((f) => ({
+      label: typeof f === "string" ? f : f.label,
+      detail: typeof f === "string" ? "" : f.detail,
+    })),
     recommendations: r.recommendations,
   };
   localStorage.setItem(KEY, JSON.stringify([entry, ...readHistory()].slice(0, 100)));

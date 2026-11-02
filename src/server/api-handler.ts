@@ -1,11 +1,12 @@
-/**
- * Handler HTTP pour l'endpoint POST /api/analyze.
- * Réutilisable par le serveur de production (server.ts) et le middleware Vite de dev.
- */
 
 import {
   analyzeContentWithGemma,
   askGemmaAssistant,
+  extractCourseFromImageWithGemma,
+  extractSmsFromImageWithGemma,
+  generateFlashcardsWithGemma,
+  generateQuizWithGemma,
+  generateStudyPlanWithGemma,
   type AnalysisType,
   type SupportedLanguage,
 } from "./gemma";
@@ -35,17 +36,23 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
   }
 
   const {
-    content,
+    content = "",
     type = "sms",
     lang = "fr",
     history = [],
     checkVirusTotal = true,
     url,
     courseContext,
+    courseTitle,
+    courseSubject,
+    examDate,
     mode,
+    imageBase64,
+    imageMimeType,
   } = body || {};
 
-  // Endpoint spécifique pour soumettre une URL inconnue à l'analyse VirusTotal
+  const selectedLang: SupportedLanguage = lang === "en" || lang === "ee" ? lang : "fr";
+
   if (type === "vt_submit") {
     const targetUrl = url || content;
     if (!targetUrl || typeof targetUrl !== "string") {
@@ -61,21 +68,97 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
     });
   }
 
-  if (!content || typeof content !== "string" || !content.trim()) {
-    return new Response(JSON.stringify({ error: "Le champ 'content' est obligatoire." }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const validTypes: AnalysisType[] = ["sms", "qr", "audio", "assistant", "learning"];
-  const selectedType: AnalysisType = validTypes.includes(type) ? type : "sms";
-  const selectedLang: SupportedLanguage = lang === "en" || lang === "ee" ? lang : "fr";
-
   try {
+    if (type === "sms_image") {
+      if (!imageBase64) {
+        return new Response(JSON.stringify({ error: "Aucune capture d'écran fournie pour l'analyse OCR." }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      const extracted = await extractSmsFromImageWithGemma(
+        { base64: imageBase64, mimeType: imageMimeType || "image/png" },
+        selectedLang,
+      );
+      return new Response(JSON.stringify(extracted), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "course_image") {
+      if (!imageBase64) {
+        return new Response(JSON.stringify({ error: "Aucune image fournie pour l'extraction du cours." }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      const extracted = await extractCourseFromImageWithGemma(
+        { base64: imageBase64, mimeType: imageMimeType || "image/jpeg" },
+        selectedLang,
+      );
+      return new Response(JSON.stringify(extracted), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "study_plan") {
+      const planRes = await generateStudyPlanWithGemma(
+        courseTitle || "Cours d'étude",
+        courseSubject || "Général",
+        courseContext || content || "",
+        examDate || "",
+        selectedLang,
+      );
+      return new Response(JSON.stringify(planRes), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "study_quiz") {
+      const quizRes = await generateQuizWithGemma(
+        courseTitle || "Cours d'étude",
+        courseSubject || "Général",
+        courseContext || content || "",
+        selectedLang,
+      );
+      return new Response(JSON.stringify(quizRes), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "study_flashcards") {
+      const flashcards = await generateFlashcardsWithGemma(
+        courseTitle || "Cours d'étude",
+        courseSubject || "Général",
+        courseContext || content || "",
+        selectedLang,
+      );
+      return new Response(JSON.stringify({ flashcards }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const hasText = typeof content === "string" && content.trim().length > 0;
+    const hasImage = typeof imageBase64 === "string" && imageBase64.length > 0;
+
+    if (!hasText && !hasImage) {
+      return new Response(JSON.stringify({ error: "Veuillez fournir un texte ou une capture d'écran à analyser." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const validTypes: AnalysisType[] = ["sms", "qr", "audio", "assistant", "learning"];
+    const selectedType: AnalysisType = validTypes.includes(type) ? type : "sms";
+
     if (selectedType === "assistant") {
       const result = await askGemmaAssistant(
-        content.trim(),
+        String(content).trim(),
         history,
         selectedLang,
         courseContext,
@@ -87,28 +170,41 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
       });
     }
 
-    if (selectedType === "sms") {
-      // Pour les SMS, on effectue l'analyse sémantique Gemma et la vérification technique VirusTotal
+    const imageInput = hasImage
+      ? { base64: imageBase64, mimeType: imageMimeType || "image/png" }
+      : undefined;
+
+    const gemmaResult = await analyzeContentWithGemma(
+      String(content).trim(),
+      selectedType,
+      selectedLang,
+      imageInput,
+    );
+
+    const textForVt = `${String(content).trim()} ${gemmaResult.extractedMeta?.transcribedText || ""}`.trim();
+    const shouldCheckVt =
+      checkVirusTotal &&
+      (selectedType === "sms" ||
+        selectedType === "qr" ||
+        /^https?:\/\//i.test(textForVt) ||
+        /[a-z0-9-]+\.(com|tg|top|xyz|net|org|live|site|online)/i.test(textForVt));
+
+    if (shouldCheckVt && textForVt) {
       let vtResult: VirusTotalAnalysisResult | undefined;
-
-      if (checkVirusTotal) {
-        try {
-          vtResult = await analyzeUrlsWithVirusTotal(content.trim());
-        } catch {
-          vtResult = {
-            enabled: true,
-            checked: false,
-            hasUrls: false,
-            urls: [],
-            summary: { totalUrls: 0, maliciousUrls: 0, suspiciousUrls: 0, cleanUrls: 0, notFoundUrls: 0 },
-            unavailable: true,
-            unavailableReason: "Vérification VirusTotal indisponible",
-            caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
-          };
-        }
+      try {
+        vtResult = await analyzeUrlsWithVirusTotal(textForVt);
+      } catch {
+        vtResult = {
+          enabled: true,
+          checked: false,
+          hasUrls: false,
+          urls: [],
+          summary: { totalUrls: 0, maliciousUrls: 0, suspiciousUrls: 0, cleanUrls: 0, notFoundUrls: 0 },
+          unavailable: true,
+          unavailableReason: "Vérification VirusTotal indisponible",
+          caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+        };
       }
-
-      const gemmaResult = await analyzeContentWithGemma(content.trim(), selectedType, selectedLang);
 
       if (vtResult) {
         const combined = combineGemmaAndVirusTotal(gemmaResult, vtResult);
@@ -117,15 +213,9 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
           headers: { "Content-Type": "application/json" },
         });
       }
-
-      return new Response(JSON.stringify(gemmaResult), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
     }
 
-    const result = await analyzeContentWithGemma(content.trim(), selectedType, selectedLang);
-    return new Response(JSON.stringify(result), {
+    return new Response(JSON.stringify(gemmaResult), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -146,3 +236,4 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
     );
   }
 }
+

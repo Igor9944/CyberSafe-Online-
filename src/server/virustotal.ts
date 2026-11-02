@@ -1,14 +1,8 @@
-/**
- * Service Backend pour VirusTotal API v3.
- * Exécute exclusivement côté serveur avec process.env.VIRUSTOTAL_API_KEY.
- * Ne JAMAIS importer ce fichier dans du code exécuté côté client/navigateur.
- */
 
 import fs from "node:fs";
 import path from "node:path";
 import type { Finding, GemmaAnalysisResponse } from "./gemma";
 
-// Cache mémoire pour respecter les quotas et limiter les appels répétés (TTL 10 min)
 interface CacheEntry {
   report: VirusTotalUrlReport;
   expiresAt: number;
@@ -60,7 +54,6 @@ function ensureEnvLoaded(): string | undefined {
         process.loadEnvFile();
       }
     } catch {
-      // Ignorer si process.loadEnvFile n'est pas disponible
     }
 
     if (!process.env["VIRUSTOTAL_API_KEY"]) {
@@ -86,7 +79,6 @@ function ensureEnvLoaded(): string | undefined {
             }
           }
         } catch {
-          // Ignorer erreur de lecture
         }
       }
     }
@@ -98,10 +90,6 @@ export function getVirusTotalApiKey(): string | undefined {
   return ensureEnvLoaded();
 }
 
-/**
- * Mots-clés sensibles dont la présence dans les paramètres d'URL
- * indique des jetons privés, codes OTP ou mots de passe.
- */
 const SENSITIVE_PARAM_KEYWORDS = [
   "token",
   "access_token",
@@ -127,13 +115,9 @@ export interface ExtractedUrlInfo {
   sensitiveReason?: string | undefined;
 }
 
-/**
- * Extrait, normalise et valide les URLs d'un SMS ou texte brut.
- */
 export function extractUrlsFromText(text: string): ExtractedUrlInfo[] {
   if (!text || typeof text !== "string") return [];
 
-  // Expression régulière robuste pour identifier les URL avec ou sans protocole
   const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<>"']+|[a-zA-Z0-9-]+\.(?:com|org|net|tg|xyz|top|live|site|online|info|me|ly|co|io|tk|ml|ga|cf|gq|biz|icu|buzz)(?:\/[^\s<>"']*)?)/gi;
 
   const matches = text.match(urlRegex) ?? [];
@@ -141,12 +125,10 @@ export function extractUrlsFromText(text: string): ExtractedUrlInfo[] {
   const seen = new Set<string>();
 
   for (const raw of matches) {
-    // Nettoyer la ponctuation traînante fréquente en fin de SMS (.,:;!?)]
     let cleaned = raw.replace(/[.,;:!?)]+$/, "").trim();
 
     if (!cleaned) continue;
 
-    // Normalisation : ajouter le protocole https:// si absent
     let withProto = cleaned;
     if (!/^https?:\/\//i.test(withProto)) {
       withProto = "https://" + withProto;
@@ -160,7 +142,6 @@ export function extractUrlsFromText(text: string): ExtractedUrlInfo[] {
       if (seen.has(normalizedUrl)) continue;
       seen.add(normalizedUrl);
 
-      // Vérifier la présence de données confidentielles / tokens
       let isSensitive = false;
       let sensitiveReason: string | undefined;
 
@@ -181,23 +162,16 @@ export function extractUrlsFromText(text: string): ExtractedUrlInfo[] {
         ...(sensitiveReason !== undefined ? { sensitiveReason } : {}),
       });
     } catch {
-      // Ignorer les chaînes qui ne forment pas une URL valide
     }
   }
 
   return results;
 }
 
-/**
- * Encode une URL au format base64url sans padding, requis par VirusTotal API v3.
- */
 export function encodeUrlForVirusTotal(url: string): string {
   return Buffer.from(url).toString("base64url");
 }
 
-/**
- * Interroge l'API VirusTotal v3 pour obtenir le rapport de réputation d'une URL.
- */
 export async function fetchVirusTotalReportForUrl(
   normalizedUrl: string,
   domain: string,
@@ -214,7 +188,6 @@ export async function fetchVirusTotalReportForUrl(
     };
   }
 
-  // Vérifier dans le cache mémoire
   const cached = URL_CACHE.get(normalizedUrl);
   if (cached && Date.now() < cached.expiresAt) {
     return cached.report;
@@ -317,9 +290,6 @@ export async function fetchVirusTotalReportForUrl(
   }
 }
 
-/**
- * Soumet une URL pour une nouvelle analyse auprès de VirusTotal (quand 404 ou non répertoriée).
- */
 export async function submitUrlToVirusTotal(
   normalizedUrl: string,
   apiKey?: string,
@@ -359,10 +329,6 @@ export async function submitUrlToVirusTotal(
   }
 }
 
-/**
- * Analyse l'ensemble des URLs contenues dans un texte via VirusTotal v3.
- * Respecte les exigences de sécurité : ne transmet QUE les URLs, jamais le SMS complet.
- */
 export async function analyzeUrlsWithVirusTotal(
   smsText: string,
   apiKey?: string,
@@ -392,7 +358,6 @@ export async function analyzeUrlsWithVirusTotal(
   let quotaCount = 0;
 
   for (const item of extracted) {
-    // Si l'URL contient des paramètres sensibles (token, OTP), on ne la soumet pas
     if (item.isSensitive) {
       reports.push({
         url: item.normalizedUrl,
@@ -455,10 +420,6 @@ export interface CombinedSmsAnalysisResponse extends GemmaAnalysisResponse {
   technicalRisk: TechnicalRiskLevel;
 }
 
-/**
- * Fusionne l'analyse contextuelle de Gemma avec la réputation technique de VirusTotal v3.
- * Sans confondre leurs rôles, conformément aux exigences du document CyberSafe Online.
- */
 export function combineGemmaAndVirusTotal(
   gemma: GemmaAnalysisResponse,
   vt: VirusTotalAnalysisResult,
@@ -479,13 +440,11 @@ export function combineGemmaAndVirusTotal(
     technicalRisk = "NON_RÉPERTORIÉ";
   }
 
-  // Fusion du score et niveau global
   let globalScore = gemma.score;
   let globalLevel = gemma.level;
 
   if (technicalRisk === "ÉLEVÉ") {
     globalLevel = "ÉLEVÉ";
-    // Si VirusTotal détecte des moteurs malveillants, le score monte à au moins 85
     globalScore = Math.max(globalScore, 85);
   } else if (technicalRisk === "SUSPECT") {
     if (globalLevel === "FAIBLE") {
@@ -497,7 +456,6 @@ export function combineGemmaAndVirusTotal(
   const combinedFindings: Finding[] = [...gemma.findings];
   const combinedRecommendations: string[] = [...gemma.recommendations];
 
-  // Ajouter les signaux techniques VirusTotal dans les findings
   if (vt.hasUrls) {
     for (const urlReport of vt.urls) {
       if (urlReport.status === "analyzed" && urlReport.stats) {
@@ -529,8 +487,6 @@ export function combineGemmaAndVirusTotal(
       }
     }
 
-    // Toujours inclure la recommandation obligatoire :
-    // « Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr »
     const cautionText = "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr (les campagnes récentes peuvent ne pas encore être répertoriées).";
     if (!combinedRecommendations.includes(cautionText)) {
       combinedRecommendations.push(cautionText);
@@ -557,3 +513,4 @@ export function combineGemmaAndVirusTotal(
     technicalRisk,
   };
 }
+

@@ -44,11 +44,14 @@ const I18nContext = createContext<I18nContextValue>({
 });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Language>(() => {
-    if (typeof window === "undefined") return "fr";
-    const saved = localStorage.getItem("cybersafe_lang") as Language;
-    return saved && (saved === "fr" || saved === "en" || saved === "ee") ? saved : "fr";
-  });
+  const [lang, setLangState] = useState<Language>("fr");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cybersafe_lang");
+    if (saved === "fr" || saved === "en" || saved === "ee") {
+      setLangState(saved);
+    }
+  }, []);
 
   const setLang = (next: Language) => {
     setLangState(next);
@@ -71,7 +74,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       if (current && typeof current === "object" && k in current) {
         current = current[k];
       } else {
-        // Fallback to French if not found in current language
         let fallbackVal = translations["fr"];
         for (const fk of keys) {
           if (fallbackVal && typeof fallbackVal === "object" && fk in fallbackVal) {
@@ -100,57 +102,66 @@ export function useI18n() {
 
 export function LanguageSelector({ variant = "outline" }: { variant?: "outline" | "ghost" | "default" }) {
   const { lang, setLang } = useI18n();
-  const current = LANGUAGES[lang];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant={variant}
-          size="sm"
-          className="gap-2 rounded-xl border-sidebar-border bg-sidebar-accent/50 text-xs font-semibold text-night-foreground hover:bg-sidebar-accent hover:text-white"
-          aria-label="Sélecteur de langue / Language selector"
-        >
-          <span className="text-base" role="img" aria-hidden="true">{current.flag}</span>
-          <span className="hidden sm:inline">{current.native}</span>
-          <Globe className="size-3.5 opacity-70" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 rounded-xl border border-border bg-popover p-1 shadow-lg">
-        {(Object.keys(LANGUAGES) as Language[]).map((k) => {
-          const item = LANGUAGES[k];
-          const active = k === lang;
-          return (
-            <DropdownMenuItem
-              key={k}
-              onClick={() => setLang(k)}
-              className="flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-accent"
-            >
-              <span className="flex items-center gap-2">
-                <span className="text-base" role="img" aria-hidden="true">{item.flag}</span>
-                <span>{item.native}</span>
-              </span>
-              {active && <Check className="size-3.5 text-primary" />}
-            </DropdownMenuItem>
-          );
-        })}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div
+      role="group"
+      aria-label="Sélecteur de langue / Language selector"
+      className="inline-flex items-center gap-0.5 rounded-xl border border-border/70 bg-muted/60 p-1 backdrop-blur-sm"
+    >
+      {(Object.keys(LANGUAGES) as Language[]).map((k) => {
+        const item = LANGUAGES[k];
+        const active = k === lang;
+        return (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setLang(k)}
+            title={item.native}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
+              active
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+            }`}
+          >
+            <span className="text-sm leading-none" role="img" aria-hidden="true">
+              {item.flag}
+            </span>
+            <span className="uppercase tracking-wider text-[11px]">
+              {k === "ee" ? "Éwé" : k.toUpperCase()}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
 export function SecurityVerificationNotice() {
-  const { t, isEwe } = useI18n();
+  const { t } = useI18n();
   return (
-    <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
-      <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-      <div>
-        <p className="font-semibold text-foreground">
-          {t("common.humanVerificationBadge")}
-        </p>
-        <p className="mt-0.5">
-          {t("common.humanVerificationWarning")}
-        </p>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/8 via-card to-electric/8 px-4 py-3 text-xs shadow-xs">
+      <div className="flex items-start sm:items-center gap-2.5">
+        <div className="grid size-7 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+          <ShieldCheck className="size-4" />
+        </div>
+        <div>
+          <span className="font-bold text-foreground">
+            {t("common.humanVerificationBadge")}
+          </span>
+          <span className="hidden md:inline text-muted-foreground"> — </span>
+          <span className="block md:inline text-muted-foreground">
+            {t("common.humanVerificationWarning")}
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+        <span className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+          T-Money : *145#
+        </span>
+        <span className="rounded-lg border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+          Moov : *155#
+        </span>
       </div>
     </div>
   );

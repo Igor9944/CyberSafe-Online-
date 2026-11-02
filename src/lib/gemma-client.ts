@@ -1,10 +1,7 @@
-/**
- * Client pour appeler l'API sécurisée /api/analyze (Gemma 4).
- * La clé GEMINI_API_KEY n'est JAMAIS manipulée ici (exclusivement côté serveur).
- */
-
 import type { Language } from "./i18n";
 import type { AnalysisResult } from "./risk-engine";
+
+export const PUBLIC_GEMMA_MODEL = "gemma-4-26b-a4b-it";
 
 export interface VirusTotalStats {
   malicious: number;
@@ -43,10 +40,21 @@ export interface VirusTotalAnalysisResult {
   caution: string;
 }
 
+export interface GemmaExtractedMeta {
+  sender?: string;
+  operator?: string;
+  syntaxConformity?: "CONFORME" | "NON_CONFORME" | "SUSPECT";
+  syntaxDetail?: string;
+  transcribedText?: string;
+  amounts?: string[];
+  phones?: string[];
+}
+
 export interface GemmaApiAnalysisResult extends AnalysisResult {
   isGemma: boolean;
   model: string;
   lang?: Language;
+  extractedMeta?: GemmaExtractedMeta | undefined;
 }
 
 export interface CombinedSmsAnalysisResult extends GemmaApiAnalysisResult {
@@ -56,11 +64,29 @@ export interface CombinedSmsAnalysisResult extends GemmaApiAnalysisResult {
   technicalRisk?: ("FAIBLE" | "SUSPECT" | "ÉLEVÉ" | "NON_RÉPERTORIÉ" | "INDISPONIBLE" | "AUCUN_LIEN") | undefined;
 }
 
+export interface StudyPlanItem {
+  id: number;
+  day: string;
+  topic: string;
+  completed: boolean;
+}
+
+export interface StudyQuizQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  answerIndex: number;
+  explanation: string;
+  userSelectedIndex?: number;
+}
+
 export interface GemmaAssistantReply {
   reply: string;
   model: string;
   isGemma: boolean;
   lang: Language;
+  plan?: StudyPlanItem[];
+  quiz?: StudyQuizQuestion[];
 }
 
 export class GemmaApiError extends Error {
@@ -80,7 +106,11 @@ export async function analyzeWithGemmaApi(
   type: "sms" | "qr" | "audio" | "assistant" | "learning" = "sms",
   lang: Language = "fr",
   history: { role: string; content: string }[] = [],
-  options?: { checkVirusTotal?: boolean },
+  options?: {
+    checkVirusTotal?: boolean;
+    imageBase64?: string;
+    imageMimeType?: string;
+  },
 ): Promise<CombinedSmsAnalysisResult> {
   const res = await fetch("/api/analyze", {
     method: "POST",
@@ -93,6 +123,8 @@ export async function analyzeWithGemmaApi(
       lang,
       history,
       checkVirusTotal: options?.checkVirusTotal ?? true,
+      imageBase64: options?.imageBase64,
+      imageMimeType: options?.imageMimeType,
     }),
   });
 
@@ -103,22 +135,24 @@ export async function analyzeWithGemmaApi(
     const errorMsg =
       data.error ||
       (isQuota
-        ? "Quota API IA CyberSafe dépassé (429). Aucune analyse fictive n'est affichée."
-        : "Erreur de communication avec le serveur d'IA CyberSafe.");
+        ? "Quota API Gemma 4 dépassé (429). Aucune analyse fictive n'est affichée."
+        : "Erreur de communication avec le serveur Gemma 4.");
     throw new GemmaApiError(errorMsg, isQuota, res.status);
   }
 
   return {
     level: data.level || "SUSPECT",
     score: typeof data.score === "number" ? data.score : 50,
-    summary: data.summary || "Analyse réalisée par l'IA CyberSafe.",
+    summary: data.summary || "Analyse réalisée par Google Gemma 4.",
     findings: Array.isArray(data.findings) ? data.findings : [],
     recommendations: Array.isArray(data.recommendations) ? data.recommendations : [],
     extracted: {
-      amounts: [],
+      sender: data.extractedMeta?.sender,
+      amounts: Array.isArray(data.extractedMeta?.amounts) ? data.extractedMeta.amounts : [],
       links: [],
-      phones: [],
+      phones: Array.isArray(data.extractedMeta?.phones) ? data.extractedMeta.phones : [],
     },
+    extractedMeta: data.extractedMeta,
     isGemma: true,
     model: data.model || "gemma-4-26b-a4b-it",
     lang,
@@ -176,15 +210,166 @@ export async function askGemmaAssistantApi(
     const errorMsg =
       data.error ||
       (isQuota
-        ? "Quota API IA CyberSafe dépassé (429). L'assistant ne peut pas répondre."
-        : "Erreur lors de l'appel à l'IA CyberSafe.");
+        ? "Quota API Gemma 4 dépassé (429). L'assistant ne peut pas répondre."
+        : "Erreur lors de l'appel à Gemma 4.");
     throw new GemmaApiError(errorMsg, isQuota, res.status);
   }
 
   return {
     reply: data.reply || "",
-    model: data.model || "IA CyberSafe",
+    model: data.model || "gemma-4-26b-a4b-it",
     isGemma: true,
     lang,
   };
 }
+
+export async function generateStudyPlanApi(
+  courseTitle: string,
+  courseSubject: string,
+  courseContent: string,
+  examDate: string,
+  lang: Language = "fr",
+): Promise<GemmaAssistantReply> {
+  const res = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "study_plan",
+      courseTitle,
+      courseSubject,
+      courseContext: courseContent,
+      examDate,
+      lang,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new GemmaApiError(data.error || "Erreur lors de la génération du plan par Gemma 4.", res.status === 429, res.status);
+  }
+
+  return {
+    reply: data.reply || "",
+    model: data.model || "gemma-4-26b-a4b-it",
+    isGemma: true,
+    lang,
+    plan: Array.isArray(data.plan) ? data.plan : [],
+  };
+}
+
+export async function generateStudyQuizApi(
+  courseTitle: string,
+  courseSubject: string,
+  courseContent: string,
+  lang: Language = "fr",
+): Promise<GemmaAssistantReply> {
+  const res = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "study_quiz",
+      courseTitle,
+      courseSubject,
+      courseContext: courseContent,
+      lang,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new GemmaApiError(data.error || "Erreur lors de la génération du quiz par Gemma 4.", res.status === 429, res.status);
+  }
+
+  return {
+    reply: data.reply || "",
+    model: data.model || "gemma-4-26b-a4b-it",
+    isGemma: true,
+    lang,
+    quiz: Array.isArray(data.quiz) ? data.quiz : [],
+  };
+}
+
+export async function extractSmsImageApi(
+  imageBase64: string,
+  imageMimeType: string,
+  lang: Language = "fr",
+): Promise<{ text: string; sender?: string; operator?: string; amounts?: string[]; phones?: string[] }> {
+  const res = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "sms_image",
+      imageBase64,
+      imageMimeType,
+      lang,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new GemmaApiError(data.error || "Erreur lors de la lecture OCR du SMS.", res.status === 429, res.status);
+  }
+
+  return {
+    text: data.text || "",
+    sender: data.sender,
+    operator: data.operator,
+    amounts: Array.isArray(data.amounts) ? data.amounts : [],
+    phones: Array.isArray(data.phones) ? data.phones : [],
+  };
+}
+
+export async function generateFlashcardsApi(
+  courseTitle: string,
+  courseSubject: string,
+  courseContent: string,
+  lang: Language = "fr",
+): Promise<{ id: string; front: string; back: string; mastered: boolean }[]> {
+  const res = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "study_flashcards",
+      courseTitle,
+      courseSubject,
+      courseContext: courseContent,
+      lang,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new GemmaApiError(data.error || "Erreur lors de la génération des flashcards.", res.status === 429, res.status);
+  }
+
+  return Array.isArray(data.flashcards) ? data.flashcards : [];
+}
+
+export async function extractCourseImageApi(
+  imageBase64: string,
+  imageMimeType: string,
+  lang: Language = "fr",
+): Promise<{ text: string; suggestedTitle: string; suggestedSubject: string }> {
+  const res = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "course_image",
+      imageBase64,
+      imageMimeType,
+      lang,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new GemmaApiError(data.error || "Erreur lors de la lecture de la photo de cours par Gemma.", res.status === 429, res.status);
+  }
+
+  return {
+    text: data.text || "",
+    suggestedTitle: data.suggestedTitle || "Cours extrait par photo",
+    suggestedSubject: data.suggestedSubject || "Cybersécurité & Réseaux",
+  };
+}
+

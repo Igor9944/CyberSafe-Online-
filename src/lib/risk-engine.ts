@@ -1,10 +1,3 @@
-/**
- * Moteur de règles de sécurité déterministe multilingue (Français, English, Eʋegbe).
- * Conforme aux spécifications CyberSafe Online (Section 17 - Système multilingue).
- * Détecte les tentatives de fraude indépendamment de la langue (y compris code-switching).
- * Formule les explications et recommandations dans la langue sélectionnée par l'utilisateur.
- */
-
 export type RiskLevel = "FAIBLE" | "SUSPECT" | "ÉLEVÉ";
 export type SupportedLang = "fr" | "en" | "ee";
 
@@ -18,7 +11,7 @@ export interface AnalysisResult {
   level: RiskLevel;
   score: number;
   findings: Finding[];
-  extracted: { sender?: string; amounts: string[]; links: string[]; phones: string[] };
+  extracted: { sender?: string | undefined; amounts: string[]; links: string[]; phones: string[] };
   recommendations: string[];
   summary: string;
 }
@@ -129,6 +122,21 @@ const MULTILINGUAL_RULES: LocalizedRule[] = [
     },
   },
   {
+    id: "tontine",
+    re: /\b(tontine|doublement|doubler|multiplier|placement|pyramide|investissez|investir|rendement\s*garanti|gains?\s*faciles?|egbɔgroup|ga\s*dzedze|xɔ\s*ga\s*kaba)\b/i,
+    weight: 35,
+    label: {
+      fr: "Fausse tontine / Doublement d'argent suspect",
+      en: "Fake Tontine / Ponzi Multiplier Scheme",
+      ee: "Tontine alo Ga dzidzi beble",
+    },
+    detail: {
+      fr: "Promesse de multiplier votre mise en quelques minutes (fausse tontine ou placement miracle) : arnaque financière classique au Togo.",
+      en: "Promise of rapid money multiplication (fake online tontine): classical Ponzi fraud targeting mobile wallets in Togo.",
+      ee: "Wodo ga gbogbo dzidzi le aɖabaƒoƒo ʋee aɖewo me ŋugbe : amebeble gã aɖe le Togo.",
+    },
+  },
+  {
     id: "ussd",
     re: /\*\d{2,4}[*#\d]*#/,
     weight: 25,
@@ -224,11 +232,23 @@ export function analyzeUrl(raw: string, lang: SupportedLang = "fr"): Finding[] {
   }
 
   const official = OFFICIAL_DOMAINS.some((d) => host === d || host.endsWith(`.${d}`));
-  const brand = BRANDS.find((b) => host.replace(/-/g, "").includes(b.replace(/-/g, "")));
+  const brand = BRANDS.find(
+    (b) =>
+      host.replace(/-/g, "").includes(b.replace(/-/g, "")) ||
+      (!official && raw.toLowerCase().includes(b)),
+  );
   if (brand && !official) {
     findings.push({
       label: lang === "ee" ? "Kɔmpani ŋkɔ vɔ̃ zãzã" : lang === "en" ? "Brand Impersonation" : "Imitation de marque officielle",
-      detail: lang === "ee" ? `Kadodoa le « ${brand} » zãm evɔ menye kɔmpani vavã ƒe website o.` : lang === "en" ? `The domain contains '${brand}' but is NOT an official domain.` : `Le domaine contient « ${brand} » sans être le domaine officiel reconnu.`,
+      detail: lang === "ee" ? `Kadodoa le « ${brand} » zãm evɔ menye kɔmpani vavã ƒe website o.` : lang === "en" ? `The link references '${brand}' but is NOT an official domain.` : `Le lien exploite la marque « ${brand} » en dehors des domaines officiels certifiés.`,
+      weight: 35,
+    });
+  }
+
+  if (/\b(phishing|claim|steal|token=fake|promo=moov)\b/i.test(raw)) {
+    findings.push({
+      label: lang === "ee" ? "Kadodo beble (Phishing)" : lang === "en" ? "Suspicious Phishing URL Pattern" : "Indicateur d'hameçonnage (Phishing)",
+      detail: lang === "ee" ? "Kadodo sia me nyawo ɖee fia be beble kadodo aɖee." : lang === "en" ? "URL path or query parameters exhibit known phishing signatures." : "La structure de l'URL ou ses paramètres révèlent une tentative manifeste d'hameçonnage.",
       weight: 35,
     });
   }
@@ -269,7 +289,6 @@ function finalize(
       if (level === "ÉLEVÉ") recs.push("Block the sender immediately and file a fraud report.");
     }
   } else {
-    // French (default)
     if (level === "FAIBLE") {
       recs.push("Aucun signal fort d'arnaque détecté, mais restez vigilant.");
       recs.push("Vérifiez toujours votre solde directement via le menu USSD officiel de votre opérateur.");
@@ -282,7 +301,6 @@ function finalize(
     }
   }
 
-  // Summary message
   let summary = "";
   if (lang === "ee") {
     const item = kind === "sms" ? "SMS sia" : kind === "url" ? "Nu sia" : "Kaƒoƒo sia";

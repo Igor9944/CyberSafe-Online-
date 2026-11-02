@@ -2,7 +2,6 @@ import {
   ShieldAlert,
   ShieldCheck,
   AlertTriangle,
-  ExternalLink,
   Globe,
   UploadCloud,
   CheckCircle2,
@@ -15,6 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/cs/ui";
+import { CyberSticker } from "@/components/cs/CyberDecorations";
 import {
   submitUrlToVirusTotalApi,
   type VirusTotalAnalysisResult,
@@ -35,98 +35,93 @@ export function VirusTotalCard({
   if (!virusTotal) return null;
 
   return (
-    <Panel className="space-y-5 border-primary/20 bg-card">
-      {/* En-tête de la carte VirusTotal */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
+    <Panel className="space-y-5 border-2 border-primary/30 bg-card shadow-neo-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b-2 pb-4">
         <div className="flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
-            <Globe className="size-5" />
+          <div className="grid size-11 place-items-center rounded-xl border-2 border-foreground bg-primary/10 text-primary shadow-neo-sm">
+            <Globe className="size-5 stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-base">Réputation technique des liens</h3>
-              <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+              <h3 className="font-black text-base">Réputation technique des liens</h3>
+              <CyberSticker tone="purple" rotate="none">
                 VirusTotal API v3
-              </span>
+              </CyberSticker>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground font-medium">
               Vérification multi-moteurs indépendante croisée avec l'analyse IA CyberSafe
             </p>
           </div>
         </div>
 
-        {/* Badge d'état global VirusTotal */}
         <div className="shrink-0">
           {virusTotal.unavailable ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-warning/10 px-3 py-1 text-xs font-semibold text-warning-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-warning/50 bg-warning/15 px-3 py-1 text-xs font-bold text-warning-foreground">
               <AlertTriangle className="size-3.5" /> Vérification VirusTotal indisponible
             </span>
           ) : !virusTotal.hasUrls ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-muted bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-muted bg-muted/60 px-3 py-1 text-xs font-bold text-muted-foreground">
               <Info className="size-3.5" /> Aucun lien dans le SMS
             </span>
           ) : virusTotal.summary.maliciousUrls > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1 text-xs font-bold text-destructive">
-              <ShieldAlert className="size-3.5" /> {virusTotal.summary.maliciousUrls} URL malveillante(s)
-            </span>
+            <CyberSticker tone="rose" icon={ShieldAlert} rotate="none">
+              {virusTotal.summary.maliciousUrls} URL malveillante(s)
+            </CyberSticker>
           ) : virusTotal.summary.suspiciousUrls > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-warning/15 px-3 py-1 text-xs font-bold text-warning-foreground">
-              <AlertTriangle className="size-3.5" /> URL suspecte détectée
-            </span>
+            <CyberSticker tone="yellow" icon={AlertTriangle} rotate="none">
+              URL suspecte détectée
+            </CyberSticker>
           ) : virusTotal.summary.notFoundUrls > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              <Info className="size-3.5" /> Nouveau lien non répertorié
-            </span>
+            <CyberSticker tone="cyan" icon={Info} rotate="none">
+              Nouveau lien non répertorié
+            </CyberSticker>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-success/40 bg-success/15 px-3 py-1 text-xs font-bold text-success">
-              <CheckCircle2 className="size-3.5" /> Aucune détection malveillante
-            </span>
+            <CyberSticker tone="lime" icon={CheckCircle2} rotate="none">
+              Aucune détection malveillante
+            </CyberSticker>
           )}
         </div>
       </div>
 
-      {/* Distinction claire des rôles : IA CyberSafe vs VirusTotal */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border bg-muted/40 p-3.5">
-          <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+        <div className="rounded-xl border-2 border-border/80 bg-muted/40 p-3.5 shadow-neo-sm">
+          <div className="flex items-center gap-2 text-xs font-bold text-primary">
             <Sparkles className="size-3.5 text-electric" />
             <span>Rôle 1 : Analyse contextuelle (IA CyberSafe)</span>
           </div>
-          <div className="mt-1 text-sm font-medium">
+          <div className="mt-1 text-sm font-semibold">
             Évaluation sémantique :{" "}
-            <span className="font-bold">{gemmaRisk || "Analysé"}</span>
+            <span className="font-black text-foreground">{gemmaRisk || "Analysé"}</span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground font-medium">
             Examine l'intention, le ton d'urgence, les demandes de PIN/OTP et le scénario d'escroquerie.
           </p>
         </div>
 
-        <div className="rounded-xl border bg-muted/40 p-3.5">
-          <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+        <div className="rounded-xl border-2 border-border/80 bg-muted/40 p-3.5 shadow-neo-sm">
+          <div className="flex items-center gap-2 text-xs font-bold text-primary">
             <Globe className="size-3.5 text-primary" />
             <span>Rôle 2 : Réputation technique (VirusTotal v3)</span>
           </div>
-          <div className="mt-1 text-sm font-medium">
+          <div className="mt-1 text-sm font-semibold">
             Réputation des liens :{" "}
-            <span className="font-bold">{technicalRisk || "Vérifié"}</span>
+            <span className="font-black text-foreground">{technicalRisk || "Vérifié"}</span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground font-medium">
             Interroge les listes mondiales d'antivirus et bases de phishing reconnues.
           </p>
         </div>
       </div>
 
-      {/* Si aucune URL n'a été détectée dans le SMS */}
       {!virusTotal.hasUrls && (
-        <div className="rounded-xl border border-dashed bg-muted/20 p-4 text-center text-xs text-muted-foreground">
+        <div className="rounded-xl border-2 border-dashed bg-muted/20 p-4 text-center text-xs text-muted-foreground font-medium">
           Ce SMS ne contient aucun lien hypertexte ou nom de domaine web. L'analyse du risque repose exclusivement sur le contenu contextuel analysé par l'IA CyberSafe.
         </div>
       )}
 
-      {/* Liste des URLs analysées */}
       {virusTotal.urls.length > 0 && (
         <div className="space-y-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="text-xs font-black uppercase tracking-wider text-muted-foreground">
             Détail des liens analysés ({virusTotal.urls.length})
           </div>
 
@@ -138,14 +133,13 @@ export function VirusTotalCard({
         </div>
       )}
 
-      {/* Avertissement obligatoire exigé par la spécification */}
-      <div className="flex items-start gap-3 rounded-xl border border-warning/30 bg-warning/5 p-4 text-xs text-foreground/90">
+      <div className="flex items-start gap-3 rounded-xl border-2 border-warning/40 bg-warning/10 p-4 text-xs text-foreground">
         <Info className="mt-0.5 size-4 shrink-0 text-warning" />
         <div className="space-y-1">
-          <span className="font-semibold text-warning-foreground">
+          <span className="font-black text-warning-foreground">
             Règle de sécurité essentielle :
           </span>
-          <p className="leading-relaxed">
+          <p className="leading-relaxed font-medium">
             {virusTotal.caution} Les escrocs créent souvent de nouveaux noms de domaine quelques minutes avant de diffuser des SMS frauduleux (Moov Money, T-Money, etc.), avant même que les moteurs antivirus n'aient eu le temps de les classifier.
           </p>
         </div>
@@ -176,19 +170,18 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
   };
 
   return (
-    <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+    <div className="rounded-xl border-2 border-border/80 bg-muted/30 p-4 space-y-3 shadow-neo-sm">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm truncate">{report.domain}</span>
+            <span className="font-black text-sm truncate">{report.domain}</span>
             {report.status === "analyzed" && (
-              <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+              <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-black text-primary">
                 Rapport officiel VT
               </span>
             )}
           </div>
-          {/* Ne jamais ouvrir automatiquement le lien : afficher uniquement comme texte non cliquable */}
-          <div className="mt-0.5 break-all font-mono text-xs text-muted-foreground select-all">
+          <div className="mt-0.5 break-all font-mono text-xs text-muted-foreground select-all font-semibold">
             {report.url}
           </div>
         </div>
@@ -198,51 +191,46 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
         </div>
       </div>
 
-      {/* Résultats détaillés pour une URL analysée */}
       {report.status === "analyzed" && report.stats && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 pt-2">
-          {/* Moteurs signalant comme malveillant */}
-          <div className="rounded-lg bg-card p-2.5 border">
-            <div className="text-[10px] font-semibold text-destructive uppercase">
+          <div className="rounded-xl border-2 border-destructive/40 bg-card p-3 shadow-neo-sm">
+            <div className="text-[10px] font-black text-destructive uppercase">
               Malveillants
             </div>
-            <div className="mt-1 font-display text-xl font-bold text-destructive">
+            <div className="mt-1 font-display text-xl font-black text-destructive">
               {report.stats.malicious}
             </div>
-            <div className="text-[10px] text-muted-foreground">moteurs alertent</div>
+            <div className="text-[10px] text-muted-foreground font-medium">moteurs alertent</div>
           </div>
 
-          {/* Moteurs sans détection (harmless + undetected) */}
-          <div className="rounded-lg bg-card p-2.5 border">
-            <div className="text-[10px] font-semibold text-success uppercase">
+          <div className="rounded-xl border-2 border-success/40 bg-card p-3 shadow-neo-sm">
+            <div className="text-[10px] font-black text-success uppercase">
               Sans détection
             </div>
-            <div className="mt-1 font-display text-xl font-bold text-success">
+            <div className="mt-1 font-display text-xl font-black text-success">
               {report.stats.harmless + report.stats.undetected}
             </div>
-            <div className="text-[10px] text-muted-foreground">moteurs neutres/sûrs</div>
+            <div className="text-[10px] text-muted-foreground font-medium">moteurs neutres/sûrs</div>
           </div>
 
-          {/* Résultats non concluants (suspects / timeout) */}
-          <div className="rounded-lg bg-card p-2.5 border">
-            <div className="text-[10px] font-semibold text-warning-foreground uppercase">
+          <div className="rounded-xl border-2 border-warning/50 bg-card p-3 shadow-neo-sm">
+            <div className="text-[10px] font-black text-warning-foreground uppercase">
               Non concluants
             </div>
-            <div className="mt-1 font-display text-xl font-bold text-warning-foreground">
+            <div className="mt-1 font-display text-xl font-black text-warning-foreground">
               {report.stats.suspicious + report.stats.timeout}
             </div>
-            <div className="text-[10px] text-muted-foreground">suspects / délais</div>
+            <div className="text-[10px] text-muted-foreground font-medium">suspects / délais</div>
           </div>
 
-          {/* Réputation / Date */}
-          <div className="rounded-lg bg-card p-2.5 border">
-            <div className="text-[10px] font-semibold text-muted-foreground uppercase">
+          <div className="rounded-xl border-2 border-border/80 bg-card p-3 shadow-neo-sm">
+            <div className="text-[10px] font-black text-muted-foreground uppercase">
               Score Réputation
             </div>
-            <div className="mt-1 font-display text-xl font-bold">
+            <div className="mt-1 font-display text-xl font-black">
               {report.reputation ?? 0}
             </div>
-            <div className="text-[10px] text-muted-foreground">
+            <div className="text-[10px] text-muted-foreground font-medium">
               {report.lastAnalysisDate
                 ? new Date(report.lastAnalysisDate * 1000).toLocaleDateString("fr-FR")
                 : "Récent"}
@@ -251,22 +239,21 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
         </div>
       )}
 
-      {/* URL non répertoriée dans VirusTotal */}
       {report.status === "not_found" && (
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs space-y-2">
+        <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-3 text-xs space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="font-semibold text-primary">
+            <span className="font-bold text-primary">
               Cette URL n'est pas encore enregistrée dans VirusTotal.
             </span>
             {submittedId ? (
-              <span className="inline-flex items-center gap-1 rounded bg-success/20 px-2 py-0.5 text-[10px] font-bold text-success">
+              <span className="inline-flex items-center gap-1 rounded-md bg-success/20 px-2 py-0.5 text-[10px] font-black text-success border border-success/40">
                 <CheckCircle2 className="size-3" /> Analyse en file d'attente
               </span>
             ) : (
               <Button
-                variant="outline"
+                variant="neo"
                 size="sm"
-                className="h-7 text-xs gap-1.5"
+                className="h-7 text-xs gap-1.5 font-bold"
                 onClick={handleManualSubmit}
                 disabled={submitting}
               >
@@ -275,15 +262,14 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
               </Button>
             )}
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground font-medium">
             L'absence de rapport préalable est fréquente pour les liens de phishing récents conçus pour cibler les utilisateurs togolais.
           </p>
         </div>
       )}
 
-      {/* URL avec paramètres sensibles / confidentiels non transmis */}
       {report.status === "skipped_sensitive" && (
-        <div className="rounded-lg border border-muted bg-muted/60 p-3 text-xs flex items-center gap-2 text-muted-foreground">
+        <div className="rounded-xl border-2 border-muted bg-muted/60 p-3 text-xs flex items-center gap-2 text-muted-foreground font-medium">
           <Lock className="size-4 shrink-0 text-primary" />
           <span>
             {report.message || "Paramètres privés détectés. Lien exclu de l'analyse externe."}
@@ -291,9 +277,8 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
         </div>
       )}
 
-      {/* Quota dépassé */}
       {report.status === "quota_exceeded" && (
-        <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs flex items-center gap-2 text-warning-foreground">
+        <div className="rounded-xl border-2 border-warning/40 bg-warning/10 p-3 text-xs flex items-center gap-2 text-warning-foreground font-medium">
           <Clock className="size-4 shrink-0" />
           <span>
             Limite de requêtes publiques VirusTotal atteinte. L'analyse sémantique locale prévaut.
@@ -301,9 +286,8 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
         </div>
       )}
 
-      {/* Service indisponible */}
       {report.status === "unavailable" && (
-        <div className="rounded-lg border border-muted bg-muted/60 p-3 text-xs text-muted-foreground">
+        <div className="rounded-xl border-2 border-muted bg-muted/60 p-3 text-xs text-muted-foreground font-medium">
           Vérification VirusTotal indisponible ({report.error || "Réseau hors portée"}).
         </div>
       )}
@@ -321,28 +305,28 @@ function StatusBadge({
   if (status === "analyzed" && stats) {
     if (stats.malicious > 0) {
       return (
-        <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive">
-          <ShieldAlert className="size-3" /> {stats.malicious} alerte(s)
-        </span>
+        <CyberSticker tone="rose" icon={ShieldAlert} rotate="none">
+          {stats.malicious} alerte(s)
+        </CyberSticker>
       );
     }
     if (stats.suspicious > 0) {
       return (
-        <span className="inline-flex items-center gap-1 rounded-md bg-warning/20 px-2 py-0.5 text-xs font-bold text-warning-foreground">
-          <AlertTriangle className="size-3" /> Suspect
-        </span>
+        <CyberSticker tone="yellow" icon={AlertTriangle} rotate="none">
+          Suspect
+        </CyberSticker>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-success/15 px-2 py-0.5 text-xs font-semibold text-success">
-        <ShieldCheck className="size-3" /> Inoffensif
-      </span>
+      <CyberSticker tone="lime" icon={ShieldCheck} rotate="none">
+        Inoffensif
+      </CyberSticker>
     );
   }
 
   if (status === "not_found") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+      <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">
         Non répertorié
       </span>
     );
@@ -350,14 +334,14 @@ function StatusBadge({
 
   if (status === "skipped_sensitive") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+      <span className="inline-flex items-center gap-1 rounded-md border border-muted bg-muted px-2 py-0.5 text-xs font-black text-muted-foreground">
         Confidentiel
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+    <span className="inline-flex items-center gap-1 rounded-md border border-muted bg-muted px-2 py-0.5 text-xs font-black text-muted-foreground">
       Indisponible
     </span>
   );

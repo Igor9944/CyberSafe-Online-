@@ -36,10 +36,13 @@
     "audio": "Scanner Audio",
     "guide": "Enregistrer un appel",
     "assistant": "Assistant CyberSafe",
+    "student": "Espace Étudiant",
     "learn": "Apprentissage",
     "history": "Historique",
     "about": "À propos",
     "settings": "Paramètres",
+    "mainNavigation": "Navigation principale",
+    "mobileNavigation": "Navigation mobile",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu"
   },
@@ -55,7 +58,8 @@
       "analyses": "Analyses réalisées",
       "threats": "Menaces détectées",
       "safe": "Messages rassurants",
-      "storedData": "Données brutes stockées"
+      "storedData": "Analyses sauvegardées localement",
+      "localHistory": "Historique local"
     },
     "scanners": {
       "sms": {
@@ -117,7 +121,8 @@
     "phones": "Numéros",
     "tooShort": "Le message est trop court pour être analysé.",
     "tooLong": "Le message dépasse 2000 caractères.",
-    "completed": "Analyse terminée"
+    "completed": "Analyse terminée",
+    "privacyDisclosure": "Le texte est transmis au service d'analyse IA. Si la vérification VirusTotal est activée, seules les URL extraites lui sont envoyées. N'incluez jamais de PIN ni de code OTP."
   },
   "qr": {
     "title": "Scanner QR Code",
@@ -223,7 +228,7 @@
     "multilingualTitle": "Engagement pour le Multilinguisme",
     "multilingualDesc": "Conformément aux exigences de la spécification CyberSafe Online, la plateforme intègre dès sa conception le Français, l'Anglais et l'Éwé (Eʋegbe). Le moteur d'analyse IA CyberSafe est adapté aux réalités linguistiques locales, y compris le code-switching et les terminologies régionales.",
     "safetyTitle": "Exigences de Sécurité & Confidentialité",
-    "safetyDesc": "Vos données restent sous votre contrôle. Aucune écoute passive, aucun enregistrement furtif, aucun lien piégé n'est ouvert sur nos serveurs."
+    "safetyDesc": "Aucune écoute passive ni aucun enregistrement en arrière-plan. Le contenu soumis est traité pour fournir l'analyse demandée ; les URL extraites peuvent être envoyées à VirusTotal si cette option est activée. Ne transmettez jamais de PIN ni de code OTP."
   },
   "settings": {
     "title": "Paramètres",
@@ -234,7 +239,9 @@
     "gemmaHelp": "L'IA CyberSafe est configurée pour analyser les messages multilingues (FR, EN, EE) et formuler les explications selon la langue choisie.",
     "verificationSection": "Vérification linguistique humaine",
     "verificationDesc": "Tous les messages de sécurité critiques relatifs aux codes PIN, OTP et transferts d'argent en Éwé font l'objet d'une validation linguistique stricte avant diffusion.",
-    "savedSuccess": "Paramètres enregistrés"
+    "savedSuccess": "Paramètres enregistrés",
+    "privacyTitle": "Données et confidentialité",
+    "privacyDescription": "Votre langue, votre thème et votre historique sont enregistrés dans ce navigateur. Le texte ou les documents soumis pour analyse sont transmis au serveur CyberSafe et peuvent être traités par le fournisseur d'IA ; les URL extraites peuvent être vérifiées par VirusTotal si cette option est activée. N'incluez jamais de PIN ni de code OTP."
   },
   "risk": {
     "riskLevel": "Niveau de risque",

@@ -36,10 +36,13 @@
     "audio": "Kpɔ Gbeɖiɖi gbɔ",
     "guide": "Lé gbeɖiɖi mɔfiame",
     "assistant": "CyberSafe Kpekpedenutɔ",
+    "student": "Sukukpɔƒe",
     "learn": "Nusrɔ̃ƒe",
     "history": "Nu xoxotɔwo",
     "about": "Mía ŋuti nyatakaka",
     "settings": "Ðoɖowo",
+    "mainNavigation": "Mɔ̃ɖoɖo vevitɔ",
+    "mobileNavigation": "Mɔ̃ɖoɖo le kaƒomɔ̃ dzi",
     "openMenu": "Ʋu mɔ̃ ɖoɖowo",
     "closeMenu": "Tu mɔ̃ ɖoɖowo"
   },
@@ -55,7 +58,8 @@
       "analyses": "Dodokpɔ siwo wowɔ",
       "threats": "Afɔku siwo wokpɔ",
       "safe": "Nyatakaka dedie",
-      "storedData": "Nyatakaka siwo wodzra ɖo"
+      "storedData": "Dodokpɔ siwo wodzra ɖo",
+      "localHistory": "Dodokpɔ ƒe ŋutinya le afisia"
     },
     "scanners": {
       "sms": {
@@ -117,7 +121,8 @@
     "phones": "Kaƒomɔ̃ xexlẽdzesiwo",
     "tooShort": "Nyatakakaa sɔgbɔ o be míakpɔ eme nyuie.",
     "tooLong": "Nyatakakaa wu xexlẽdzesi 2000.",
-    "completed": "Dodokpɔa wu enu dedie"
+    "completed": "Dodokpɔa wu enu dedie",
+    "privacyDisclosure": "Woɖoa nyagblɔgblɔ sia ɖe IA dodokpɔ dɔwɔƒe. Ne VirusTotal ƒe dodokpɔ le dɔ wɔm, URL siwo woɖe le eme ko woɖoa ɖe eŋu. Mègatsɔ PIN alo OTP ɖo eŋu o."
   },
   "qr": {
     "title": "Kpɔ QR Code gbɔ",
@@ -223,7 +228,7 @@
     "multilingualTitle": "Gbe Geɖe Zazã ƒe Nyaɖoɖo",
     "multilingualDesc": "Le CyberSafe Online sedede nu la, míezã Fransegbe, Eŋlisigbe kple Eʋegbe tso gɔmedzedzea me ke. CyberSafe AI mɔ̃ kple dɔwɔnuwo nyana ale si Togo dukɔmeviwo fona gbe vovovowo tsakana (code-switching).",
     "safetyTitle": "Dedienɔnɔ kple Adzãmenyawo Ŋu Kakaɖedzi",
-    "safetyDesc": "Wò nyatakakawo tsi wò ŋutɔ si. Míemeɖoa to ame adzãe o, míemeléa gbe le adzãme o, eye link vɔ̃ɖi aɖeke meʋuna le míaƒe mɔ̃ dzi o."
+    "safetyDesc": "Míele to ameɖe gbeɖom le megbe o, eye míele gbe ɖem le megbe o. Nyatakaka si nèɖo ɖa hena dodokpɔ la, woaɖo ɖe CyberSafe dɔwɔƒe me; URL siwo woɖe le eme ate ŋu ayi VirusTotal me ne wòɖe eŋu. Mègatsɔ PIN alo OTP ɖo eŋu o."
   },
   "settings": {
     "title": "Ðoɖowo",
@@ -234,7 +239,9 @@
     "gemmaHelp": "CyberSafe AI le klalo be wòakpɔ nya siwo le gbe geɖe me (FR, EN, EE) hena kpekpeɖeŋu nam le wò gbe me.",
     "verificationSection": "Eʋegbe Nyagɔmeɖeɖe Dzidzenu",
     "verificationDesc": "Nyatakaka vevi siwo ku ɖe PIN, OTP kple ga ɖoɖo ŋu le Eʋegbe me la, amegbetɔ kpɔ wo gbɔ nyuie hafi woɖo afisia.",
-    "savedSuccess": "Wodzra ɖoɖowo ɖo nyuie"
+    "savedSuccess": "Wodzra ɖoɖowo ɖo nyuie",
+    "privacyTitle": "Nyatakaka kple dzɔdzɔme",
+    "privacyDescription": "Wò gbe, tema kple dodokpɔ ƒe ŋutinya la wodzra ɖo le wò browser me. Nyatakaka alo document si nèɖo ɖa hena dodokpɔ la, woaɖo ɖe CyberSafe dɔwɔƒe me eye IA dɔwɔƒe ate ŋu awɔ dɔ kplii; URL siwo woɖe le eme ate ŋu ayi VirusTotal me ne wòɖe eŋu. Mègatsɔ PIN alo OTP ɖo eŋu o."
   },
   "risk": {
     "riskLevel": "Afɔku ƒe dzesi",
