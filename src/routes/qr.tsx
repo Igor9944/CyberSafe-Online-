@@ -101,6 +101,9 @@ function QrPage() {
   const [cameraPermission, setCameraPermission] = useState<"granted" | "denied" | "prompt">("prompt");
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraStatus, setCameraStatus] = useState<"idle" | "active" | "denied">("idle");
+  const [detectedQr, setDetectedQr] = useState<string | null>(null);
+  const [qrScanned, setQrScanned] = useState(false);
+  const scanFrame = useRef<number>(0);
 
   useEffect(() => {
     return () => {
@@ -203,6 +206,9 @@ function QrPage() {
       }
       setIsCameraActive(true);
       setCameraPermission("granted");
+      setDetectedQr(null);
+      setQrScanned(false);
+      startContinuousScan();
       toast.success(t("qr.cameraPermission"));
     } catch (err: any) {
       console.error("Camera permission error:", err);
@@ -224,7 +230,50 @@ function QrPage() {
       videoRef.current.srcObject = null;
     }
     setIsCameraActive(false);
+    if (scanFrame.current) {
+      cancelAnimationFrame(scanFrame.current);
+      scanFrame.current = 0;
+    }
+    setDetectedQr(null);
+    setQrScanned(false);
     toast.info(t("qr.cameraStopped"));
+  };
+
+  const startContinuousScan = () => {
+    if (!videoRef.current) return;
+
+    const loop = async () => {
+      if (!isCameraActive || cameraPermission !== "granted") return;
+
+      const video = videoRef.current;
+      if (!video || !video.readyState) return;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
+      if (qrCode && qrCode.data) {
+        const content = qrCode.data.trim();
+        if (content && content !== detectedQr) {
+          setDetectedQr(content);
+          setQrScanned(true);
+          if (!busy) {
+            toast.success(t("qr.qrDetected", content.slice(0, 50)));
+            finish(content);
+          }
+        }
+      }
+
+      scanFrame.current = window.requestAnimationFrame(loop);
+    };
+
+    scanFrame.current = window.requestAnimationFrame(loop);
   };
 
   return (
