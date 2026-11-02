@@ -1,4 +1,3 @@
-
 import {
   analyzeContentWithGemma,
   askGemmaAssistant,
@@ -56,10 +55,13 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
   if (type === "vt_submit") {
     const targetUrl = url || content;
     if (!targetUrl || typeof targetUrl !== "string") {
-      return new Response(JSON.stringify({ error: "Une URL valide est requise pour la soumission." }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Une URL valide est requise pour la soumission." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
     const res = await submitUrlToVirusTotal(targetUrl.trim());
     return new Response(JSON.stringify(res), {
@@ -71,10 +73,13 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
   try {
     if (type === "sms_image") {
       if (!imageBase64) {
-        return new Response(JSON.stringify({ error: "Aucune capture d'écran fournie pour l'analyse OCR." }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Aucune capture d'écran fournie pour l'analyse OCR." }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
       const extracted = await extractSmsFromImageWithGemma(
         { base64: imageBase64, mimeType: imageMimeType || "image/png" },
@@ -88,10 +93,13 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
 
     if (type === "course_image") {
       if (!imageBase64) {
-        return new Response(JSON.stringify({ error: "Aucune image fournie pour l'extraction du cours." }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Aucune image fournie pour l'extraction du cours." }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
       const extracted = await extractCourseFromImageWithGemma(
         { base64: imageBase64, mimeType: imageMimeType || "image/jpeg" },
@@ -147,10 +155,13 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
     const hasImage = typeof imageBase64 === "string" && imageBase64.length > 0;
 
     if (!hasText && !hasImage) {
-      return new Response(JSON.stringify({ error: "Veuillez fournir un texte ou une capture d'écran à analyser." }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Veuillez fournir un texte ou une capture d'écran à analyser." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const validTypes: AnalysisType[] = ["sms", "qr", "audio", "assistant", "learning"];
@@ -181,7 +192,8 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
       imageInput,
     );
 
-    const textForVt = `${String(content).trim()} ${gemmaResult.extractedMeta?.transcribedText || ""}`.trim();
+    const textForVt =
+      `${String(content).trim()} ${gemmaResult.extractedMeta?.transcribedText || ""}`.trim();
     const shouldCheckVt =
       checkVirusTotal &&
       (selectedType === "sms" ||
@@ -199,10 +211,17 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
           checked: false,
           hasUrls: false,
           urls: [],
-          summary: { totalUrls: 0, maliciousUrls: 0, suspiciousUrls: 0, cleanUrls: 0, notFoundUrls: 0 },
+          summary: {
+            totalUrls: 0,
+            maliciousUrls: 0,
+            suspiciousUrls: 0,
+            cleanUrls: 0,
+            notFoundUrls: 0,
+          },
           unavailable: true,
           unavailableReason: "Vérification VirusTotal indisponible",
-          caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+          caution:
+            "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
         };
       }
 
@@ -221,7 +240,7 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
     });
   } catch (error: any) {
     const isQuota = error?.quotaExceeded || error?.statusCode === 429;
-    const status = isQuota ? 429 : (error?.statusCode || 500);
+    const status = isQuota ? 429 : error?.statusCode || 500;
 
     return new Response(
       JSON.stringify({
@@ -236,4 +255,3 @@ export async function handleAnalyzeApiRequest(request: Request): Promise<Respons
     );
   }
 }
-

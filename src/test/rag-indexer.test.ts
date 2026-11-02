@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  chunkDocument,
-  retrieveRelevantPassages,
-  buildRagContextPrompt,
-} from "../lib/rag-indexer";
+import { chunkDocument, retrieveRelevantPassages, buildRagContextPrompt } from "../lib/rag-indexer";
 
 describe("Moteur RAG local et découpage sémantique (rag-indexer)", () => {
   it("découpe un document en conservant les numéros de diapositives ou de pages", () => {
@@ -44,7 +40,8 @@ L'escroquerie par moyen électronique et faux transfert d'argent est réprimée 
         chunkIndex: 1,
         pageOrSlideNumber: 1,
         sectionTitle: "Langages de programmation",
-        content: "Le polymorphisme et la gestion manuelle de mémoire en C++ avec les pointeurs et destructeurs.",
+        content:
+          "Le polymorphisme et la gestion manuelle de mémoire en C++ avec les pointeurs et destructeurs.",
         wordCount: 15,
       },
       {
@@ -65,7 +62,10 @@ L'escroquerie par moyen électronique et faux transfert d'argent est réprimée 
       },
     ];
 
-    const passagesCpp = retrieveRelevantPassages("Comment fonctionne le destructeur en C++ ?", chunks);
+    const passagesCpp = retrieveRelevantPassages(
+      "Comment fonctionne le destructeur en C++ ?",
+      chunks,
+    );
     expect(passagesCpp.length).toBeGreaterThan(0);
     expect(passagesCpp[0]?.chunk.id).toBe("c1");
     expect(passagesCpp[0]?.citation).toContain("Diapo 1");
@@ -82,7 +82,8 @@ L'escroquerie par moyen électronique et faux transfert d'argent est réprimée 
           chunkIndex: 1,
           pageOrSlideNumber: 3,
           sectionTitle: "Authentification",
-          content: "L'authentification multi-facteurs (MFA) réduit de 99% les compromissions de compte.",
+          content:
+            "L'authentification multi-facteurs (MFA) réduit de 99% les compromissions de compte.",
           wordCount: 12,
         },
         score: 8,
@@ -97,4 +98,3 @@ L'escroquerie par moyen électronique et faux transfert d'argent est réprimée 
     expect(prompt).toContain("Ne fabrique AUCUNE référence inventée");
   });
 });
-

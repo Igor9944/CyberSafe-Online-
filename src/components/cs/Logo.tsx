@@ -342,9 +342,7 @@ export function Logo({
   const shouldShowText = showText !== undefined ? showText : !isCompact;
   const effectiveTheme: LogoThemeVariant =
     themeVariant ||
-    (variant === "light" || variant === "dark" || variant === "electric"
-      ? variant
-      : "default");
+    (variant === "light" || variant === "dark" || variant === "electric" ? variant : "default");
 
   // Responsive size styling tokens
   const sizeClasses: Record<
@@ -380,10 +378,8 @@ export function Logo({
   const themeContainerClasses: Record<LogoThemeVariant, string> = {
     default:
       "bg-slate-900 border-2 border-slate-900 text-cyan-400 shadow-neo-sm dark:bg-slate-950 dark:border-cyan-400 dark:shadow-[0_0_12px_rgba(6,182,212,0.35)]",
-    light:
-      "bg-slate-900 border-2 border-slate-900 text-cyan-400 shadow-neo-sm dark:bg-slate-950",
-    dark:
-      "bg-slate-900 dark:bg-slate-950 border-2 border-cyan-400 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.35)]",
+    light: "bg-slate-900 border-2 border-slate-900 text-cyan-400 shadow-neo-sm dark:bg-slate-950",
+    dark: "bg-slate-900 dark:bg-slate-950 border-2 border-cyan-400 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.35)]",
     electric:
       "bg-slate-900 dark:bg-slate-950 border-2 border-cyan-400 text-cyan-300 shadow-[0_0_14px_rgba(6,182,212,0.45)] ring-2 ring-cyan-400/30",
   };
@@ -399,7 +395,7 @@ export function Logo({
           containerClass,
           currentSizeConfig.iconBox,
           "transition-transform duration-200 hover:scale-105 flex items-center justify-center",
-          iconClassName
+          iconClassName,
         )}
       >
         <CyberSafeEmblem variant={effectiveTheme} size={size} />
@@ -412,16 +408,17 @@ export function Logo({
               className={cn(
                 effectiveTheme === "electric"
                   ? "text-cyan-400 dark:text-cyan-300 font-black animate-pulse"
-                  : "text-electric font-black"
+                  : "text-electric font-black",
               )}
             >
-              {" "}Online
+              {" "}
+              Online
             </span>
           </div>
           <div
             className={cn(
               "mt-0.5 flex items-center gap-1.5 uppercase opacity-75",
-              currentSizeConfig.subtitle
+              currentSizeConfig.subtitle,
             )}
           >
             <span>Sécurité & IA · Togo</span>

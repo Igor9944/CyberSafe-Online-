@@ -21,13 +21,7 @@ import { toast } from "sonner";
 import jsQR from "jsqr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  GemmaStatusBanner,
-  PageHeader,
-  Panel,
-  ProgressBar,
-  ResultView,
-} from "@/components/cs/ui";
+import { GemmaStatusBanner, PageHeader, Panel, ProgressBar, ResultView } from "@/components/cs/ui";
 import { VirusTotalCard } from "@/components/cs/VirusTotalCard";
 import { CyberSticker } from "@/components/cs/CyberDecorations";
 import { saveAnalysis } from "@/lib/history";
@@ -51,8 +45,7 @@ export const Route = createFileRoute("/qr")({
       { property: "og:title", content: "Scanner QR Code — CyberSafe Online" },
       {
         property: "og:description",
-        content:
-          "Détection des domaines piégés, faux QR marchands et phishing QR Code au Togo.",
+        content: "Détection des domaines piégés, faux QR marchands et phishing QR Code au Togo.",
       },
     ],
   }),
@@ -98,7 +91,9 @@ function QrPage() {
   const [result, setResult] = useState<CombinedSmsAnalysisResult | null>(null);
   const [apiError, setApiError] = useState<{ message: string; quota: boolean } | null>(null);
   const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
-  const [cameraPermission, setCameraPermission] = useState<"granted" | "denied" | "prompt">("prompt");
+  const [cameraPermission, setCameraPermission] = useState<"granted" | "denied" | "prompt">(
+    "prompt",
+  );
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraStatus, setCameraStatus] = useState<"idle" | "active" | "denied">("idle");
   const [detectedQr, setDetectedQr] = useState<string | null>(null);
@@ -223,7 +218,7 @@ function QrPage() {
 
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (videoRef.current) {
@@ -276,7 +271,17 @@ function QrPage() {
       // Redimensionner et dessiner
       const scaleX = targetWidth / video.videoWidth;
       const scaleY = targetHeight / video.videoHeight;
-      scanCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, targetWidth, targetHeight);
+      scanCtx.drawImage(
+        video,
+        0,
+        0,
+        video.videoWidth,
+        video.videoHeight,
+        0,
+        0,
+        targetWidth,
+        targetHeight,
+      );
 
       const imageData = scanCtx.getImageData(0, 0, targetWidth, targetHeight);
 
@@ -298,7 +303,11 @@ function QrPage() {
     scanFrame.current = window.requestAnimationFrame(loop);
   };
 
-  const captureAndUploadQrFrame = async (video: HTMLVideoElement, canvas: HTMLCanvasElement, content: string) => {
+  const captureAndUploadQrFrame = async (
+    video: HTMLVideoElement,
+    canvas: HTMLCanvasElement,
+    content: string,
+  ) => {
     try {
       // Capture la frame actuelle sur le canvas
       canvas.width = video.videoWidth;
@@ -325,7 +334,7 @@ function QrPage() {
         scanFrame.current = 0;
       }
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
       if (videoRef.current) {
@@ -345,11 +354,7 @@ function QrPage() {
 
   return (
     <>
-      <PageHeader
-        icon={QrCode}
-        title={t("qr.title")}
-        subtitle={t("qr.subtitle")}
-      >
+      <PageHeader icon={QrCode} title={t("qr.title")} subtitle={t("qr.subtitle")}>
         <div className="flex flex-wrap items-center gap-2">
           <CyberSticker tone="yellow" icon={QrCode} rotate="none">
             Anti-Quishing Togo
@@ -476,7 +481,7 @@ function QrPage() {
                   </Button>
                 )}
               </div>
-              
+
               {/* Aperçu en direct de la caméra */}
               {isCameraActive && (
                 <div className="relative rounded-xl border-2 border-primary/40 bg-black p-3 overflow-hidden">
@@ -502,14 +507,12 @@ function QrPage() {
                   </div>
                   {cameraPermission === "denied" && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <p className="text-white text-sm text-center p-4">
-                        {t("qr.cameraDenied")}
-                      </p>
+                      <p className="text-white text-sm text-center p-4">{t("qr.cameraDenied")}</p>
                     </div>
                   )}
                 </div>
               )}
-              
+
               <button
                 type="button"
                 disabled={busy}
@@ -531,7 +534,8 @@ function QrPage() {
                       />
                     </div>
                     <div className="text-xs font-bold text-primary flex items-center justify-center gap-1.5">
-                      <RefreshCw className="size-3.5 animate-spin text-electric" /> Décodage et analyse en cours...
+                      <RefreshCw className="size-3.5 animate-spin text-electric" /> Décodage et
+                      analyse en cours...
                     </div>
                   </div>
                 ) : (
@@ -543,7 +547,8 @@ function QrPage() {
                       {t("qr.dropzone")}
                     </div>
                     <div className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-sm font-medium">
-                      Glissez votre capture d'écran de QR Code ou cliquez pour parcourir (PNG, JPG, WEBP jusqu'à 5 Mo).
+                      Glissez votre capture d'écran de QR Code ou cliquez pour parcourir (PNG, JPG,
+                      WEBP jusqu'à 5 Mo).
                     </div>
                   </>
                 )}
@@ -572,9 +577,7 @@ function QrPage() {
             </Panel>
           ) : (
             <Panel className="space-y-4 border-2 shadow-neo-sm">
-              <label className="block text-sm font-black">
-                Contenu du QR Code à analyser :
-              </label>
+              <label className="block text-sm font-black">Contenu du QR Code à analyser :</label>
               <div className="flex gap-2">
                 <Input
                   value={manualText}
@@ -595,7 +598,8 @@ function QrPage() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground font-medium">
-                Collez l'URL ou le texte brut issu d'un lecteur QR pour une analyse instantanée sans ouvrir le navigateur.
+                Collez l'URL ou le texte brut issu d'un lecteur QR pour une analyse instantanée sans
+                ouvrir le navigateur.
               </p>
             </Panel>
           )}

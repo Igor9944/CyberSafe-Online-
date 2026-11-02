@@ -56,7 +56,8 @@ function GuidePage() {
             <Lock className="size-4" /> 1. Le PIN est Sacré
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-            Ni Togocom ni Moov Africa ne vous demanderont <strong>JAMAIS</strong> votre code PIN ou un code OTP reçu par SMS, même en cas de problème technique.
+            Ni Togocom ni Moov Africa ne vous demanderont <strong>JAMAIS</strong> votre code PIN ou
+            un code OTP reçu par SMS, même en cas de problème technique.
           </p>
         </div>
 
@@ -65,7 +66,9 @@ function GuidePage() {
             <Smartphone className="size-4" /> 2. Faux Dépôt par Erreur
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-            Si quelqu'un prétend vous avoir envoyé de l'argent par erreur, vérifiez toujours votre vrai solde via <code className="font-bold">*145#</code> ou <code className="font-bold">*155#</code> avant de renvoyer quoi que ce soit.
+            Si quelqu'un prétend vous avoir envoyé de l'argent par erreur, vérifiez toujours votre
+            vrai solde via <code className="font-bold">*145#</code> ou{" "}
+            <code className="font-bold">*155#</code> avant de renvoyer quoi que ce soit.
           </p>
         </div>
 
@@ -74,7 +77,8 @@ function GuidePage() {
             <CheckCircle2 className="size-4" /> 3. Nom d'Expéditeur
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-            Les vrais SMS proviennent de <strong>TMoney</strong> ou <strong>MoovMoney</strong>. Tout SMS reçu d'un numéro à 8 chiffres (+228 9X...) prétendant être un dépôt est un faux !
+            Les vrais SMS proviennent de <strong>TMoney</strong> ou <strong>MoovMoney</strong>. Tout
+            SMS reçu d'un numéro à 8 chiffres (+228 9X...) prétendant être un dépôt est un faux !
           </p>
         </div>
 
@@ -83,7 +87,8 @@ function GuidePage() {
             <AlertTriangle className="size-4" /> 4. Zéro Lien Web
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-            Les notifications officielles de transfert n'intègrent aucun lien Internet cliquable (ex: bit.ly, .top, .xyz). Ne cliquez jamais dessus.
+            Les notifications officielles de transfert n'intègrent aucun lien Internet cliquable
+            (ex: bit.ly, .top, .xyz). Ne cliquez jamais dessus.
           </p>
         </div>
       </div>
@@ -116,7 +121,8 @@ function GuidePage() {
                   <CheckCircle2 className="size-3.5" /> SMS Officiel Conforme :
                 </div>
                 <code className="block font-mono text-[11px] text-foreground font-semibold">
-                  Transfert reçu de 15 000 FCFA du 90 12 00 00 (KOFFI A.). Frais: 0 FCFA. Nouveau solde : 42 500 FCFA. Réf : TX261031001.
+                  Transfert reçu de 15 000 FCFA du 90 12 00 00 (KOFFI A.). Frais: 0 FCFA. Nouveau
+                  solde : 42 500 FCFA. Réf : TX261031001.
                 </code>
               </div>
 
@@ -125,7 +131,8 @@ function GuidePage() {
                   <XCircle className="size-3.5" /> Faux SMS Frauduleux :
                 </div>
                 <code className="block font-mono text-[11px] text-foreground font-semibold">
-                  De: +228 91 00 00 00 : Vous avez reçu 15 000 FCFA. Erreur de transfert, renvoyez au 91 00 00 00 urgence hôpital.
+                  De: +228 91 00 00 00 : Vous avez reçu 15 000 FCFA. Erreur de transfert, renvoyez
+                  au 91 00 00 00 urgence hôpital.
                 </code>
               </div>
             </div>
@@ -145,7 +152,8 @@ function GuidePage() {
                   <CheckCircle2 className="size-3.5" /> SMS Officiel Conforme :
                 </div>
                 <code className="block font-mono text-[11px] text-foreground font-semibold">
-                  Vous avez reçu 8 500 FCFA de 99 00 11 22. Nouveau solde Flooz : 19 200 FCFA. ID Transaction : MV8849201.
+                  Vous avez reçu 8 500 FCFA de 99 00 11 22. Nouveau solde Flooz : 19 200 FCFA. ID
+                  Transaction : MV8849201.
                 </code>
               </div>
 
@@ -154,7 +162,8 @@ function GuidePage() {
                   <XCircle className="size-3.5" /> Faux SMS Frauduleux :
                 </div>
                 <code className="block font-mono text-[11px] text-foreground font-semibold">
-                  Moov Money Promo: Votre numéro gagne 150 000 FCFA. Cliquez sur http://bit.ly/moov-togo pour valider avant ce soir.
+                  Moov Money Promo: Votre numéro gagne 150 000 FCFA. Cliquez sur
+                  http://bit.ly/moov-togo pour valider avant ce soir.
                 </code>
               </div>
             </div>
@@ -166,7 +175,8 @@ function GuidePage() {
         <div className="flex items-start gap-3 rounded-2xl border-2 border-warning/50 bg-warning/15 p-4 text-sm shadow-neo-sm">
           <AlertTriangle className="mt-0.5 size-5 shrink-0 text-warning" />
           <p className="text-foreground text-xs sm:text-sm font-medium">
-            {t("guide.legalNotice")} Au Togo, conservez les preuves en cas d'escroquerie pour déposer plainte auprès de la DCPJ ou alerter l'ANCy (cert.tg).
+            {t("guide.legalNotice")} Au Togo, conservez les preuves en cas d'escroquerie pour
+            déposer plainte auprès de la DCPJ ou alerter l'ANCy (cert.tg).
           </p>
         </div>
 
@@ -226,7 +236,11 @@ function GuidePage() {
             </div>
           </div>
 
-          <Button asChild variant="hero" className="shrink-0 shadow-neo border-2 border-white/20 font-bold">
+          <Button
+            asChild
+            variant="hero"
+            className="shrink-0 shadow-neo border-2 border-white/20 font-bold"
+          >
             <Link to="/sms">
               Scanner un SMS suspect <ArrowRight className="size-4" />
             </Link>

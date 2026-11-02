@@ -225,6 +225,112 @@
     transition: opacity 300ms ease, transform 300ms ease;
   }
 
+  /* Mobile: max-width container for small screens */
+  @media (max-width: 640px) {
+    .max-w-6xl {
+      max-width: 100%;
+    }
+    .px-4 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .py-6 {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+    .py-8 {
+      padding-top: 2.5rem;
+      padding-bottom: 2.5rem;
+    }
+  }
+
+  /* Tablet: add side padding */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .px-4 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .py-6 {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+  }
+
+  /* Dashboard stats grid - mobile first */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+  }
+
+  /* Action buttons - touch friendly on mobile */
+  @media (pointer: coarse) {
+    .action-btn:active {
+      transform: scale(0.95);
+    }
+
+    .action-btn:active .btn-glow {
+      opacity: 1;
+    }
+
+    .action-btn:active .btn-glow {
+      opacity: 1;
+    }
+
+    .quick-action:active {
+      transform: scale(0.95);
+    }
+
+    .mobile-menu-hidden {
+      display: none;
+    }
+  }
+
+  /* Reduce motion on mobile */
+  @media (pointer: coarse) and (prefers-reduced-motion: reduce) {
+    .action-btn:active {
+      transform: none;
+    }
+
+    .quick-action:active {
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    .page-enter {
+      opacity: 1;
+      transform: none;
+    }
+
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   /* Scroll-aware header */
   .scroll-spy-header {
     transition: box-shadow 0.2s ease;

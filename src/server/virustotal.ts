@@ -1,7 +1,7 @@
-
 import fs from "node:fs";
 import path from "node:path";
 import type { Finding, GemmaAnalysisResponse } from "./gemma";
+import { extractUrlsFromText, encodeUrlForVirusTotal } from "./ssrf-protection";
 
 interface CacheEntry {
   report: VirusTotalUrlReport;
@@ -21,7 +21,8 @@ export interface VirusTotalStats {
 export interface VirusTotalUrlReport {
   url: string;
   domain: string;
-  status: "analyzed" | "not_found" | "queued" | "unavailable" | "quota_exceeded" | "skipped_sensitive";
+  status:
+    "analyzed" | "not_found" | "queued" | "unavailable" | "quota_exceeded" | "skipped_sensitive";
   stats?: VirusTotalStats | undefined;
   reputation?: number | undefined;
   categories?: string[] | undefined;
@@ -47,14 +48,18 @@ export interface VirusTotalAnalysisResult {
   caution: string;
 }
 
+export interface CombinedAnalysisResult extends GemmaAnalysisResponse {
+  gemmaRisk: "ÉLEVÉ" | "SUSPECT" | "FAIBLE";
+  technicalRisk: string;
+}
+
 function ensureEnvLoaded(): string | undefined {
   if (!process.env["VIRUSTOTAL_API_KEY"]) {
     try {
       if (typeof process.loadEnvFile === "function") {
         process.loadEnvFile();
       }
-    } catch {
-    }
+    } catch {}
 
     if (!process.env["VIRUSTOTAL_API_KEY"]) {
       const pathsToTry = [
@@ -70,7 +75,10 @@ function ensureEnvLoaded(): string | undefined {
               if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
                 const [k, ...v] = trimmed.split("=");
                 const keyName = (k || "").trim();
-                const val = v.join("=").trim().replace(/^["']|["']$/g, "");
+                const val = v
+                  .join("=")
+                  .trim()
+                  .replace(/^['"]|['"]$/g, "");
                 if (keyName === "VIRUSTOTAL_API_KEY" && val) {
                   process.env["VIRUSTOTAL_API_KEY"] = val;
                   break;
@@ -78,8 +86,7 @@ function ensureEnvLoaded(): string | undefined {
               }
             }
           }
-        } catch {
-        }
+        } catch {}
       }
     }
   }
@@ -90,23 +97,6 @@ export function getVirusTotalApiKey(): string | undefined {
   return ensureEnvLoaded();
 }
 
-const SENSITIVE_PARAM_KEYWORDS = [
-  "token",
-  "access_token",
-  "id_token",
-  "jwt",
-  "otp",
-  "pin",
-  "password",
-  "pwd",
-  "secret",
-  "key",
-  "api_key",
-  "auth",
-  "code",
-  "session",
-];
-
 export interface ExtractedUrlInfo {
   rawUrl: string;
   normalizedUrl: string;
@@ -115,62 +105,7 @@ export interface ExtractedUrlInfo {
   sensitiveReason?: string | undefined;
 }
 
-export function extractUrlsFromText(text: string): ExtractedUrlInfo[] {
-  if (!text || typeof text !== "string") return [];
-
-  const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<>"']+|[a-zA-Z0-9-]+\.(?:com|org|net|tg|xyz|top|live|site|online|info|me|ly|co|io|tk|ml|ga|cf|gq|biz|icu|buzz)(?:\/[^\s<>"']*)?)/gi;
-
-  const matches = text.match(urlRegex) ?? [];
-  const results: ExtractedUrlInfo[] = [];
-  const seen = new Set<string>();
-
-  for (const raw of matches) {
-    let cleaned = raw.replace(/[.,;:!?)]+$/, "").trim();
-
-    if (!cleaned) continue;
-
-    let withProto = cleaned;
-    if (!/^https?:\/\//i.test(withProto)) {
-      withProto = "https://" + withProto;
-    }
-
-    try {
-      const parsed = new URL(withProto);
-      const normalizedUrl = parsed.toString();
-      const domain = parsed.hostname.toLowerCase();
-
-      if (seen.has(normalizedUrl)) continue;
-      seen.add(normalizedUrl);
-
-      let isSensitive = false;
-      let sensitiveReason: string | undefined;
-
-      for (const [key, val] of parsed.searchParams.entries()) {
-        const lowerKey = key.toLowerCase();
-        if (SENSITIVE_PARAM_KEYWORDS.some((kw) => lowerKey.includes(kw))) {
-          isSensitive = true;
-          sensitiveReason = `Paramètre sensible détecté (?${key}=...) non soumis à un tiers`;
-          break;
-        }
-      }
-
-      results.push({
-        rawUrl: cleaned,
-        normalizedUrl,
-        domain,
-        isSensitive,
-        ...(sensitiveReason !== undefined ? { sensitiveReason } : {}),
-      });
-    } catch {
-    }
-  }
-
-  return results;
-}
-
-export function encodeUrlForVirusTotal(url: string): string {
-  return Buffer.from(url).toString("base64url");
-}
+export { extractUrlsFromText, encodeUrlForVirusTotal };
 
 export async function fetchVirusTotalReportForUrl(
   normalizedUrl: string,
@@ -284,7 +219,7 @@ export async function fetchVirusTotalReportForUrl(
       url: normalizedUrl,
       domain,
       status: "unavailable",
-      error: isTimeout ? "Délai de connexion dépassé" : (err?.message || "Erreur réseau"),
+      error: isTimeout ? "Délai de connexion dépassé" : err?.message || "Erreur réseau",
       message: "Vérification VirusTotal indisponible",
     };
   }
@@ -349,7 +284,8 @@ export async function analyzeUrlsWithVirusTotal(
         notFoundUrls: 0,
       },
       unavailable: false,
-      caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+      caution:
+        "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
     };
   }
 
@@ -377,7 +313,9 @@ export async function analyzeUrlsWithVirusTotal(
 
   const maliciousUrls = reports.filter((r) => (r.stats?.malicious ?? 0) > 0).length;
   const suspiciousUrls = reports.filter((r) => (r.stats?.suspicious ?? 0) > 0).length;
-  const cleanUrls = reports.filter((r) => (r.stats?.malicious ?? 0) === 0 && (r.stats?.harmless ?? 0) > 0).length;
+  const cleanUrls = reports.filter(
+    (r) => (r.stats?.malicious ?? 0) === 0 && (r.stats?.harmless ?? 0) > 0,
+  ).length;
   const notFoundUrls = reports.filter((r) => r.status === "not_found").length;
 
   const isAllUnavailable = unavailableCount > 0 && unavailableCount === reports.length;
@@ -395,122 +333,121 @@ export async function analyzeUrlsWithVirusTotal(
       cleanUrls,
       notFoundUrls,
     },
-    unavailable: isAllUnavailable || isQuota,
-    ...(isQuota
-      ? { unavailableReason: "Quota VirusTotal atteint (429)" }
-      : isAllUnavailable
-      ? { unavailableReason: "Vérification VirusTotal indisponible" }
-      : {}),
-    caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+    unavailable: isAllUnavailable,
+    unavailableReason: isAllUnavailable ? "Tous les liens sont inaccessibles" : undefined,
+    caution:
+      "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
   };
-}
-
-export type TechnicalRiskLevel =
-  | "FAIBLE"
-  | "SUSPECT"
-  | "ÉLEVÉ"
-  | "NON_RÉPERTORIÉ"
-  | "INDISPONIBLE"
-  | "AUCUN_LIEN";
-
-export interface CombinedSmsAnalysisResponse extends GemmaAnalysisResponse {
-  virusTotal: VirusTotalAnalysisResult;
-  gemmaRisk: "FAIBLE" | "SUSPECT" | "ÉLEVÉ";
-  gemmaScore: number;
-  technicalRisk: TechnicalRiskLevel;
 }
 
 export function combineGemmaAndVirusTotal(
-  gemma: GemmaAnalysisResponse,
-  vt: VirusTotalAnalysisResult,
-): CombinedSmsAnalysisResponse {
-  let technicalRisk: TechnicalRiskLevel = "AUCUN_LIEN";
-
-  if (vt.unavailable) {
+  gemmaResult: GemmaAnalysisResponse,
+  virusTotalResult: VirusTotalAnalysisResult,
+): CombinedAnalysisResult {
+  // Determine technical risk based on VirusTotal results
+  let technicalRisk: string = "AUCUN_LIEN";
+  if (virusTotalResult.unavailable) {
     technicalRisk = "INDISPONIBLE";
-  } else if (!vt.hasUrls) {
-    technicalRisk = "AUCUN_LIEN";
-  } else if (vt.summary.maliciousUrls > 0) {
-    technicalRisk = "ÉLEVÉ";
-  } else if (vt.summary.suspiciousUrls > 0) {
-    technicalRisk = "SUSPECT";
-  } else if (vt.summary.cleanUrls > 0) {
-    technicalRisk = "FAIBLE";
-  } else if (vt.summary.notFoundUrls > 0) {
+  } else if (virusTotalResult.summary.notFoundUrls > 0) {
     technicalRisk = "NON_RÉPERTORIÉ";
+  } else if (virusTotalResult.summary.maliciousUrls > 0) {
+    technicalRisk = "ÉLEVÉ";
+  } else if (virusTotalResult.summary.suspiciousUrls > 0) {
+    technicalRisk = "SUSPECT";
   }
 
-  let globalScore = gemma.score;
-  let globalLevel = gemma.level;
+  // Determine final overall level
+  let finalLevel: "FAIBLE" | "SUSPECT" | "ÉLEVÉ" = "FAIBLE";
+  if (gemmaResult.level === "ÉLEVÉ") {
+    finalLevel = "ÉLEVÉ";
+  } else if (gemmaResult.level === "SUSPECT") {
+    finalLevel = "SUSPECT";
+  }
+  if (virusTotalResult.summary.maliciousUrls > 0) {
+    finalLevel = "ÉLEVÉ";
+  } else if (virusTotalResult.summary.suspiciousUrls > 0) {
+    finalLevel = finalLevel === "FAIBLE" ? "SUSPECT" : finalLevel;
+  }
 
-  if (technicalRisk === "ÉLEVÉ") {
-    globalLevel = "ÉLEVÉ";
-    globalScore = Math.max(globalScore, 85);
-  } else if (technicalRisk === "SUSPECT") {
-    if (globalLevel === "FAIBLE") {
-      globalLevel = "SUSPECT";
-      globalScore = Math.max(globalScore, 60);
+  // Build findings
+  const findings: Array<{ label: string; detail: string; weight: number }> = [];
+
+  // Add Gemma findings (mark them as from Gemma)
+  if (gemmaResult.findings && Array.isArray(gemmaResult.findings)) {
+    for (const f of gemmaResult.findings) {
+      findings.push({
+        label: f.label || "Détection de Gemma",
+        detail: f.detail || "Aucun détail",
+        weight: f.weight || 20,
+      });
     }
   }
 
-  const combinedFindings: Finding[] = [...gemma.findings];
-  const combinedRecommendations: string[] = [...gemma.recommendations];
-
-  if (vt.hasUrls) {
-    for (const urlReport of vt.urls) {
-      if (urlReport.status === "analyzed" && urlReport.stats) {
-        if (urlReport.stats.malicious > 0) {
-          combinedFindings.unshift({
-            label: `VirusTotal : ${urlReport.stats.malicious} moteur(s) classent ${urlReport.domain} comme malveillant`,
-            detail: `L'URL ${urlReport.url} a été formellement signalée comme malveillante ou phishing sur VirusTotal.`,
-            weight: 45,
-          });
-        } else if (urlReport.stats.suspicious > 0) {
-          combinedFindings.push({
-            label: `VirusTotal : ${urlReport.stats.suspicious} moteur(s) suspectent ${urlReport.domain}`,
-            detail: `L'URL ${urlReport.url} présente des indices d'activité suspecte selon VirusTotal.`,
-            weight: 20,
-          });
-        }
-      } else if (urlReport.status === "not_found") {
-        combinedFindings.push({
-          label: `VirusTotal : ${urlReport.domain} non encore répertorié`,
-          detail: `Ce lien n'a pas encore de rapport public dans la base VirusTotal. Il peut s'agir d'un domaine très récent créé pour une campagne d'escroquerie.`,
-          weight: 15,
-        });
-      } else if (urlReport.status === "skipped_sensitive") {
-        combinedFindings.push({
-          label: "Protection confidentialité : Paramètres privés non transmis",
-          detail: `L'URL contient des identifiants sensibles. Elle a été protégée et non transmise à un service tiers.`,
-          weight: 0,
-        });
-      }
-    }
-
-    const cautionText = "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr (les campagnes récentes peuvent ne pas encore être répertoriées).";
-    if (!combinedRecommendations.includes(cautionText)) {
-      combinedRecommendations.push(cautionText);
-    }
-
-    if (technicalRisk === "ÉLEVÉ") {
-      combinedRecommendations.unshift("NE CLIQUEZ PAS sur le lien contenu dans ce SMS : il est formellement répertorié comme dangereux.");
-    }
+  // Add VirusTotal findings
+  if (virusTotalResult.summary.maliciousUrls > 0) {
+    findings.push({
+      label: "Lien malveillant détecté par VirusTotal",
+      detail: `VirusTotal a détecté ${virusTotalResult.summary.maliciousUrls} fichier(s) malveillant(s) sur ${virusTotalResult.summary.totalUrls} lien(s)`,
+      weight: 80,
+    });
+  } else if (virusTotalResult.summary.suspiciousUrls > 0) {
+    findings.push({
+      label: "Lien suspect détecté par VirusTotal",
+      detail: `VirusTotal a détecté ${virusTotalResult.summary.suspiciousUrls} lien(s) suspect(s)`,
+      weight: 40,
+    });
+  } else if (virusTotalResult.summary.notFoundUrls > 0) {
+    findings.push({
+      label: "Lien non encore répertorié par VirusTotal",
+      detail: "VirusTotal n'a pas encore analysé ce lien, le danger est incertain",
+      weight: 10,
+    });
   }
 
-  if (vt.unavailable) {
-    combinedRecommendations.push("Vérification VirusTotal indisponible : La décision repose sur l'analyse contextuelle de Gemma.");
+  // Build recommendations
+  const recommendations: string[] = [];
+  if (gemmaResult.recommendations && Array.isArray(gemmaResult.recommendations)) {
+    recommendations.push(...gemmaResult.recommendations);
   }
+
+  if (virusTotalResult.summary.maliciousUrls > 0) {
+    recommendations.push("NE CLIQUEZ PAS sur les liens suspects");
+  }
+
+  if (virusTotalResult.summary.notFoundUrls > 0) {
+    recommendations.push("VirusTotal n'a pas encore vérifié ce lien, faites attention");
+  }
+
+  if (!virusTotalResult.unavailable && virusTotalResult.summary.totalUrls > 0) {
+    recommendations.push("Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.");
+  } else if (virusTotalResult.unavailable) {
+    recommendations.push("Vérification VirusTotal indisponible - l'analyse se base sur Gemma uniquement");
+  }
+
+  const gemmaScore = gemmaResult.score || 0;
+  // Calculate score based on VirusTotal stats (malicious=7, suspicious=2)
+  let vtScore = 0;
+  if (virusTotalResult.urls && virusTotalResult.urls.length > 0) {
+    const url = virusTotalResult.urls[0];
+    if (url && typeof url.stats === "object" && url.stats) {
+      const stats: VirusTotalStats = url.stats as VirusTotalStats;
+      const malicious = stats.malicious || 0;
+      const suspicious = stats.suspicious || 0;
+      vtScore = (malicious * 7) + (suspicious * 2);
+    }
+  } else {
+    vtScore = virusTotalResult.summary.maliciousUrls * 40;
+  }
+  const totalScore = Math.max(gemmaScore, vtScore);
 
   return {
-    ...gemma,
-    level: globalLevel,
-    score: globalScore,
-    findings: combinedFindings,
-    recommendations: combinedRecommendations,
-    virusTotal: vt,
-    gemmaRisk: gemma.level,
-    gemmaScore: gemma.score,
+    ...gemmaResult,
+    level: finalLevel,
+    score: totalScore,
+    gemmaRisk: finalLevel,
     technicalRisk,
-  };
+    virusTotal: virusTotalResult,
+    findings,
+    recommendations,
+  } as CombinedAnalysisResult;
 }
-

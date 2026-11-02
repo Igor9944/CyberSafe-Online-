@@ -1,4 +1,3 @@
-
 export interface DocumentChunk {
   id: string;
   chunkIndex: number;
@@ -72,7 +71,9 @@ export function chunkDocument(
     const trimmed = para.trim();
     if (!trimmed) continue;
 
-    const isHeading = /^(?:#{1,4}\s+|[0-9IVX]+\.|\bchapitre\b|\bpartie\b|\bsection\b)/i.test(trimmed);
+    const isHeading = /^(?:#{1,4}\s+|[0-9IVX]+\.|\bchapitre\b|\bpartie\b|\bsection\b)/i.test(
+      trimmed,
+    );
     if (isHeading) {
       if (currentWords.length > 0) {
         chunks.push({
@@ -84,7 +85,10 @@ export function chunkDocument(
         });
         currentWords = [];
       }
-      currentSection = trimmed.slice(0, 60).replace(/[#*`_]/g, "").trim();
+      currentSection = trimmed
+        .slice(0, 60)
+        .replace(/[#*`_]/g, "")
+        .trim();
     }
 
     const paraWords = trimmed.split(/\s+/).filter(Boolean);
@@ -151,10 +155,51 @@ export function retrieveRelevantPassages(
   if (!query || chunks.length === 0) return [];
 
   const stopWords = new Set([
-    "le", "la", "les", "un", "une", "des", "du", "de", "ce", "cet", "cette", "ces",
-    "en", "dans", "pour", "par", "sur", "avec", "sans", "est", "sont", "ont", "a",
-    "que", "qui", "quoi", "dont", "ou", "et", "mais", "donc", "or", "ni", "car",
-    "the", "a", "an", "in", "on", "at", "for", "with", "about", "to", "from",
+    "le",
+    "la",
+    "les",
+    "un",
+    "une",
+    "des",
+    "du",
+    "de",
+    "ce",
+    "cet",
+    "cette",
+    "ces",
+    "en",
+    "dans",
+    "pour",
+    "par",
+    "sur",
+    "avec",
+    "sans",
+    "est",
+    "sont",
+    "ont",
+    "a",
+    "que",
+    "qui",
+    "quoi",
+    "dont",
+    "ou",
+    "et",
+    "mais",
+    "donc",
+    "or",
+    "ni",
+    "car",
+    "the",
+    "a",
+    "an",
+    "in",
+    "on",
+    "at",
+    "for",
+    "with",
+    "about",
+    "to",
+    "from",
   ]);
 
   const queryTokens = query
@@ -229,4 +274,3 @@ Ne fabrique AUCUNE référence inventée ni contenu absent du document.
 ${passagesText}
 `;
 }
-

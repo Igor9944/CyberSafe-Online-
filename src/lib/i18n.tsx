@@ -83,10 +83,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
             break;
           }
         }
-        return (typeof fallbackVal === "string" ? fallbackVal : fallback ?? path);
+        return typeof fallbackVal === "string" ? fallbackVal : (fallback ?? path);
       }
     }
-    return typeof current === "string" ? current : fallback ?? path;
+    return typeof current === "string" ? current : (fallback ?? path);
   };
 
   return (
@@ -100,7 +100,11 @@ export function useI18n() {
   return useContext(I18nContext);
 }
 
-export function LanguageSelector({ variant = "outline" }: { variant?: "outline" | "ghost" | "default" }) {
+export function LanguageSelector({
+  variant = "outline",
+}: {
+  variant?: "outline" | "ghost" | "default";
+}) {
   const { lang, setLang } = useI18n();
 
   return (
@@ -146,9 +150,7 @@ export function SecurityVerificationNotice() {
           <ShieldCheck className="size-4" />
         </div>
         <div>
-          <span className="font-bold text-foreground">
-            {t("common.humanVerificationBadge")}
-          </span>
+          <span className="font-bold text-foreground">{t("common.humanVerificationBadge")}</span>
           <span className="hidden md:inline text-muted-foreground"> — </span>
           <span className="block md:inline text-muted-foreground">
             {t("common.humanVerificationWarning")}

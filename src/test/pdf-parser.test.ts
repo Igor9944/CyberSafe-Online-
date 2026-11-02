@@ -8,6 +8,8 @@ describe("Extracteur de texte PDF universel", () => {
 
   it("gère gracieusement les erreurs sur un buffer invalide", async () => {
     const invalidBuffer = new Uint8Array([1, 2, 3, 4, 5]);
-    await expect(extractTextFromPdf(invalidBuffer)).rejects.toThrow("Impossible d'extraire le texte");
+    await expect(extractTextFromPdf(invalidBuffer)).rejects.toThrow(
+      "Impossible d'extraire le texte",
+    );
   });
 });

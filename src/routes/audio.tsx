@@ -17,13 +17,7 @@ import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  GemmaStatusBanner,
-  PageHeader,
-  Panel,
-  ProgressBar,
-  ResultView,
-} from "@/components/cs/ui";
+import { GemmaStatusBanner, PageHeader, Panel, ProgressBar, ResultView } from "@/components/cs/ui";
 import { CyberSticker } from "@/components/cs/CyberDecorations";
 import { saveAnalysis } from "@/lib/history";
 import { DEMO_AUDIO_SCENARIOS, type DemoAudioScenario } from "@/lib/demo";
@@ -224,13 +218,17 @@ function AudioPage() {
   const runAnalysis = async () => {
     const trimmed = text.trim();
     if (trimmed.length < 15) {
-      toast.error("Le texte retranscrit est trop court pour une analyse fiable (minimum 15 caractères).");
+      toast.error(
+        "Le texte retranscrit est trop court pour une analyse fiable (minimum 15 caractères).",
+      );
       return;
     }
 
     setApiError(null);
     setLoading(true);
-    toast.loading("Gemma 4 analyse les techniques d'ingénierie sociale...", { id: "audio-analysis" });
+    toast.loading("Gemma 4 analyse les techniques d'ingénierie sociale...", {
+      id: "audio-analysis",
+    });
 
     try {
       const res = await analyzeWithGemmaApi(trimmed, "audio", lang);
@@ -254,11 +252,7 @@ function AudioPage() {
 
   return (
     <>
-      <PageHeader
-        icon={AudioLines}
-        title={t("audio.title")}
-        subtitle={t("audio.subtitle")}
-      >
+      <PageHeader icon={AudioLines} title={t("audio.title")} subtitle={t("audio.subtitle")}>
         <div className="flex flex-wrap items-center gap-2">
           <CyberSticker tone="rose" icon={AudioLines} rotate="none">
             Anti-Vishing Vocal
@@ -345,11 +339,21 @@ function AudioPage() {
                   </div>
 
                   {isRecording ? (
-                    <Button variant="destructive" size="sm" onClick={stopRecording} className="border-2 font-bold shadow-neo-sm">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={stopRecording}
+                      className="border-2 font-bold shadow-neo-sm"
+                    >
                       <Square className="size-3.5 fill-current" /> Terminer
                     </Button>
                   ) : (
-                    <Button variant="hero" size="sm" onClick={startRecording} className="border-2 border-white/20 font-bold shadow-neo-sm">
+                    <Button
+                      variant="hero"
+                      size="sm"
+                      onClick={startRecording}
+                      className="border-2 border-white/20 font-bold shadow-neo-sm"
+                    >
                       <Mic className="size-3.5" /> Démarrer
                     </Button>
                   )}
@@ -395,14 +399,18 @@ function AudioPage() {
               <div className="flex items-start gap-2 rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground font-medium">
                 <FileAudio className="mt-0.5 size-4 shrink-0 text-primary" />
                 <span>
-                  L'audio est traité localement pour préserver la confidentialité. La transcription est envoyée à Gemma 4 pour analyse sémantique.
+                  L'audio est traité localement pour préserver la confidentialité. La transcription
+                  est envoyée à Gemma 4 pour analyse sémantique.
                 </span>
               </div>
 
               <div className="flex items-start gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-3 text-[11px] text-muted-foreground font-medium">
                 <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-warning" />
                 <span>
-                  <strong>Précision sur la langue Éwé :</strong> Le moteur Web Speech API du navigateur supporte le français (`fr-TG`) et l'anglais. Pour l'Éwé (`Eʋegbe`), nous recommandons les scénarios de démonstration ci-dessous ou la saisie/retouche manuelle, les navigateurs n'intégrant pas encore de modèle ASR natif pour l'Éwé.
+                  <strong>Précision sur la langue Éwé :</strong> Le moteur Web Speech API du
+                  navigateur supporte le français (`fr-TG`) et l'anglais. Pour l'Éwé (`Eʋegbe`),
+                  nous recommandons les scénarios de démonstration ci-dessous ou la saisie/retouche
+                  manuelle, les navigateurs n'intégrant pas encore de modèle ASR natif pour l'Éwé.
                 </span>
               </div>
             </Panel>
@@ -521,7 +529,8 @@ function AudioPage() {
             <GemmaStatusBanner />
             <p className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
               <ShieldCheck className="size-4 text-success shrink-0" />
-              Données strictement anonymisées conformément aux règles de la compétition et aux directives de l'ANCy.
+              Données strictement anonymisées conformément aux règles de la compétition et aux
+              directives de l'ANCy.
             </p>
           </div>
         </div>

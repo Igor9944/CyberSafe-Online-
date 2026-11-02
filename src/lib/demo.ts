@@ -75,10 +75,13 @@ CHAPITRE 3 : PROTOCOLES CRYPTOGRAPHIQUES (TLS, HACHAGE & MFA)
         front: "Code PIN Mobile Money & Tiers",
         back: "Le code PIN est un secret cryptographique strictement personnel. Aucun agent ou opérateur légitime ne demande jamais votre code PIN ou OTP.",
         mastered: false,
-        binaryStatement: "Un agent officiel du service client T-Money ou Moov Money est habilité à vous demander votre code secret PIN pour annuler une transaction frauduleuse.",
+        binaryStatement:
+          "Un agent officiel du service client T-Money ou Moov Money est habilité à vous demander votre code secret PIN pour annuler une transaction frauduleuse.",
         binaryAnswer: false,
-        binaryExplanation: "FAUX. Aucun agent, technicien ou responsable d'opérateur n'a le droit de réclamer votre code PIN ou votre code temporaire OTP. Toute demande de cet ordre est une escroquerie avérée.",
-        mcqQuestion: "Lors d'un prétendu virement Mobile Money reçu par erreur, quelle est la démarche rigoureusement recommandée avant d'agir ?",
+        binaryExplanation:
+          "FAUX. Aucun agent, technicien ou responsable d'opérateur n'a le droit de réclamer votre code PIN ou votre code temporaire OTP. Toute demande de cet ordre est une escroquerie avérée.",
+        mcqQuestion:
+          "Lors d'un prétendu virement Mobile Money reçu par erreur, quelle est la démarche rigoureusement recommandée avant d'agir ?",
         mcqOptions: [
           "Vérifier son solde réel directement via le menu USSD officiel (*145# ou *155#)",
           "Faire confiance au SMS reçu et renvoyer la somme réclamée par l'appelant",
@@ -86,17 +89,21 @@ CHAPITRE 3 : PROTOCOLES CRYPTOGRAPHIQUES (TLS, HACHAGE & MFA)
           "Cliquer sur le lien d'annulation web contenu dans le message reçu",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "La règle fondamentale de défense contre l'arnaque au faux dépôt est de vérifier systématiquement son solde réel via la commande USSD opérateur (*145# ou *155#) et non de se fier aux SMS reçus d'un numéro ordinaire.",
+        mcqExplanation:
+          "La règle fondamentale de défense contre l'arnaque au faux dépôt est de vérifier systématiquement son solde réel via la commande USSD opérateur (*145# ou *155#) et non de se fier aux SMS reçus d'un numéro ordinaire.",
       },
       {
         id: "cyber-fc-2",
         front: "Notifications SMS officielles d'opérateur",
         back: "Un SMS légitime émane d'un identifiant court officiel (TMoney, MoovMoney), mentionne le nouveau solde exact et ne contient jamais de lien web externe.",
         mastered: false,
-        binaryStatement: "Un SMS officiel de transaction Mobile Money comporte obligatoirement un identifiant d'expéditeur court certifié et une référence unique de transaction (TxID).",
+        binaryStatement:
+          "Un SMS officiel de transaction Mobile Money comporte obligatoirement un identifiant d'expéditeur court certifié et une référence unique de transaction (TxID).",
         binaryAnswer: true,
-        binaryExplanation: "VRAI. Les notifications officielles émises par les passerelles télécoms comportent toujours l'expéditeur court vérifié (ex: TMoney, MoovMoney), le solde actualisé et la référence d'opération (TxID), sans lien hypertexte.",
-        mcqQuestion: "Quel indicateur technique signale immédiatement un SMS frauduleux tentant d'imiter Mobile Money ?",
+        binaryExplanation:
+          "VRAI. Les notifications officielles émises par les passerelles télécoms comportent toujours l'expéditeur court vérifié (ex: TMoney, MoovMoney), le solde actualisé et la référence d'opération (TxID), sans lien hypertexte.",
+        mcqQuestion:
+          "Quel indicateur technique signale immédiatement un SMS frauduleux tentant d'imiter Mobile Money ?",
         mcqOptions: [
           "L'expéditeur est un numéro mobile personnel ordinaire (+228 9X...) accompagné d'un lien raccourci",
           "Le message mentionne le montant exact en francs CFA (FCFA)",
@@ -104,17 +111,21 @@ CHAPITRE 3 : PROTOCOLES CRYPTOGRAPHIQUES (TLS, HACHAGE & MFA)
           "Le SMS indique le montant des frais appliqués",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "Les escrocs ne peuvent pas émettre depuis le Sender ID certifié des opérateurs et recourent donc à des puces SIM prépayées classiques avec un lien de phishing externe.",
+        mcqExplanation:
+          "Les escrocs ne peuvent pas émettre depuis le Sender ID certifié des opérateurs et recourent donc à des puces SIM prépayées classiques avec un lien de phishing externe.",
       },
       {
         id: "cyber-fc-3",
         front: "Authentification Multifacteur (MFA / 2FA)",
         back: "La MFA combine au moins deux facteurs distincts : ce que l'on sait (PIN), ce que l'on possède (SIM / OTP), ou ce que l'on est (biométrie).",
         mastered: false,
-        binaryStatement: "L'utilisation simultanée d'un mot de passe et d'une validation par empreinte digitale constitue une authentification multifacteur (MFA).",
+        binaryStatement:
+          "L'utilisation simultanée d'un mot de passe et d'une validation par empreinte digitale constitue une authentification multifacteur (MFA).",
         binaryAnswer: true,
-        binaryExplanation: "VRAI. Le mot de passe relève du facteur de connaissance ('ce que je sais') et l'empreinte digitale relève du facteur d'inhérence ('ce que je suis'). La combinaison des deux valide la MFA.",
-        mcqQuestion: "Dans le protocole TLS 1.3, quel avantage sécuritaire majeur est systématiquement imposé par rapport aux anciennes versions ?",
+        binaryExplanation:
+          "VRAI. Le mot de passe relève du facteur de connaissance ('ce que je sais') et l'empreinte digitale relève du facteur d'inhérence ('ce que je suis'). La combinaison des deux valide la MFA.",
+        mcqQuestion:
+          "Dans le protocole TLS 1.3, quel avantage sécuritaire majeur est systématiquement imposé par rapport aux anciennes versions ?",
         mcqOptions: [
           "Poignée de main (handshake) accélérée à 1-RTT et chiffrement systématique avec Perfect Forward Secrecy",
           "Suppression définitive du besoin de certificats cryptographiques",
@@ -122,17 +133,21 @@ CHAPITRE 3 : PROTOCOLES CRYPTOGRAPHIQUES (TLS, HACHAGE & MFA)
           "Compatibilité avec les transferts de mots de passe en texte clair",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "TLS 1.3 réduit la poignée de main à un seul aller-retour (1-RTT), élimine toutes les suites cryptographiques obsolètes et impose la confidentialité persistante (PFS).",
+        mcqExplanation:
+          "TLS 1.3 réduit la poignée de main à un seul aller-retour (1-RTT), élimine toutes les suites cryptographiques obsolètes et impose la confidentialité persistante (PFS).",
       },
       {
         id: "cyber-fc-4",
         front: "Hachage cryptographique et stockage de mots de passe",
         back: "Une fonction à sens unique irréversible conçue pour stocker les mots de passe et vérifier l'intégrité sans jamais divulguer le secret original.",
         mastered: false,
-        binaryStatement: "Le hachage cryptographique SHA-256 est une méthode réversible permettant de recalculer le mot de passe initial grâce à une clé secrète de déchiffrement.",
+        binaryStatement:
+          "Le hachage cryptographique SHA-256 est une méthode réversible permettant de recalculer le mot de passe initial grâce à une clé secrète de déchiffrement.",
         binaryAnswer: false,
-        binaryExplanation: "FAUX. Le hachage est une fonction mathématique à sens unique stricte : il est calculatoirement impossible d'inverser le condensat (hash) pour retrouver le mot de passe original.",
-        mcqQuestion: "Quel algorithme de hachage est particulièrement recommandé pour stocker les mots de passe grâce à sa résistance prouvée face aux attaques massives par GPU ?",
+        binaryExplanation:
+          "FAUX. Le hachage est une fonction mathématique à sens unique stricte : il est calculatoirement impossible d'inverser le condensat (hash) pour retrouver le mot de passe original.",
+        mcqQuestion:
+          "Quel algorithme de hachage est particulièrement recommandé pour stocker les mots de passe grâce à sa résistance prouvée face aux attaques massives par GPU ?",
         mcqOptions: [
           "Argon2id (avec coût mémoire et temporel paramétrable)",
           "MD5 (rapide et compact)",
@@ -140,7 +155,8 @@ CHAPITRE 3 : PROTOCOLES CRYPTOGRAPHIQUES (TLS, HACHAGE & MFA)
           "Base64 (encodage standard)",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "Argon2id (vainqueur du Password Hashing Competition) applique un coût mémoire et processeur configurable qui sature la mémoire vive des puces graphiques (GPU/ASIC), rendant le cassage par force brute inopérant.",
+        mcqExplanation:
+          "Argon2id (vainqueur du Password Hashing Competition) applique un coût mémoire et processeur configurable qui sature la mémoire vive des puces graphiques (GPU/ASIC), rendant le cassage par force brute inopérant.",
       },
     ],
   },
@@ -162,10 +178,13 @@ La loi togolaise sur la cybersécurité et la lutte contre la cybercriminalité 
         front: "Supériorité des Actes Uniformes OHADA",
         back: "Les Actes Uniformes OHADA sont directement applicables et obligatoires dans les États membres nonobstant toute disposition contraire de droit interne.",
         mastered: false,
-        binaryStatement: "Un tribunal togolais a la faculté d'écarter un Acte Uniforme OHADA au profit d'une loi nationale commerciale antérieure.",
+        binaryStatement:
+          "Un tribunal togolais a la faculté d'écarter un Acte Uniforme OHADA au profit d'une loi nationale commerciale antérieure.",
         binaryAnswer: false,
-        binaryExplanation: "FAUX. Selon l'article 10 du Traité de l'OHADA, les Actes Uniformes priment de plein droit et de manière absolue sur toute disposition contraire de droit interne des États membres.",
-        mcqQuestion: "Quels sont les trois éléments cumulatifs indispensables pour engager une action en responsabilité civile délictuelle ?",
+        binaryExplanation:
+          "FAUX. Selon l'article 10 du Traité de l'OHADA, les Actes Uniformes priment de plein droit et de manière absolue sur toute disposition contraire de droit interne des États membres.",
+        mcqQuestion:
+          "Quels sont les trois éléments cumulatifs indispensables pour engager une action en responsabilité civile délictuelle ?",
         mcqOptions: [
           "Une faute prouvée, un dommage certain et un lien de causalité direct",
           "Un contrat commercial écrit, un retard d'exécution et une mise en demeure",
@@ -173,17 +192,21 @@ La loi togolaise sur la cybersécurité et la lutte contre la cybercriminalité 
           "Un consentement mutuel formel, une cause licite et un objet déterminé",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "L'engagement de la responsabilité civile extracontractuelle exige obligatoirement la preuve simultanée d'une faute, d'un préjudice réel et d'un lien direct de cause à effet.",
+        mcqExplanation:
+          "L'engagement de la responsabilité civile extracontractuelle exige obligatoirement la preuve simultanée d'une faute, d'un préjudice réel et d'un lien direct de cause à effet.",
       },
       {
         id: "droit-fc-2",
         front: "Cadre légal de la cybersécurité au Togo (Loi n° 2018-026)",
         back: "La loi togolaise punit l'accès non autorisé aux systèmes informatiques, l'usurpation d'identité en ligne et la fraude par voie électronique.",
         mastered: false,
-        binaryStatement: "La loi togolaise n° 2018-026 érige en infraction pénale l'escroquerie commise au moyen d'un réseau de communication électronique.",
+        binaryStatement:
+          "La loi togolaise n° 2018-026 érige en infraction pénale l'escroquerie commise au moyen d'un réseau de communication électronique.",
         binaryAnswer: true,
-        binaryExplanation: "VRAI. La législation togolaise sanctionne lourdement l'escroquerie numérique, l'usurpation d'identité en ligne et les faux SMS de paiement mobile.",
-        mcqQuestion: "Quelle entité publique togolaise pilote la stratégie nationale et la réponse aux incidents de sécurité des systèmes d'information ?",
+        binaryExplanation:
+          "VRAI. La législation togolaise sanctionne lourdement l'escroquerie numérique, l'usurpation d'identité en ligne et les faux SMS de paiement mobile.",
+        mcqQuestion:
+          "Quelle entité publique togolaise pilote la stratégie nationale et la réponse aux incidents de sécurité des systèmes d'information ?",
         mcqOptions: [
           "L'ANCy (Agence Nationale de la Cybersécurité)",
           "L'Autorité de Régulation des Télécoms (ARCEP)",
@@ -191,17 +214,21 @@ La loi togolaise sur la cybersécurité et la lutte contre la cybercriminalité 
           "La Chambre de Commerce et d'Industrie du Togo",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "L'ANCy est l'agence gouvernementale togolaise mandatée pour protéger le cyberespace national, certifier les opérateurs d'importance vitale et contrer les cybermenaces.",
+        mcqExplanation:
+          "L'ANCy est l'agence gouvernementale togolaise mandatée pour protéger le cyberespace national, certifier les opérateurs d'importance vitale et contrer les cybermenaces.",
       },
       {
         id: "droit-fc-3",
         front: "Valeur juridique de la preuve électronique",
         back: "L'écrit électronique a la même force probante que l'écrit papier si l'identité du signataire est attestée et l'intégrité de l'acte garantie.",
         mastered: false,
-        binaryStatement: "En droit OHADA et togolais, un document sous forme électronique bénéficie de la même force probante que l'écrit sur support papier dès lors que son auteur est identifiable et son intégrité préservée.",
+        binaryStatement:
+          "En droit OHADA et togolais, un document sous forme électronique bénéficie de la même force probante que l'écrit sur support papier dès lors que son auteur est identifiable et son intégrité préservée.",
         binaryAnswer: true,
-        binaryExplanation: "VRAI. Le droit consacre l'équivalence stricte de la preuve numérique sous réserve d'identification certaine de l'auteur et d'intégrité assurée par des mécanismes fiables.",
-        mcqQuestion: "Quelle technologie confère à une signature numérique une présomption de fiabilité équivalente à la signature manuscrite ?",
+        binaryExplanation:
+          "VRAI. Le droit consacre l'équivalence stricte de la preuve numérique sous réserve d'identification certaine de l'auteur et d'intégrité assurée par des mécanismes fiables.",
+        mcqQuestion:
+          "Quelle technologie confère à une signature numérique une présomption de fiabilité équivalente à la signature manuscrite ?",
         mcqOptions: [
           "La signature électronique qualifiée reposant sur un certificat cryptographique asymétrique",
           "La numérisation d'une signature manuscrite insérée comme image JPEG dans un traitement de texte",
@@ -209,7 +236,8 @@ La loi togolaise sur la cybersécurité et la lutte contre la cybercriminalité 
           "La mention 'Lu et approuvé' tapée au clavier à la fin d'un courriel",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "Seul un certificat de signature électronique qualifié, adossé à une paire de clés asymétriques et délivré par une autorité de certification reconnue, garantit l'opposabilité juridique pleine.",
+        mcqExplanation:
+          "Seul un certificat de signature électronique qualifié, adossé à une paire de clés asymétriques et délivré par une autorité de certification reconnue, garantit l'opposabilité juridique pleine.",
       },
     ],
   },
@@ -233,28 +261,30 @@ La loi togolaise sur la cybersécurité et la lutte contre la cybercriminalité 
         front: "Complexité d'accès aux dictionnaires Python",
         back: "L'accès à une clé dans un dictionnaire (`dict`) ou ensemble (`set`) en Python s'exécute en temps moyen amorti O(1).",
         mastered: false,
-        binaryStatement: "Dans un dictionnaire Python standard (dict), l'accès à une clé existante s'effectue en complexité moyenne O(1).",
+        binaryStatement:
+          "Dans un dictionnaire Python standard (dict), l'accès à une clé existante s'effectue en complexité moyenne O(1).",
         binaryAnswer: true,
-        binaryExplanation: "VRAI. Le dictionnaire Python s'appuie sur une table de hachage hautement optimisée, permettant des opérations de lecture, d'insertion et de suppression en temps moyen constant O(1).",
-        mcqQuestion: "Quelle est la complexité temporelle dans le pire des cas d'une recherche dichotomique (Binary Search) opérant sur un tableau trié de taille N ?",
-        mcqOptions: [
-          "O(log N)",
-          "O(N)",
-          "O(N log N)",
-          "O(1)",
-        ],
+        binaryExplanation:
+          "VRAI. Le dictionnaire Python s'appuie sur une table de hachage hautement optimisée, permettant des opérations de lecture, d'insertion et de suppression en temps moyen constant O(1).",
+        mcqQuestion:
+          "Quelle est la complexité temporelle dans le pire des cas d'une recherche dichotomique (Binary Search) opérant sur un tableau trié de taille N ?",
+        mcqOptions: ["O(log N)", "O(N)", "O(N log N)", "O(1)"],
         mcqAnswerIndex: 0,
-        mcqExplanation: "À chaque étape, l'algorithme divise l'intervalle de recherche par 2, ce qui donne une complexité logarithmique O(log N).",
+        mcqExplanation:
+          "À chaque étape, l'algorithme divise l'intervalle de recherche par 2, ce qui donne une complexité logarithmique O(log N).",
       },
       {
         id: "algo-fc-2",
         front: "Mutabilité et clés de dictionnaires en Python",
         back: "Les listes sont mutables. Seuls les types immuables et hachables (tuples, chaînes, entiers) peuvent servir de clés dans un dictionnaire.",
         mastered: false,
-        binaryStatement: "Une liste Python classique (`list`) peut être utilisée en tant que clé au sein d'un dictionnaire `dict` standard.",
+        binaryStatement:
+          "Une liste Python classique (`list`) peut être utilisée en tant que clé au sein d'un dictionnaire `dict` standard.",
         binaryAnswer: false,
-        binaryExplanation: "FAUX. Les listes Python sont mutables et ne sont donc pas hachables (`TypeError: unhashable type: 'list'`). Seuls les objets immuables peuvent servir de clés de dictionnaire.",
-        mcqQuestion: "Quel algorithme de tri hybride performant est exécuté par la méthode native `list.sort()` en Python ?",
+        binaryExplanation:
+          "FAUX. Les listes Python sont mutables et ne sont donc pas hachables (`TypeError: unhashable type: 'list'`). Seuls les objets immuables peuvent servir de clés de dictionnaire.",
+        mcqQuestion:
+          "Quel algorithme de tri hybride performant est exécuté par la méthode native `list.sort()` en Python ?",
         mcqOptions: [
           "Timsort (combinaison adaptée de Merge Sort et Insertion Sort)",
           "Quicksort avec pivot aléatoire",
@@ -262,25 +292,25 @@ La loi togolaise sur la cybersécurité et la lutte contre la cybercriminalité 
           "Tri à bulles (Bubble Sort)",
         ],
         mcqAnswerIndex: 0,
-        mcqExplanation: "Python utilise le Timsort, un algorithme adaptatif et stable offrant une complexité de O(N log N) dans le pire des cas et de O(N) sur des listes déjà partiellement ordonnées.",
+        mcqExplanation:
+          "Python utilise le Timsort, un algorithme adaptatif et stable offrant une complexité de O(N log N) dans le pire des cas et de O(N) sur des listes déjà partiellement ordonnées.",
       },
       {
         id: "algo-fc-3",
         front: "File vs Pile (FIFO vs LIFO)",
         back: "Une file (Queue) fonctionne en FIFO (premier entré, premier sorti), alors qu'une pile (Stack) fonctionne en LIFO (dernier entré, premier sorti).",
         mastered: false,
-        binaryStatement: "Dans une structure de file (Queue), le premier élément inséré est le premier élément à être extrait (principe FIFO).",
+        binaryStatement:
+          "Dans une structure de file (Queue), le premier élément inséré est le premier élément à être extrait (principe FIFO).",
         binaryAnswer: true,
-        binaryExplanation: "VRAI. La file observe rigoureusement le principe FIFO (First-In, First-Out), à l'opposé de la pile qui observe le principe LIFO (Last-In, First-Out).",
-        mcqQuestion: "Quelle structure de la bibliothèque standard Python offre une complexité O(1) garantie pour les insertions et suppressions aux deux extrémités d'une file ?",
-        mcqOptions: [
-          "collections.deque",
-          "list standard avec pop(0)",
-          "tuple immuable",
-          "set",
-        ],
+        binaryExplanation:
+          "VRAI. La file observe rigoureusement le principe FIFO (First-In, First-Out), à l'opposé de la pile qui observe le principe LIFO (Last-In, First-Out).",
+        mcqQuestion:
+          "Quelle structure de la bibliothèque standard Python offre une complexité O(1) garantie pour les insertions et suppressions aux deux extrémités d'une file ?",
+        mcqOptions: ["collections.deque", "list standard avec pop(0)", "tuple immuable", "set"],
         mcqAnswerIndex: 0,
-        mcqExplanation: "Un `collections.deque` (double-ended queue) est implémenté sous forme de liste doublement chaînée par blocs, garantissant des opérations push/pop en O(1) à gauche comme à droite.",
+        mcqExplanation:
+          "Un `collections.deque` (double-ended queue) est implémenté sous forme de liste doublement chaînée par blocs, garantissant des opérations push/pop en O(1) à gauche comme à droite.",
       },
     ],
   },
@@ -392,13 +422,15 @@ export const DEMO_QR_ITEMS: DemoQrItem[] = [
     label: "🚨 Phishing Moov Money (Faux bonus 50 000 F)",
     content: "http://testsafebrowsing.appspot.com/s/phishing.html?promo=moov50k&token=fake",
     tag: "scam",
-    description: "Lien pirate usurpant Moov Africa Togo promettant un bonus pour voler le code PIN.",
+    description:
+      "Lien pirate usurpant Moov Africa Togo promettant un bonus pour voler le code PIN.",
   },
   {
     label: "🚨 Faux QR T-Money (Mise à jour SIM piégée)",
     content: "http://tmoney-gift.top/claim?user=verify&action=steal_pin",
     tag: "scam",
-    description: "Domaine suspect (.top) non affilié à Togocom exigeant les identifiants Mobile Money.",
+    description:
+      "Domaine suspect (.top) non affilié à Togocom exigeant les identifiants Mobile Money.",
   },
   {
     label: "✅ QR Marchand T-Money Officiel (Lomé Assigamé)",
@@ -433,7 +465,8 @@ export const DEMO_AUDIO_SCENARIOS: DemoAudioItem[] = [
     tag: "scam",
     transcript:
       "Allô mon cher frère ! Je suis désespéré, ma femme accouche au CHU Sylvanus Olympio de Tokoin. Je devais envoyer 45 000 FCFA à la sage-femme mais j'ai tapé votre numéro par erreur. Vous avez reçu le SMS de dépôt T-Money à l'instant ! Renvoyez-moi vite les 45 000 FCFA au 91 44 22 11 sinon ils ne vont pas opérer ma femme !",
-    notes: "Pression émotionnelle extrême, faux SMS reçu préalablement, refus de laisser la victime vérifier son vrai solde.",
+    notes:
+      "Pression émotionnelle extrême, faux SMS reçu préalablement, refus de laisser la victime vérifier son vrai solde.",
   },
   {
     id: "scam-loterie-avance",

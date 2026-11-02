@@ -1,4 +1,3 @@
-
 import { createWorker } from "tesseract.js";
 
 export interface OcrExtractionResult {
@@ -7,34 +6,31 @@ export interface OcrExtractionResult {
   engine: "gemma_vision" | "tesseract_local";
 }
 
+let worker: any = null;
+let workerPromise: Promise<any> | null = null;
+
 export async function extractTextWithLocalOcr(
   imageSource: string | File | Blob,
   lang: "fra" | "eng" = "fra",
 ): Promise<OcrExtractionResult> {
-  let worker: any = null;
-  try {
-    worker = await createWorker(lang);
-    const result = await worker.recognize(imageSource);
-    const text = result?.data?.text?.trim() || "";
-    const confidence = result?.data?.confidence || 0;
+  const loadWorker = async () => {
+    const { createWorker } = await import("tesseract.js");
+    const w = await createWorker(lang);
+    return w;
+  };
 
-    return {
-      text,
-      confidence,
-      engine: "tesseract_local",
-    };
-  } catch (error) {
-    console.warn("Échec OCR Tesseract local:", error);
-    throw new Error(
-      "Impossible d'extraire le texte de l'image localement. Vérifiez la netteté de la capture d'écran.",
-    );
-  } finally {
-    if (worker) {
-      try {
-        await worker.terminate();
-      } catch {
-      }
-    }
+  if (!workerPromise) {
+    workerPromise = loadWorker();
   }
-}
+  worker = await workerPromise;
 
+  const result = await worker.recognize(imageSource);
+  const text = result?.data?.text?.trim() || "";
+  const confidence = result?.data?.confidence || 0;
+
+  return {
+    text,
+    confidence,
+    engine: "tesseract_local",
+  };
+}

@@ -36,11 +36,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AiStatusBanner, PageHeader, Panel } from "@/components/cs/ui";
-import {
-  CyberSticker,
-  WavyCyberGrid,
-  MemphisDoodle,
-} from "@/components/cs/CyberDecorations";
+import { CyberSticker, WavyCyberGrid, MemphisDoodle } from "@/components/cs/CyberDecorations";
 import { useI18n, type Language } from "@/lib/i18n";
 import {
   askGemmaAssistantApi,
@@ -614,7 +610,13 @@ function AssistantPage() {
         setCourseInputTitle(finalTitle);
         setCourseInputSubject(finalSubject);
         setCourseInputText(extracted.text);
-        saveCourseData(finalTitle, extracted.text, courseExamDate || "2026-11-07", finalSubject, "photo");
+        saveCourseData(
+          finalTitle,
+          extracted.text,
+          courseExamDate || "2026-11-07",
+          finalSubject,
+          "photo",
+        );
       } catch (err: any) {
         console.error(err);
         toast.dismiss("img-parse");
@@ -647,7 +649,11 @@ function AssistantPage() {
 
       let detectedSubject = courseInputSubject;
       const lowerText = (cleanTitle + " " + text.slice(0, 1000)).toLowerCase();
-      if (lowerText.includes("math") || lowerText.includes("algèbre") || lowerText.includes("équation")) {
+      if (
+        lowerText.includes("math") ||
+        lowerText.includes("algèbre") ||
+        lowerText.includes("équation")
+      ) {
         detectedSubject = "Mathématiques & Algèbre";
       } else if (
         lowerText.includes("droit") ||
@@ -680,7 +686,13 @@ function AssistantPage() {
       }
 
       setCourseInputSubject(detectedSubject);
-      saveCourseData(cleanTitle, text, courseExamDate || "2026-11-07", detectedSubject, parsedDoc.format);
+      saveCourseData(
+        cleanTitle,
+        text,
+        courseExamDate || "2026-11-07",
+        detectedSubject,
+        parsedDoc.format,
+      );
     } catch (err: any) {
       console.error(err);
       toast.dismiss("doc-parse");
@@ -751,7 +763,8 @@ function AssistantPage() {
         },
         {
           id: 2,
-          question: "Dans un triangle rectangle, quel théorème permet de calculer la longueur de l'hypoténuse ?",
+          question:
+            "Dans un triangle rectangle, quel théorème permet de calculer la longueur de l'hypoténuse ?",
           options: [
             "Le théorème de Thalès",
             "Le théorème de Pythagore",
@@ -792,7 +805,8 @@ function AssistantPage() {
         },
         {
           id: 2,
-          question: "En Python, quel type de structure de données est immuable (non modifiable après instanciation) ?",
+          question:
+            "En Python, quel type de structure de données est immuable (non modifiable après instanciation) ?",
           options: ["list (liste)", "dict (dictionnaire)", "tuple (uplet)", "set (ensemble)"],
           answerIndex: 2,
           explanation:
@@ -800,7 +814,8 @@ function AssistantPage() {
         },
         {
           id: 3,
-          question: "Quel protocole réseau sécurisé chiffre les échanges web entre le navigateur et le serveur ?",
+          question:
+            "Quel protocole réseau sécurisé chiffre les échanges web entre le navigateur et le serveur ?",
           options: ["HTTP", "HTTPS (avec protocole TLS)", "FTP", "Telnet non chiffré"],
           answerIndex: 1,
           explanation:
@@ -820,14 +835,20 @@ function AssistantPage() {
           id: 1,
           question:
             "Selon la hiérarchie des normes (Pyramide de Kelsen), quelle norme juridique prime sur toutes les autres au sein de l'État ?",
-          options: ["Le décret ministériel", "La loi ordinaire", "La Constitution", "Le règlement intérieur"],
+          options: [
+            "Le décret ministériel",
+            "La loi ordinaire",
+            "La Constitution",
+            "Le règlement intérieur",
+          ],
           answerIndex: 2,
           explanation:
             "La Constitution est la norme suprême au sommet de l'ordre juridique de l'État de droit.",
         },
         {
           id: 2,
-          question: "Quelles sont les trois conditions cumulatives pour engager la responsabilité civile délictuelle ?",
+          question:
+            "Quelles sont les trois conditions cumulatives pour engager la responsabilité civile délictuelle ?",
           options: [
             "Une faute, un dommage certain et un lien de causalité direct",
             "Un contrat signé, un paiement bancaire et une quittance",
@@ -840,7 +861,8 @@ function AssistantPage() {
         },
         {
           id: 3,
-          question: "Dans l'espace OHADA, quel instrument régit de manière uniforme le droit commercial général ?",
+          question:
+            "Dans l'espace OHADA, quel instrument régit de manière uniforme le droit commercial général ?",
           options: [
             "Le Code civil français",
             "Les Actes Uniformes de l'OHADA",
@@ -916,19 +938,22 @@ function AssistantPage() {
       {
         id: 3,
         day: "Jour 3 — Synthèse & Fiches Mémorielles",
-        topic: "Élaboration des formules indispensables, définitions exactes et synthèse des pièges fréquents.",
+        topic:
+          "Élaboration des formules indispensables, définitions exactes et synthèse des pièges fréquents.",
         completed: false,
       },
       {
         id: 4,
         day: `Jour 4 — Mise en Situation d'Examen${examDateStr ? ` (Objectif : ${examDateStr})` : ""}`,
-        topic: "Auto-évaluation chronométrée sur annales ou sujets types et analyse approfondie des erreurs.",
+        topic:
+          "Auto-évaluation chronométrée sur annales ou sujets types et analyse approfondie des erreurs.",
         completed: false,
       },
       {
         id: 5,
         day: "Jour 5 — Relecture Stratégique & Consolidation",
-        topic: "Mémorisation active des points cardinaux et révision finale la veille de l'épreuve.",
+        topic:
+          "Mémorisation active des points cardinaux et révision finale la veille de l'épreuve.",
         completed: false,
       },
     ];
@@ -1131,13 +1156,7 @@ function AssistantPage() {
           ? `Génère une fiche de synthèse pédagogique structurée pour ce cours intitulé "${course.title}" en ${course.subject}. Inclure : 1. Notions et concepts fondamentaux, 2. Définitions et formules clés, 3. Les 3 pièges fréquents à l'examen, 4. La synthèse mémorisable.`
           : `Génère une fiche de synthèse pédagogique sur la matière "${course.subject || "Cybersécurité"}" : concepts fondamentaux, formules ou règles clés, pièges d'examen et méthode de réussite.`;
 
-        const res = await askGemmaAssistantApi(
-          prompt,
-          [],
-          lang,
-          course.content,
-          "student",
-        );
+        const res = await askGemmaAssistantApi(prompt, [], lang, course.content, "student");
 
         setMessages((prev) => [
           ...prev,
@@ -1379,7 +1398,11 @@ function AssistantPage() {
                 onClick={() => setShowCourseEditor(!showCourseEditor)}
                 className="gap-1 text-xs h-8 border-foreground/60 shadow-neo-sm"
               >
-                {showCourseEditor ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                {showCourseEditor ? (
+                  <ChevronUp className="size-3.5" />
+                ) : (
+                  <ChevronDown className="size-3.5" />
+                )}
                 {showCourseEditor ? "Fermer" : "Gérer cours"}
               </Button>
               <Button
@@ -1401,10 +1424,12 @@ function AssistantPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3">
             <div>
               <h3 className="font-bold text-sm sm:text-base flex items-center gap-2 text-foreground font-display">
-                <GraduationCap className="size-4 text-purple-600" /> Volet « Apprendre » — Téléversez votre support d'étude
+                <GraduationCap className="size-4 text-purple-600" /> Volet « Apprendre » —
+                Téléversez votre support d'étude
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Formats acceptés : PDF polycopiés, photos de cours/cahiers (transcription Gemma Vision), documents Word ou texte brut.
+                Formats acceptés : PDF polycopiés, photos de cours/cahiers (transcription Gemma
+                Vision), documents Word ou texte brut.
               </p>
             </div>
             <CyberSticker tone="purple" icon={Sparkles} rotate="none">
@@ -1415,7 +1440,8 @@ function AssistantPage() {
           {/* Cours Démo 1-clic */}
           <div className="rounded-xl border-2 border-primary/25 bg-primary/5 p-3.5 space-y-2.5">
             <div className="text-xs font-black text-primary flex items-center gap-1.5 uppercase tracking-wider">
-              <Sparkles className="size-3.5 text-electric" /> Cours prêts pour la démo (Chargement en 1 clic) :
+              <Sparkles className="size-3.5 text-electric" /> Cours prêts pour la démo (Chargement
+              en 1 clic) :
             </div>
             <div className="grid gap-2 sm:grid-cols-3">
               {DEMO_COURSES.map((dc) => (
@@ -1446,7 +1472,10 @@ function AssistantPage() {
                   type="button"
                   onClick={() => {
                     setCourseInputSubject(cat.name);
-                    if (!courseInputTitle || SUBJECT_CATEGORIES.some((c) => c.name === courseInputTitle)) {
+                    if (
+                      !courseInputTitle ||
+                      SUBJECT_CATEGORIES.some((c) => c.name === courseInputTitle)
+                    ) {
                       setCourseInputTitle(cat.name);
                     }
                   }}
@@ -1466,7 +1495,9 @@ function AssistantPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-bold text-muted-foreground">Titre précis du cours :</label>
+              <label className="text-xs font-bold text-muted-foreground">
+                Titre précis du cours :
+              </label>
               <input
                 type="text"
                 value={courseInputTitle}
@@ -1476,7 +1507,9 @@ function AssistantPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-muted-foreground">Date de l'examen (pour /plan) :</label>
+              <label className="text-xs font-bold text-muted-foreground">
+                Date de l'examen (pour /plan) :
+              </label>
               <input
                 type="date"
                 value={courseExamDate}
@@ -1538,7 +1571,12 @@ function AssistantPage() {
                 variant="hero"
                 size="sm"
                 onClick={() =>
-                  saveCourseData(courseInputTitle, courseInputText, courseExamDate, courseInputSubject)
+                  saveCourseData(
+                    courseInputTitle,
+                    courseInputText,
+                    courseExamDate,
+                    courseInputSubject,
+                  )
                 }
                 disabled={(!courseInputText.trim() && !courseInputTitle.trim()) || parsingPdf}
                 className="text-xs gap-1.5 shadow-neo-sm"
@@ -1568,7 +1606,11 @@ function AssistantPage() {
                   {/* Avatar Assistant */}
                   {m.role === "assistant" && (
                     <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-electric text-night font-bold shadow-neo-sm border-2 border-foreground/80 mt-1">
-                      {m.isStudent ? <GraduationCap className="size-4" /> : <Bot className="size-4" />}
+                      {m.isStudent ? (
+                        <GraduationCap className="size-4" />
+                      ) : (
+                        <Bot className="size-4" />
+                      )}
                     </div>
                   )}
 
@@ -1636,7 +1678,8 @@ function AssistantPage() {
                           disabled={loading}
                           className="h-8 gap-1.5 rounded-xl text-xs font-bold"
                         >
-                          <FileText className="size-3.5 text-emerald-500" /> Fiche de révision (/resume)
+                          <FileText className="size-3.5 text-emerald-500" /> Fiche de révision
+                          (/resume)
                         </Button>
                       </div>
                     )}
@@ -1649,7 +1692,9 @@ function AssistantPage() {
                             <HelpCircle className="size-4" /> Quiz Interactif & Adaptatif (Gemma 4)
                           </span>
                           <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300">
-                            Score : {m.quiz.filter((q) => q.userSelectedIndex === q.answerIndex).length} / {m.quiz.length}
+                            Score :{" "}
+                            {m.quiz.filter((q) => q.userSelectedIndex === q.answerIndex).length} /{" "}
+                            {m.quiz.length}
                           </span>
                         </div>
 
@@ -1658,12 +1703,17 @@ function AssistantPage() {
                           const isCorrect = q.userSelectedIndex === q.answerIndex;
 
                           return (
-                            <div key={q.id} className="rounded-xl border-2 border-border/80 bg-muted/20 p-3.5 text-xs space-y-3">
+                            <div
+                              key={q.id}
+                              className="rounded-xl border-2 border-border/80 bg-muted/20 p-3.5 text-xs space-y-3"
+                            >
                               <div className="flex items-start gap-2">
                                 <span className="grid size-5 shrink-0 place-items-center rounded-md bg-amber-500/20 font-bold text-amber-700 dark:text-amber-300 text-[11px]">
                                   {qIndex + 1}
                                 </span>
-                                <p className="font-bold text-sm text-foreground leading-snug">{q.question}</p>
+                                <p className="font-bold text-sm text-foreground leading-snug">
+                                  {q.question}
+                                </p>
                               </div>
 
                               <div className="space-y-2">
@@ -1672,12 +1722,15 @@ function AssistantPage() {
                                   const isTheCorrectOne = optIdx === q.answerIndex;
                                   const letter = OPTION_LETTERS[optIdx] ?? `${optIdx + 1}`;
 
-                                  let btnStyle = "border-border/80 bg-card hover:border-foreground/60 text-foreground";
+                                  let btnStyle =
+                                    "border-border/80 bg-card hover:border-foreground/60 text-foreground";
                                   if (hasAnswered) {
                                     if (isTheCorrectOne) {
-                                      btnStyle = "border-emerald-500 bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 font-bold shadow-sm";
+                                      btnStyle =
+                                        "border-emerald-500 bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 font-bold shadow-sm";
                                     } else if (isSelected && !isCorrect) {
-                                      btnStyle = "border-destructive bg-destructive/15 text-destructive font-bold";
+                                      btnStyle =
+                                        "border-destructive bg-destructive/15 text-destructive font-bold";
                                     } else {
                                       btnStyle = "opacity-50 border-transparent bg-muted/40";
                                     }
@@ -1720,7 +1773,11 @@ function AssistantPage() {
                                   )}
                                 >
                                   <div>
-                                    <strong>{isCorrect ? "✓ Excellente analyse ! " : "✗ Correction pédagogique : "}</strong>
+                                    <strong>
+                                      {isCorrect
+                                        ? "✓ Excellente analyse ! "
+                                        : "✗ Correction pédagogique : "}
+                                    </strong>
                                     {q.explanation}
                                   </div>
                                   {!isCorrect && (
@@ -1730,7 +1787,8 @@ function AssistantPage() {
                                       disabled={loading}
                                       className="inline-flex items-center gap-1.5 rounded-lg border-2 border-foreground/60 bg-card px-2.5 py-1 text-[11px] font-bold text-foreground transition hover:bg-accent shadow-neo-sm"
                                     >
-                                      <RefreshCw className="size-3 text-electric" /> Notion mal comprise ? Réexpliquer avec Gemma 4
+                                      <RefreshCw className="size-3 text-electric" /> Notion mal
+                                      comprise ? Réexpliquer avec Gemma 4
                                     </button>
                                   )}
                                 </div>
@@ -1749,7 +1807,8 @@ function AssistantPage() {
                             <Calendar className="size-4" /> Plan d'Étude Méthodique (Gemma 4)
                           </span>
                           <span className="rounded-full bg-blue-500/15 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300">
-                            {m.plan.filter((p) => p.completed).length} / {m.plan.length} étapes validées
+                            {m.plan.filter((p) => p.completed).length} / {m.plan.length} étapes
+                            validées
                           </span>
                         </div>
 
@@ -1788,7 +1847,9 @@ function AssistantPage() {
                                 <div className="font-bold text-[11px] uppercase tracking-wider text-primary">
                                   {item.day}
                                 </div>
-                                <div className="mt-0.5 font-medium leading-relaxed">{item.topic}</div>
+                                <div className="mt-0.5 font-medium leading-relaxed">
+                                  {item.topic}
+                                </div>
                               </div>
                             </button>
                           ))}
@@ -1813,7 +1874,8 @@ function AssistantPage() {
                     <Sparkles className="size-3.5 animate-spin" />
                   </div>
                   <span>
-                    Google Gemma 4 génère la réponse en {lang === "ee" ? "Eʋegbe" : lang === "en" ? "English" : "Français"}...
+                    Google Gemma 4 génère la réponse en{" "}
+                    {lang === "ee" ? "Eʋegbe" : lang === "en" ? "English" : "Français"}...
                   </span>
                 </div>
               )}
@@ -1841,7 +1903,9 @@ function AssistantPage() {
                           <strong className="font-mono text-primary">{item.cmd}</strong>
                           <span className="text-muted-foreground">— {item.label}</span>
                         </span>
-                        <span className="text-[11px] text-muted-foreground hidden sm:inline">{item.desc}</span>
+                        <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                          {item.desc}
+                        </span>
                       </button>
                     );
                   })}
@@ -2040,13 +2104,9 @@ function AssistantPage() {
                         <code className="font-mono font-bold text-primary text-[11px]">
                           {item.cmd}
                         </code>
-                        <span className="text-[11px] font-bold text-foreground">
-                          {item.label}
-                        </span>
+                        <span className="text-[11px] font-bold text-foreground">{item.label}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground line-clamp-1">
-                        {item.desc}
-                      </p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">{item.desc}</p>
                     </div>
                   </button>
                 );
@@ -2070,7 +2130,8 @@ function AssistantPage() {
                 Zéro conservation de données personnelles
               </div>
               <p className="leading-relaxed">
-                Vos SMS et documents d'étude sont analysés en mémoire vive pour générer les réponses. Aucune donnée bancaire ni aucun numéro de téléphone n'est enregistré.
+                Vos SMS et documents d'étude sont analysés en mémoire vive pour générer les
+                réponses. Aucune donnée bancaire ni aucun numéro de téléphone n'est enregistré.
               </p>
               <div className="flex items-center gap-1.5 text-emerald-400 font-bold pt-1 text-[10px]">
                 <CheckCircle2 className="size-3" /> Clés API protégées côté serveur

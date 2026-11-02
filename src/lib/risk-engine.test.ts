@@ -40,9 +40,12 @@ describe("risk engine", () => {
   });
 
   it("handles code-switching (French + Éwé)", () => {
-    const mixed = "Bonjour mon frère, j'ai fait une erreur de transfert de 25 000 FCFA sur ton compte T-Money. Na trɔ ga nam kaba s'il te plaît !";
+    const mixed =
+      "Bonjour mon frère, j'ai fait une erreur de transfert de 25 000 FCFA sur ton compte T-Money. Na trɔ ga nam kaba s'il te plaît !";
     const result = analyzeSms(mixed, "fr");
     expect(result.level).not.toBe("FAIBLE");
-    expect(result.findings.some((f) => f.label.includes("transfert") || f.label.includes("Arnaque"))).toBe(true);
+    expect(
+      result.findings.some((f) => f.label.includes("transfert") || f.label.includes("Arnaque")),
+    ).toBe(true);
   });
 });

@@ -31,7 +31,9 @@ export function readHistory(): HistoryEntry[] {
       ...entry,
       findings: Array.isArray(entry.findings)
         ? entry.findings.map((f: any) =>
-            typeof f === "string" ? { label: f, detail: "" } : { label: f?.label || "", detail: f?.detail || "" },
+            typeof f === "string"
+              ? { label: f, detail: "" }
+              : { label: f?.label || "", detail: f?.detail || "" },
           )
         : [],
     }));
@@ -41,7 +43,8 @@ export function readHistory(): HistoryEntry[] {
 }
 
 export function saveAnalysis(type: ScanType, r: AnalysisResult) {
-  if (typeof window === "undefined" || localStorage.getItem("cybersafe.saveHistory") === "off") return;
+  if (typeof window === "undefined" || localStorage.getItem("cybersafe.saveHistory") === "off")
+    return;
   const entry: HistoryEntry = {
     id: crypto.randomUUID(),
     type,

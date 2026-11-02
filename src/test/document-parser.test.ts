@@ -48,7 +48,8 @@ describe("Extracteur de documents universel (PDF, DOCX, PPTX, TXT)", () => {
   });
 
   it("gère l'extraction de documents texte brut (TXT / Markdown)", async () => {
-    const rawText = "Algèbre linéaire\nThéorème du rang pour les espaces vectoriels de dimension finie.";
+    const rawText =
+      "Algèbre linéaire\nThéorème du rang pour les espaces vectoriels de dimension finie.";
     const buffer = new TextEncoder().encode(rawText).buffer;
 
     const result = await extractTextFromDocument(buffer, "cours-maths.txt");

@@ -46,7 +46,8 @@ Voici l'analyse demandée :
   });
 
   it("appelle réellement l'API Gemma 4 et retourne un résultat structuré conforme", async () => {
-    const testSms = "URGENT Moov Money: Votre compte sera bloqué sous 2h. Envoyez votre code OTP au 90001122 pour le débloquer.";
+    const testSms =
+      "URGENT Moov Money: Votre compte sera bloqué sous 2h. Envoyez votre code OTP au 90001122 pour le débloquer.";
 
     try {
       const result = await analyzeContentWithGemma(testSms, "sms", "fr");

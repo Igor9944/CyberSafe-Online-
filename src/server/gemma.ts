@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 import fs from "node:fs";
 import path from "node:path";
@@ -10,8 +9,7 @@ function ensureEnvLoaded() {
       if (typeof process.loadEnvFile === "function") {
         process.loadEnvFile();
       }
-    } catch {
-    }
+    } catch {}
 
     if (!process.env["GEMINI_API_KEY"]) {
       try {
@@ -22,7 +20,10 @@ function ensureEnvLoaded() {
             const trimmed = line.trim();
             if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
               const [k, ...v] = trimmed.split("=");
-              const val = v.join("=").trim().replace(/^["']|["']$/g, "");
+              const val = v
+                .join("=")
+                .trim()
+                .replace(/^["']|["']$/g, "");
               if (k && k.trim() === "GEMINI_API_KEY" && val) {
                 process.env["GEMINI_API_KEY"] = val;
               }
@@ -75,7 +76,9 @@ export function parseGemmaJsonResponse<T = any>(text: string): T {
     } catch {}
   }
 
-  throw new Error(`Impossible d'extraire un JSON valide de la réponse Gemma : ${trimmed.slice(0, 100)}...`);
+  throw new Error(
+    `Impossible d'extraire un JSON valide de la réponse Gemma : ${trimmed.slice(0, 100)}...`,
+  );
 }
 
 export type AnalysisType = "sms" | "qr" | "audio" | "assistant" | "learning";
@@ -170,20 +173,42 @@ function getClient(): GoogleGenAI {
   return new GoogleGenAI({ apiKey });
 }
 
-async function callGemmaWithFallback(client: GoogleGenAI, payload: any): Promise<any> {
+const GEMMA_REQUEST_TIMEOUT_MS = 60_000; // 60 secondes maximum (compatible Vercel serverless)
+
+async function callGemmaWithFallback(client: GoogleGenAI, payload: any, options: any = {}): Promise<any> {
+  const { timeoutMs = GEMMA_REQUEST_TIMEOUT_MS } = payload.config || {};
+  const configWithTimeout = {
+    ...payload,
+    config: {
+      ...payload.config,
+      timeoutMs: timeoutMs ?? GEMMA_REQUEST_TIMEOUT_MS,
+    },
+  };
   try {
     return await client.models.generateContent({
       model: GEMMA_MODEL,
-      ...payload,
+      ...configWithTimeout,
     });
   } catch (err: any) {
     const msg = String(err?.message || "");
-    if ((msg.includes("404") || msg.includes("NOT_FOUND")) && GEMMA_MODEL !== GEMMA_FALLBACK_MODEL) {
-      console.warn(`[Gemma Model Fallback] ${GEMMA_MODEL} non disponible, basculement sur ${GEMMA_FALLBACK_MODEL}`);
-      return await client.models.generateContent({
+    const isModelError = (msg.includes("404") || msg.includes("NOT_FOUND") || msg.includes("UNAVAILABLE"));
+    if (isModelError && GEMMA_MODEL !== GEMMA_FALLBACK_MODEL && options.allowFallback) {
+      const result = await client.models.generateContent({
         model: GEMMA_FALLBACK_MODEL,
-        ...payload,
+        ...configWithTimeout,
       });
+      const response = (result as any)?.response;
+      if (response?.candidates && response.candidates.length > 0) {
+        const modelUsed = GEMMA_FALLBACK_MODEL;
+        const fullResponse = {
+          ...response,
+          modelUsed,
+          fallbackTriggered: true,
+          fallbackFrom: GEMMA_MODEL,
+        };
+        return fullResponse;
+      }
+      return result;
     }
     throw err;
   }
@@ -321,7 +346,10 @@ Réponds EXCLUSIVEMENT sous la forme d'un objet JSON strict avec cette structure
   } catch (error: any) {
     console.error("[Gemma Backend Service Error]:", error);
     const message = error?.message || String(error);
-    const isQuota = message.includes("429") || message.includes("quota") || message.includes("RESOURCE_EXHAUSTED");
+    const isQuota =
+      message.includes("429") ||
+      message.includes("quota") ||
+      message.includes("RESOURCE_EXHAUSTED");
     const err: any = new Error(
       isQuota
         ? "Quota API Gemma dépassé (429 RESOURCE_EXHAUSTED). Veuillez patienter ou vérifier vos crédits Google GenAI."
@@ -336,7 +364,13 @@ Réponds EXCLUSIVEMENT sous la forme d'un objet JSON strict avec cette structure
 export async function extractSmsFromImageWithGemma(
   image: GemmaImageInput,
   lang: SupportedLanguage = "fr",
-): Promise<{ text: string; sender?: string; operator?: string; amounts?: string[]; phones?: string[] }> {
+): Promise<{
+  text: string;
+  sender?: string;
+  operator?: string;
+  amounts?: string[];
+  phones?: string[];
+}> {
   const client = getClient();
   const prompt = `Tu es l'analyste de sécurité Mobile Money de CyberSafe Online au Togo.
 Analyse cette capture d'écran d'un SMS ou notification reçue sur un smartphone au Togo (T-Money, Moov Money, ou message privé).
@@ -382,7 +416,10 @@ Réponds EXCLUSIVEMENT en JSON strict avec ce format :
     parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) parsed = parsed[0];
   } catch {
-    const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+    const clean = raw
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
     parsed = JSON.parse(clean);
     if (Array.isArray(parsed)) parsed = parsed[0];
   }
@@ -436,7 +473,10 @@ Réponds EXCLUSIVEMENT en JSON strict avec ce format :
   try {
     parsed = JSON.parse(raw);
   } catch {
-    const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+    const clean = raw
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
     parsed = JSON.parse(clean);
   }
 
@@ -498,7 +538,10 @@ Réponds EXCLUSIVEMENT en JSON strict avec cette structure :
     parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) parsed = parsed[0];
   } catch {
-    const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+    const clean = raw
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
     parsed = JSON.parse(clean);
     if (Array.isArray(parsed)) parsed = parsed[0];
   }
@@ -574,7 +617,10 @@ Réponds EXCLUSIVEMENT en JSON strict avec cette structure :
     parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) parsed = parsed[0];
   } catch {
-    const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+    const clean = raw
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
     parsed = JSON.parse(clean);
     if (Array.isArray(parsed)) parsed = parsed[0];
   }
@@ -583,8 +629,14 @@ Réponds EXCLUSIVEMENT en JSON strict avec cette structure :
     ? parsed.quiz.map((q: any, idx: number) => ({
         id: idx + 1,
         question: String(q.question || `Question ${idx + 1}`),
-        options: Array.isArray(q.options) && q.options.length >= 2 ? q.options.map(String) : ["Vrai", "Faux"],
-        answerIndex: typeof q.answerIndex === "number" && q.answerIndex >= 0 && q.answerIndex < 4 ? q.answerIndex : 0,
+        options:
+          Array.isArray(q.options) && q.options.length >= 2
+            ? q.options.map(String)
+            : ["Vrai", "Faux"],
+        answerIndex:
+          typeof q.answerIndex === "number" && q.answerIndex >= 0 && q.answerIndex < 4
+            ? q.answerIndex
+            : 0,
         explanation: String(q.explanation || "Référez-vous aux notions clés du cours."),
       }))
     : [];
@@ -655,7 +707,10 @@ Réponds EXCLUSIVEMENT en JSON strict avec ce format :
     parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) parsed = parsed[0];
   } catch {
-    const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+    const clean = raw
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
     parsed = JSON.parse(clean);
     if (Array.isArray(parsed)) parsed = parsed[0];
   }
@@ -668,12 +723,16 @@ Réponds EXCLUSIVEMENT en JSON strict avec ce format :
         const binaryAnswer = typeof fc.binaryAnswer === "boolean" ? fc.binaryAnswer : true;
         const binaryExplanation = fc.binaryExplanation ? String(fc.binaryExplanation) : back;
         const mcqQuestion = fc.mcqQuestion ? String(fc.mcqQuestion) : front;
-        const mcqOptions = Array.isArray(fc.mcqOptions) && fc.mcqOptions.length >= 2
-          ? fc.mcqOptions.map(String)
-          : [back, "Alternative inexacte", "Option non recommandée"];
-        const mcqAnswerIndex = typeof fc.mcqAnswerIndex === "number" && fc.mcqAnswerIndex >= 0 && fc.mcqAnswerIndex < mcqOptions.length
-          ? fc.mcqAnswerIndex
-          : 0;
+        const mcqOptions =
+          Array.isArray(fc.mcqOptions) && fc.mcqOptions.length >= 2
+            ? fc.mcqOptions.map(String)
+            : [back, "Alternative inexacte", "Option non recommandée"];
+        const mcqAnswerIndex =
+          typeof fc.mcqAnswerIndex === "number" &&
+          fc.mcqAnswerIndex >= 0 &&
+          fc.mcqAnswerIndex < mcqOptions.length
+            ? fc.mcqAnswerIndex
+            : 0;
         const mcqExplanation = fc.mcqExplanation ? String(fc.mcqExplanation) : back;
 
         return {
@@ -769,7 +828,10 @@ ${studentGuidelines}`;
   } catch (error: any) {
     console.error("[CyberSafe AI Assistant Error]:", error);
     const message = error?.message || String(error);
-    const isQuota = message.includes("429") || message.includes("quota") || message.includes("RESOURCE_EXHAUSTED");
+    const isQuota =
+      message.includes("429") ||
+      message.includes("quota") ||
+      message.includes("RESOURCE_EXHAUSTED");
     const err: any = new Error(
       isQuota
         ? "Quota API Gemma dépassé (429 RESOURCE_EXHAUSTED). Le service d'assistance est momentanément restreint."
@@ -780,4 +842,3 @@ ${studentGuidelines}`;
     throw err;
   }
 }
-

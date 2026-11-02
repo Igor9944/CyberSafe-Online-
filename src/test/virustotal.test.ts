@@ -18,7 +18,8 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
 
   describe("Extraction, normalisation et confidentialité des URL", () => {
     it("extrait et normalise les URLs dans les SMS en nettoyant la ponctuation", () => {
-      const sms = "Félicitations, réclamez votre lot sur https://moov-promo.tg/gain, vite avant minuit !";
+      const sms =
+        "Félicitations, réclamez votre lot sur https://moov-promo.tg/gain, vite avant minuit !";
       const urls = extractUrlsFromText(sms);
 
       expect(urls.length).toBe(1);
@@ -37,7 +38,8 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
     });
 
     it("protège la confidentialité : ne transmet JAMAIS les liens contenant des jetons privés (tokens/OTP)", () => {
-      const sms = "Votre lien de réinitialisation: https://banque.tg/auth?token=secret123456&user=test";
+      const sms =
+        "Votre lien de réinitialisation: https://banque.tg/auth?token=secret123456&user=test";
       const urls = extractUrlsFromText(sms);
 
       expect(urls.length).toBe(1);
@@ -95,7 +97,8 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
           notFoundUrls: 0,
         },
         unavailable: false,
-        caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+        caution:
+          "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
       };
 
       const combined = combineGemmaAndVirusTotal(mockGemma, mockVt);
@@ -105,7 +108,9 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
       expect(combined.technicalRisk).toBe("ÉLEVÉ");
       expect(combined.findings.some((f) => f.label.includes("malveillant"))).toBe(true);
       expect(combined.recommendations.some((r) => r.includes("NE CLIQUEZ PAS"))).toBe(true);
-      expect(combined.recommendations.some((r) => r.includes("sans détection ne signifie pas"))).toBe(true);
+      expect(
+        combined.recommendations.some((r) => r.includes("sans détection ne signifie pas")),
+      ).toBe(true);
     });
 
     it("Scénario 2 : Un SMS contenant une URL sans rapport disponible indique un lien non répertorié sans inventer de faux rapport", () => {
@@ -140,18 +145,22 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
           notFoundUrls: 1,
         },
         unavailable: false,
-        caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+        caution:
+          "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
       };
 
       const combined = combineGemmaAndVirusTotal(mockGemma, mockVt);
 
       expect(combined.technicalRisk).toBe("NON_RÉPERTORIÉ");
       expect(combined.findings.some((f) => f.label.includes("non encore répertorié"))).toBe(true);
-      expect(combined.recommendations.some((r) => r.includes("sans détection ne signifie pas"))).toBe(true);
+      expect(
+        combined.recommendations.some((r) => r.includes("sans détection ne signifie pas")),
+      ).toBe(true);
     });
 
     it("Scénario 3 : Un SMS sans URL n'appelle pas VirusTotal et conserve l'analyse textuelle", async () => {
-      const smsWithoutUrl = "Votre code de réinitialisation Moov est 4488. Ne le communiquez à personne.";
+      const smsWithoutUrl =
+        "Votre code de réinitialisation Moov est 4488. Ne le communiquez à personne.";
       const vtResult = await analyzeUrlsWithVirusTotal(smsWithoutUrl);
 
       expect(vtResult.hasUrls).toBe(false);
@@ -192,13 +201,16 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
         },
         unavailable: true,
         unavailableReason: "Quota VirusTotal atteint (429)",
-        caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+        caution:
+          "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
       };
 
       const combined = combineGemmaAndVirusTotal(mockGemma, mockVtQuota);
 
       expect(combined.technicalRisk).toBe("INDISPONIBLE");
-      expect(combined.recommendations.some((r) => r.includes("Vérification VirusTotal indisponible"))).toBe(true);
+      expect(
+        combined.recommendations.some((r) => r.includes("Vérification VirusTotal indisponible")),
+      ).toBe(true);
     });
 
     it("Scénario 5 : Une indisponibilité de VirusTotal affiche 'Vérification VirusTotal indisponible'", () => {
@@ -218,16 +230,25 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
         checked: false,
         hasUrls: true,
         urls: [],
-        summary: { totalUrls: 0, maliciousUrls: 0, suspiciousUrls: 0, cleanUrls: 0, notFoundUrls: 0 },
+        summary: {
+          totalUrls: 0,
+          maliciousUrls: 0,
+          suspiciousUrls: 0,
+          cleanUrls: 0,
+          notFoundUrls: 0,
+        },
         unavailable: true,
         unavailableReason: "Vérification VirusTotal indisponible",
-        caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+        caution:
+          "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
       };
 
       const combined = combineGemmaAndVirusTotal(mockGemma, mockVtDown);
 
-      expect(combined.virusTotal.unavailable).toBe(true);
-      expect(combined.recommendations.some((r) => r.includes("Vérification VirusTotal indisponible"))).toBe(true);
+      expect(combined.technicalRisk).toBe("INDISPONIBLE");
+      expect(
+        combined.recommendations.some((r) => r.includes("Vérification VirusTotal indisponible")),
+      ).toBe(true);
     });
 
     it("Scénario 6 : Un SMS frauduleux sans lien est détecté comme ÉLEVÉ par Gemma uniquement", () => {
@@ -236,7 +257,11 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
         score: 95,
         summary: "Tentative flagrante d'escroquerie : demande d'envoi du code secret OTP par SMS.",
         findings: [
-          { label: "Vol d'identifiants", detail: "Demande du code OTP ou PIN personnel", weight: 45 },
+          {
+            label: "Vol d'identifiants",
+            detail: "Demande du code OTP ou PIN personnel",
+            weight: 45,
+          },
           { label: "Fausse identité", detail: "Usurpation de l'opérateur Moov Money", weight: 35 },
         ],
         recommendations: ["Ne partagez jamais vos codes secrets."],
@@ -250,9 +275,16 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
         checked: true,
         hasUrls: false,
         urls: [],
-        summary: { totalUrls: 0, maliciousUrls: 0, suspiciousUrls: 0, cleanUrls: 0, notFoundUrls: 0 },
+        summary: {
+          totalUrls: 0,
+          maliciousUrls: 0,
+          suspiciousUrls: 0,
+          cleanUrls: 0,
+          notFoundUrls: 0,
+        },
         unavailable: false,
-        caution: "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
+        caution:
+          "Un résultat VirusTotal sans détection ne signifie pas qu'un lien est forcément sûr.",
       };
 
       const combined = combineGemmaAndVirusTotal(mockGemma, mockVtNoUrls);
@@ -284,4 +316,3 @@ describe("VirusTotal API v3 — CyberSafe Online Integration", () => {
     }, 15000);
   });
 });
-

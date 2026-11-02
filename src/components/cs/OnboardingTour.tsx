@@ -299,9 +299,7 @@ export function OnboardingTour({ open, onClose }: OnboardingTourProps) {
               <h3 className="text-base font-black tracking-tight text-foreground sm:text-lg">
                 {step.title}
               </h3>
-              <p className="text-xs font-semibold text-muted-foreground">
-                {step.subtitle}
-              </p>
+              <p className="text-xs font-semibold text-muted-foreground">{step.subtitle}</p>
             </div>
           </div>
 

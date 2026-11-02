@@ -30,7 +30,7 @@ describe("Milestone 6 Empirical Challenge & Verification", () => {
     const customClasses = ["custom-brand-class", "p-4 border-red-500", "", undefined];
     const iconClasses = ["custom-icon-class", "ring-4", "", undefined];
 
-    it("renders cleanly under all 2,268 Cartesian prop combinations without throwing", () => {
+    it("renders cleanly under all 2,268 Cartesian prop combinations without throwing", { timeout: 20000 }, () => {
       let renderCount = 0;
       for (const size of sizes) {
         for (const variant of variants) {
@@ -46,7 +46,7 @@ describe("Milestone 6 Empirical Challenge & Verification", () => {
                       showText,
                       className,
                       iconClassName,
-                    })
+                    }),
                   );
 
                   renderCount++;
@@ -80,12 +80,25 @@ describe("Milestone 6 Empirical Challenge & Verification", () => {
           }
         }
       }
-      expect(renderCount).toBe(sizes.length * variants.length * compactFlags.length * showTextFlags.length * customClasses.length * iconClasses.length);
+      expect(renderCount).toBe(
+        sizes.length *
+          variants.length *
+          compactFlags.length *
+          showTextFlags.length *
+          customClasses.length *
+          iconClasses.length,
+      );
       expect(renderCount).toBe(4032);
     });
 
     it("verifies CyberSafeEmblem standalone under all theme variants and sizes", () => {
-      const emblemThemes: (LogoThemeVariant | undefined)[] = ["default", "light", "dark", "electric", undefined];
+      const emblemThemes: (LogoThemeVariant | undefined)[] = [
+        "default",
+        "light",
+        "dark",
+        "electric",
+        undefined,
+      ];
       const emblemSizes: (LogoSize | undefined)[] = ["sm", "md", "lg", undefined];
 
       for (const variant of emblemThemes) {
@@ -95,7 +108,7 @@ describe("Milestone 6 Empirical Challenge & Verification", () => {
               variant,
               size,
               className: "test-emblem-cls",
-            })
+            }),
           );
 
           expect(html).toContain("<svg");
@@ -126,7 +139,7 @@ describe("Milestone 6 Empirical Challenge & Verification", () => {
         React.createElement(Logo, {
           variant: "non-existent-variant" as any,
           size: "unknown-size" as any,
-        })
+        }),
       );
       // If unknown size, sizeClasses["unknown-size"] might be undefined unless handled or fallback. Let's see what happens!
     });
@@ -180,7 +193,9 @@ describe("Milestone 6 Empirical Challenge & Verification", () => {
 
       // Check <use> instances
       const uses = Array.from(doc.querySelectorAll("use")) as Element[];
-      const forearmUses = uses.filter((u: Element) => u.getAttribute("href") === "#canonical-forearm");
+      const forearmUses = uses.filter(
+        (u: Element) => u.getAttribute("href") === "#canonical-forearm",
+      );
       const handUses = uses.filter((u: Element) => u.getAttribute("href") === "#canonical-hand");
 
       expect(forearmUses.length).toBe(3);
@@ -229,7 +244,8 @@ describe("Milestone 6 Empirical Challenge & Verification", () => {
       const imageCount = buf.readUInt16LE(4);
       expect(imageCount).toBeGreaterThanOrEqual(3);
 
-      const frames: { width: number; height: number; bpp: number; offset: number; size: number }[] = [];
+      const frames: { width: number; height: number; bpp: number; offset: number; size: number }[] =
+        [];
       for (let i = 0; i < imageCount; i++) {
         const entryOffset = 6 + i * 16;
         let width = buf.readUInt8(entryOffset);

@@ -168,13 +168,49 @@ const MULTILINGUAL_RULES: LocalizedRule[] = [
   },
 ];
 
-const SHORTENERS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "is.gd", "cutt.ly", "rb.gy", "ow.ly", "shorturl.at"];
-const SUSPICIOUS_TLDS = [".xyz", ".top", ".click", ".live", ".icu", ".buzz", ".gq", ".tk", ".ml", ".cf", ".ga", ".info", ".online", ".site"];
-const BRANDS = ["moov", "tmoney", "t-money", "togocom", "flooz", "mtn", "orange", "ecobank", "wave"];
+const SHORTENERS = [
+  "bit.ly",
+  "tinyurl.com",
+  "t.co",
+  "goo.gl",
+  "is.gd",
+  "cutt.ly",
+  "rb.gy",
+  "ow.ly",
+  "shorturl.at",
+];
+const SUSPICIOUS_TLDS = [
+  ".xyz",
+  ".top",
+  ".click",
+  ".live",
+  ".icu",
+  ".buzz",
+  ".gq",
+  ".tk",
+  ".ml",
+  ".cf",
+  ".ga",
+  ".info",
+  ".online",
+  ".site",
+];
+const BRANDS = [
+  "moov",
+  "tmoney",
+  "t-money",
+  "togocom",
+  "flooz",
+  "mtn",
+  "orange",
+  "ecobank",
+  "wave",
+];
 const OFFICIAL_DOMAINS = ["moov-africa.tg", "togocom.tg", "yas.tg"];
 
 export function extractLinks(text: string): string[] {
-  const re = /\b((?:https?:\/\/|www\.)[^\s<>"']+|[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|tg|xyz|top|click|live|icu|buzz|info|online|site|ly|co|me|io|gq|tk|ml)(?:\/[^\s<>"']*)?)/gi;
+  const re =
+    /\b((?:https?:\/\/|www\.)[^\s<>"']+|[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|tg|xyz|top|click|live|icu|buzz|info|online|site|ly|co|me|io|gq|tk|ml)(?:\/[^\s<>"']*)?)/gi;
   return Array.from(new Set(text.match(re) ?? [])).map((l) => l.replace(/[.,;)]+$/, ""));
 }
 
@@ -201,32 +237,68 @@ export function analyzeUrl(raw: string, lang: SupportedLang = "fr"): Finding[] {
 
   if (url.protocol === "http:" && /^https?:/i.test(raw)) {
     findings.push({
-      label: lang === "ee" ? "Kadodo manɔ dedie (HTTP)" : lang === "en" ? "Unencrypted Connection (HTTP)" : "Connexion non chiffrée (HTTP)",
-      detail: lang === "ee" ? "Kadodo sia mezã HTTPS o." : lang === "en" ? "Uses insecure plain HTTP instead of HTTPS." : "Le lien utilise HTTP, pas de chiffrement HTTPS.",
+      label:
+        lang === "ee"
+          ? "Kadodo manɔ dedie (HTTP)"
+          : lang === "en"
+            ? "Unencrypted Connection (HTTP)"
+            : "Connexion non chiffrée (HTTP)",
+      detail:
+        lang === "ee"
+          ? "Kadodo sia mezã HTTPS o."
+          : lang === "en"
+            ? "Uses insecure plain HTTP instead of HTTPS."
+            : "Le lien utilise HTTP, pas de chiffrement HTTPS.",
       weight: 10,
     });
   }
 
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
     findings.push({
-      label: lang === "ee" ? "IP Xexlẽdzesi ko" : lang === "en" ? "Raw IP Address Host" : "Adresse IP brute",
-      detail: lang === "ee" ? "Kadodoa yi IP xexlẽdzesi teƒe tsɔ wu dukɔmevi ŋkɔ." : lang === "en" ? "Points directly to an IP address instead of a recognized domain." : "Le lien pointe directement vers une adresse IP sans nom de domaine.",
+      label:
+        lang === "ee"
+          ? "IP Xexlẽdzesi ko"
+          : lang === "en"
+            ? "Raw IP Address Host"
+            : "Adresse IP brute",
+      detail:
+        lang === "ee"
+          ? "Kadodoa yi IP xexlẽdzesi teƒe tsɔ wu dukɔmevi ŋkɔ."
+          : lang === "en"
+            ? "Points directly to an IP address instead of a recognized domain."
+            : "Le lien pointe directement vers une adresse IP sans nom de domaine.",
       weight: 30,
     });
   }
 
   if (SHORTENERS.some((s) => host === s || host.endsWith(`.${s}`))) {
     findings.push({
-      label: lang === "ee" ? "Kadodo kpuie ɣaɣla" : lang === "en" ? "Shortened URL" : "Lien raccourci",
-      detail: lang === "ee" ? `${host} le afi si tututu nèyina ɣlam.` : lang === "en" ? `${host} hides the real final destination.` : `${host} masque la véritable destination finale.`,
+      label:
+        lang === "ee" ? "Kadodo kpuie ɣaɣla" : lang === "en" ? "Shortened URL" : "Lien raccourci",
+      detail:
+        lang === "ee"
+          ? `${host} le afi si tututu nèyina ɣlam.`
+          : lang === "en"
+            ? `${host} hides the real final destination.`
+            : `${host} masque la véritable destination finale.`,
       weight: 20,
     });
   }
 
   if (SUSPICIOUS_TLDS.some((t) => host.endsWith(t))) {
     findings.push({
-      label: lang === "ee" ? "Domain vɔ̃ɖi" : lang === "en" ? "High-Risk Domain Extension" : "Extension de domaine à risque",
-      detail: lang === "ee" ? `Domain ${host} nye esi amebeblatɔwo zãna zi geɖe.` : lang === "en" ? `The domain suffix of ${host} is known for high scam prevalence.` : `L'extension de ${host} est très fréquemment utilisée par les fraudeurs.`,
+      label:
+        lang === "ee"
+          ? "Domain vɔ̃ɖi"
+          : lang === "en"
+            ? "High-Risk Domain Extension"
+            : "Extension de domaine à risque",
+      detail:
+        lang === "ee"
+          ? `Domain ${host} nye esi amebeblatɔwo zãna zi geɖe.`
+          : lang === "en"
+            ? `The domain suffix of ${host} is known for high scam prevalence.`
+            : `L'extension de ${host} est très fréquemment utilisée par les fraudeurs.`,
       weight: 20,
     });
   }
@@ -239,16 +311,36 @@ export function analyzeUrl(raw: string, lang: SupportedLang = "fr"): Finding[] {
   );
   if (brand && !official) {
     findings.push({
-      label: lang === "ee" ? "Kɔmpani ŋkɔ vɔ̃ zãzã" : lang === "en" ? "Brand Impersonation" : "Imitation de marque officielle",
-      detail: lang === "ee" ? `Kadodoa le « ${brand} » zãm evɔ menye kɔmpani vavã ƒe website o.` : lang === "en" ? `The link references '${brand}' but is NOT an official domain.` : `Le lien exploite la marque « ${brand} » en dehors des domaines officiels certifiés.`,
+      label:
+        lang === "ee"
+          ? "Kɔmpani ŋkɔ vɔ̃ zãzã"
+          : lang === "en"
+            ? "Brand Impersonation"
+            : "Imitation de marque officielle",
+      detail:
+        lang === "ee"
+          ? `Kadodoa le « ${brand} » zãm evɔ menye kɔmpani vavã ƒe website o.`
+          : lang === "en"
+            ? `The link references '${brand}' but is NOT an official domain.`
+            : `Le lien exploite la marque « ${brand} » en dehors des domaines officiels certifiés.`,
       weight: 35,
     });
   }
 
   if (/\b(phishing|claim|steal|token=fake|promo=moov)\b/i.test(raw)) {
     findings.push({
-      label: lang === "ee" ? "Kadodo beble (Phishing)" : lang === "en" ? "Suspicious Phishing URL Pattern" : "Indicateur d'hameçonnage (Phishing)",
-      detail: lang === "ee" ? "Kadodo sia me nyawo ɖee fia be beble kadodo aɖee." : lang === "en" ? "URL path or query parameters exhibit known phishing signatures." : "La structure de l'URL ou ses paramètres révèlent une tentative manifeste d'hameçonnage.",
+      label:
+        lang === "ee"
+          ? "Kadodo beble (Phishing)"
+          : lang === "en"
+            ? "Suspicious Phishing URL Pattern"
+            : "Indicateur d'hameçonnage (Phishing)",
+      detail:
+        lang === "ee"
+          ? "Kadodo sia me nyawo ɖee fia be beble kadodo aɖee."
+          : lang === "en"
+            ? "URL path or query parameters exhibit known phishing signatures."
+            : "La structure de l'URL ou ses paramètres révèlent une tentative manifeste d'hameçonnage.",
       weight: 35,
     });
   }
@@ -262,7 +354,10 @@ function finalize(
   kind: "sms" | "url" | "audio",
   lang: SupportedLang = "fr",
 ): AnalysisResult {
-  const score = Math.min(100, findings.reduce((s, f) => s + f.weight, 0));
+  const score = Math.min(
+    100,
+    findings.reduce((s, f) => s + f.weight, 0),
+  );
   const level = levelFromScore(score);
   const recs: string[] = [];
 
@@ -272,7 +367,8 @@ function finalize(
       recs.push("Kpɔ wò ga le akɔnta me to USSD se vavã dzi gbã.");
     } else {
       recs.push("Mègatsɔ wò PIN alo OTP gbeɖe na ame aɖeke o, eɖanye 'dɔwɔla' hã o.");
-      if (extracted.links.length) recs.push("Mègaʋu kadodo (link) sia o. Ŋlɔ adrɛs vavã la wò ŋutɔ.");
+      if (extracted.links.length)
+        recs.push("Mègaʋu kadodo (link) sia o. Ŋlɔ adrɛs vavã la wò ŋutɔ.");
       recs.push("Mègaƒo USSD kɔdi aɖeke si wogblɔ na wò le SMS alo kaƒoƒo me o.");
       recs.push("Yɔ wò kɔmpani (Moov alo Togocom) to woƒe dɔwɔƒe xexlẽdzesi vavã dzi.");
       if (level === "ÉLEVÉ") recs.push("Tui mɔ ame sia eye nàgblɔe na kɔmpani la kaba.");
@@ -283,7 +379,8 @@ function finalize(
       recs.push("Always verify your account balance directly via official telecom USSD menus.");
     } else {
       recs.push("Never disclose your PIN, OTP, or secret validation codes to anyone.");
-      if (extracted.links.length) recs.push("Do not open the link. Manually navigate to official websites.");
+      if (extracted.links.length)
+        recs.push("Do not open the link. Manually navigate to official websites.");
       recs.push("Do not execute USSD strings received via SMS or unexpected calls.");
       recs.push("Contact your operator via their published official support numbers.");
       if (level === "ÉLEVÉ") recs.push("Block the sender immediately and file a fraud report.");
@@ -291,13 +388,17 @@ function finalize(
   } else {
     if (level === "FAIBLE") {
       recs.push("Aucun signal fort d'arnaque détecté, mais restez vigilant.");
-      recs.push("Vérifiez toujours votre solde directement via le menu USSD officiel de votre opérateur.");
+      recs.push(
+        "Vérifiez toujours votre solde directement via le menu USSD officiel de votre opérateur.",
+      );
     } else {
       recs.push("Ne communiquez jamais votre PIN, OTP ou code secret, même à un « agent ».");
-      if (extracted.links.length) recs.push("N'ouvrez pas le lien. Tapez vous-même l'adresse officielle si besoin.");
+      if (extracted.links.length)
+        recs.push("N'ouvrez pas le lien. Tapez vous-même l'adresse officielle si besoin.");
       recs.push("Ne composez aucun code USSD reçu par message ou appel.");
       recs.push("Contactez votre opérateur via son numéro officiel pour vérifier.");
-      if (level === "ÉLEVÉ") recs.push("Bloquez l'expéditeur et signalez le message à votre opérateur.");
+      if (level === "ÉLEVÉ")
+        recs.push("Bloquez l'expéditeur et signalez le message à votre opérateur.");
     }
   }
 
@@ -351,7 +452,8 @@ export function analyzeSms(text: string, lang: SupportedLang = "fr"): AnalysisRe
   }
 
   if (links.length) {
-    const linkLabel = lang === "ee" ? "Kadodo le eme" : lang === "en" ? "Embedded URL Link" : "Lien présent";
+    const linkLabel =
+      lang === "ee" ? "Kadodo le eme" : lang === "en" ? "Embedded URL Link" : "Lien présent";
     const linkDetail =
       lang === "ee"
         ? "Mobile Money kɔmpaniwo meɖoa link be woaxɔ transaction o."
@@ -361,12 +463,21 @@ export function analyzeSms(text: string, lang: SupportedLang = "fr"): AnalysisRe
     findings.push({ label: linkLabel, detail: linkDetail, weight: 10 });
   }
 
-  const amounts = Array.from(new Set(text.match(/\d[\d\s.,]*\s?(?:F\s?CFA|FCFA|XOF|F)\b/gi) ?? [])).map((a) => a.trim());
-  const phones = Array.from(new Set(text.match(/(?:\+?228[\s-]?)?\b\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{2}\b/g) ?? []));
+  const amounts = Array.from(
+    new Set(text.match(/\d[\d\s.,]*\s?(?:F\s?CFA|FCFA|XOF|F)\b/gi) ?? []),
+  ).map((a) => a.trim());
+  const phones = Array.from(
+    new Set(text.match(/(?:\+?228[\s-]?)?\b\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{2}\b/g) ?? []),
+  );
   const senderMatch = text.match(/^(?:de|from|exp[ée]diteur|ame\s*si\s*[dɖ]oe)\s*:\s*(.+)$/im);
 
   if (phones.length && /appel|contact|whatsapp|joindre|call|dial|reach|ƒo\s*ka|kaƒo/i.test(text)) {
-    const privLabel = lang === "ee" ? "Kaƒomɔ̃ xexlẽdzesi kpea yɔyɔ" : lang === "en" ? "Private Phone Number to Contact" : "Numéro personnel à contacter";
+    const privLabel =
+      lang === "ee"
+        ? "Kaƒomɔ̃ xexlẽdzesi kpea yɔyɔ"
+        : lang === "en"
+          ? "Private Phone Number to Contact"
+          : "Numéro personnel à contacter";
     const privDetail =
       lang === "ee"
         ? "Wole biam be nàyɔ ame ŋutɔ ƒe xexlẽdzesi tsɔ wu kɔmpani ƒe dɔwɔƒe xexlẽdzesi."
@@ -376,7 +487,12 @@ export function analyzeSms(text: string, lang: SupportedLang = "fr"): AnalysisRe
     findings.push({ label: privLabel, detail: privDetail, weight: 15 });
   }
 
-  return finalize(findings, { sender: senderMatch?.[1]?.trim(), amounts, links, phones }, "sms", lang);
+  return finalize(
+    findings,
+    { sender: senderMatch?.[1]?.trim(), amounts, links, phones },
+    "sms",
+    lang,
+  );
 }
 
 export function analyzeQrContent(content: string, lang: SupportedLang = "fr"): AnalysisResult {

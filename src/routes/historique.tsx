@@ -1,11 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  History,
-  Trash2,
-  Search,
-  Download,
-  Sparkles,
-} from "lucide-react";
+import { History, Trash2, Search, Download, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -43,7 +37,11 @@ export function HistoriquePage() {
       return (
         h.summary.toLowerCase().includes(term) ||
         h.type.toLowerCase().includes(term) ||
-        h.findings.some((f) => f.label.toLowerCase().includes(term) || (f.detail ? f.detail.toLowerCase().includes(term) : false))
+        h.findings.some(
+          (f) =>
+            f.label.toLowerCase().includes(term) ||
+            (f.detail ? f.detail.toLowerCase().includes(term) : false),
+        )
       );
     });
 
@@ -59,10 +57,14 @@ export function HistoriquePage() {
       toast.info("Aucun historique à exporter.");
       return;
     }
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
+    const dataStr =
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `cybersafe-historique-${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute(
+      "download",
+      `cybersafe-historique-${new Date().toISOString().slice(0, 10)}.json`,
+    );
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -143,7 +145,12 @@ export function HistoriquePage() {
                 : "Vos vérifications de SMS, QR codes et appels analysés apparaîtront ici avec leur niveau de risque."}
             </p>
             <div className="mt-5">
-              <Button asChild variant="hero" size="sm" className="font-bold shadow-neo border-2 border-white/20">
+              <Button
+                asChild
+                variant="hero"
+                size="sm"
+                className="font-bold shadow-neo border-2 border-white/20"
+              >
                 <Link to="/sms">
                   <Sparkles className="size-4" /> Lancer un scan SMS
                 </Link>

@@ -65,7 +65,10 @@ export interface Flashcard {
   mcqExplanation?: string;
 }
 
-export function normalizeFlashcard(rawCard?: Partial<Flashcard> | null, index: number = 0): Flashcard {
+export function normalizeFlashcard(
+  rawCard?: Partial<Flashcard> | null,
+  index: number = 0,
+): Flashcard {
   const card = rawCard || {};
   const front = card.front?.trim() || `Concept clé ${index + 1}`;
   const back = card.back?.trim() || "Consultez les notes pour la définition complète.";
@@ -149,7 +152,9 @@ export function StudentSpacePage() {
   const { lang } = useI18n();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "courses" | "quiz" | "flashcards" | "progress">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "courses" | "quiz" | "flashcards" | "progress"
+  >("overview");
   const [courses, setCourses] = useState<StoredCourseItem[]>([]);
   const [quizHistory, setQuizHistory] = useState<QuizAttempt[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>("Tous");
@@ -193,9 +198,10 @@ export function StudentSpacePage() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           const normalizedCourses: StoredCourseItem[] = parsed.map((c: any) => ({
             ...c,
-            flashcards: Array.isArray(c.flashcards) && c.flashcards.length > 0
-              ? c.flashcards.map((f: any, idx: number) => normalizeFlashcard(f, idx))
-              : generateFlashcardsForContent(c.title || "Cours", c.content || ""),
+            flashcards:
+              Array.isArray(c.flashcards) && c.flashcards.length > 0
+                ? c.flashcards.map((f: any, idx: number) => normalizeFlashcard(f, idx))
+                : generateFlashcardsForContent(c.title || "Cours", c.content || ""),
           }));
           setCourses(normalizedCourses);
           return;
@@ -205,8 +211,7 @@ export function StudentSpacePage() {
       const initial: StoredCourseItem[] = [];
       setCourses(initial);
       localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(initial));
-    } catch {
-    }
+    } catch {}
 
     try {
       const qHist = localStorage.getItem(QUIZ_HISTORY_KEY);
@@ -239,7 +244,10 @@ export function StudentSpacePage() {
   };
 
   function generateFlashcardsForContent(title: string, text: string): Flashcard[] {
-    const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 20);
+    const lines = text
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 20);
     const cards: Flashcard[] = [];
     if (lines.length >= 2 && lines[0] && lines[1]) {
       const line0 = lines[0];
@@ -264,8 +272,8 @@ export function StudentSpacePage() {
             mcqExplanation: `Explication pédagogique : ${line0}`,
             mastered: false,
           },
-          0
-        )
+          0,
+        ),
       );
       cards.push(
         normalizeFlashcard(
@@ -287,8 +295,8 @@ export function StudentSpacePage() {
             mcqExplanation: `Détail : ${line1}`,
             mastered: false,
           },
-          1
-        )
+          1,
+        ),
       );
       if (lines[2]) {
         cards.push(
@@ -311,8 +319,8 @@ export function StudentSpacePage() {
               mcqExplanation: `Explication pédagogique : ${lines[2]}`,
               mastered: false,
             },
-            2
-          )
+            2,
+          ),
         );
       }
     } else {
@@ -337,8 +345,8 @@ export function StudentSpacePage() {
             mcqExplanation: `Explication détaillée : ${summary}`,
             mastered: false,
           },
-          0
-        )
+          0,
+        ),
       );
     }
     return cards;
@@ -366,15 +374,25 @@ export function StudentSpacePage() {
       const lower = (cleanTitle + " " + extractedText.slice(0, 1500)).toLowerCase();
       if (lower.includes("droit") || lower.includes("juridique") || lower.includes("loi")) {
         setNewSubject("Droit & Sciences Juridiques");
-      } else if (lower.includes("math") || lower.includes("algèbre") || lower.includes("théorème")) {
+      } else if (
+        lower.includes("math") ||
+        lower.includes("algèbre") ||
+        lower.includes("théorème")
+      ) {
         setNewSubject("Mathématiques & Algèbre");
-      } else if (lower.includes("code") || lower.includes("python") || lower.includes("algorithme")) {
+      } else if (
+        lower.includes("code") ||
+        lower.includes("python") ||
+        lower.includes("algorithme")
+      ) {
         setNewSubject("Informatique & Programmation");
       } else if (lower.includes("éco") || lower.includes("gestion") || lower.includes("finance")) {
         setNewSubject("Économie, Finance & Gestion");
       }
 
-      toast.success(`Fichier [${parsedDoc.format.toUpperCase()}] "${file.name}" chargé avec succès (${parsedDoc.wordCount} mots) !`);
+      toast.success(
+        `Fichier [${parsedDoc.format.toUpperCase()}] "${file.name}" chargé avec succès (${parsedDoc.wordCount} mots) !`,
+      );
     } catch (err: any) {
       toast.dismiss("doc-read");
       toast.error(err.message || "Erreur lors de la lecture du fichier.");
@@ -414,7 +432,7 @@ export function StudentSpacePage() {
           content: newCourseItem.content,
           examDate: newCourseItem.examDate,
           savedAt: new Date().toISOString(),
-        })
+        }),
       );
     } catch {}
 
@@ -433,7 +451,10 @@ export function StudentSpacePage() {
     }
   };
 
-  const launchBotWithCourse = (course: StoredCourseItem, command: "/apprendre" | "/plan" | "/quiz" | "/resume") => {
+  const launchBotWithCourse = (
+    course: StoredCourseItem,
+    command: "/apprendre" | "/plan" | "/quiz" | "/resume",
+  ) => {
     try {
       localStorage.setItem(
         ACTIVE_COURSE_KEY,
@@ -443,7 +464,7 @@ export function StudentSpacePage() {
           content: course.content,
           examDate: course.examDate,
           savedAt: new Date().toISOString(),
-        })
+        }),
       );
     } catch {}
     toast.info(`Ouverture de l'Assistant avec ${command}...`);
@@ -451,7 +472,13 @@ export function StudentSpacePage() {
   };
 
   const buildTopicGroundedQuiz = (course: StoredCourseItem) => {
-    const lower = (course.title + " " + course.subject + " " + course.content.slice(0, 500)).toLowerCase();
+    const lower = (
+      course.title +
+      " " +
+      course.subject +
+      " " +
+      course.content.slice(0, 500)
+    ).toLowerCase();
 
     if (lower.includes("math") || lower.includes("algèbre") || lower.includes("calcul")) {
       return [
@@ -465,11 +492,13 @@ export function StudentSpacePage() {
             "Elles n'admettent aucun maximum local",
           ],
           answerIndex: 0,
-          explanation: "Le théorème des valeurs intermédiaires est le résultat fondamental d'analyse pour toute fonction continue sur un compact.",
+          explanation:
+            "Le théorème des valeurs intermédiaires est le résultat fondamental d'analyse pour toute fonction continue sur un compact.",
         },
         {
           id: 2,
-          question: "Quelle méthode matricielle permet de résoudre un système d'équations linéaires de dimension N ?",
+          question:
+            "Quelle méthode matricielle permet de résoudre un système d'équations linéaires de dimension N ?",
           options: [
             "L'élimination de Gauss-Jordan",
             "Le crible d'Ératosthène",
@@ -477,11 +506,13 @@ export function StudentSpacePage() {
             "Le théorème de Shannon",
           ],
           answerIndex: 0,
-          explanation: "Le pivot de Gauss / Gauss-Jordan est la méthode canonique de résolution des systèmes linéaires.",
+          explanation:
+            "Le pivot de Gauss / Gauss-Jordan est la méthode canonique de résolution des systèmes linéaires.",
         },
         {
           id: 3,
-          question: "En probabilités, si deux événements A et B sont indépendants, quelle relation est toujours vérifiée ?",
+          question:
+            "En probabilités, si deux événements A et B sont indépendants, quelle relation est toujours vérifiée ?",
           options: [
             "P(A ∩ B) = P(A) × P(B)",
             "P(A ∪ B) = P(A) + P(B)",
@@ -489,12 +520,18 @@ export function StudentSpacePage() {
             "P(A | B) = 0",
           ],
           answerIndex: 0,
-          explanation: "L'indépendance probabiliste est définie rigoureusement par la factorisation de la probabilité conjointe.",
+          explanation:
+            "L'indépendance probabiliste est définie rigoureusement par la factorisation de la probabilité conjointe.",
         },
       ];
     }
 
-    if (lower.includes("code") || lower.includes("python") || lower.includes("programmation") || lower.includes("algo")) {
+    if (
+      lower.includes("code") ||
+      lower.includes("python") ||
+      lower.includes("programmation") ||
+      lower.includes("algo")
+    ) {
       return [
         {
           id: 1,
@@ -506,11 +543,13 @@ export function StudentSpacePage() {
             "La file d'attente (FIFO)",
           ],
           answerIndex: 0,
-          explanation: "Les tables de hachage offrent une complexité temporelle amortie en O(1) grâce au calcul direct d'empreinte mémoire.",
+          explanation:
+            "Les tables de hachage offrent une complexité temporelle amortie en O(1) grâce au calcul direct d'empreinte mémoire.",
         },
         {
           id: 2,
-          question: "Quel principe de programmation orientée objet (POO) permet de cacher les détails d'implémentation interne d'une classe ?",
+          question:
+            "Quel principe de programmation orientée objet (POO) permet de cacher les détails d'implémentation interne d'une classe ?",
           options: [
             "L'encapsulation (attributs privés et accesseurs)",
             "Le polymorphisme ad hoc",
@@ -518,11 +557,13 @@ export function StudentSpacePage() {
             "La compilation dynamique",
           ],
           answerIndex: 0,
-          explanation: "L'encapsulation isole l'état interne d'un objet et ne l'expose que via une interface publique maîtrisée.",
+          explanation:
+            "L'encapsulation isole l'état interne d'un objet et ne l'expose que via une interface publique maîtrisée.",
         },
         {
           id: 3,
-          question: "Dans une architecture logicielle sécurisée, pourquoi ne doit-on jamais stocker les mots de passe en clair ?",
+          question:
+            "Dans une architecture logicielle sécurisée, pourquoi ne doit-on jamais stocker les mots de passe en clair ?",
           options: [
             "Il faut obligatoirement utiliser une fonction de hachage robuste avec sel (ex: Argon2 ou bcrypt)",
             "Parce que les disques durs ne peuvent pas écrire de texte alphabétique",
@@ -530,7 +571,8 @@ export function StudentSpacePage() {
             "Pour économiser l'espace mémoire dans la base SQL",
           ],
           answerIndex: 0,
-          explanation: "Le hachage cryptographique irréversible avec sel protège les utilisateurs en cas de fuite de la base de données.",
+          explanation:
+            "Le hachage cryptographique irréversible avec sel protège les utilisateurs en cas de fuite de la base de données.",
         },
       ];
     }
@@ -547,11 +589,13 @@ export function StudentSpacePage() {
             "Le contrat verbal n'engage jamais la responsabilité de son auteur",
           ],
           answerIndex: 0,
-          explanation: "Le principe de la force obligatoire des contrats (Pacta sunt servanda) est la pierre angulaire du droit des obligations.",
+          explanation:
+            "Le principe de la force obligatoire des contrats (Pacta sunt servanda) est la pierre angulaire du droit des obligations.",
         },
         {
           id: 2,
-          question: "Quelle est la juridiction suprême commune en matière commerciale dans l'espace OHADA ?",
+          question:
+            "Quelle est la juridiction suprême commune en matière commerciale dans l'espace OHADA ?",
           options: [
             "La Cour Commune de Justice et d'Arbitrage (CCJA) à Abidjan",
             "La Cour Pénale Internationale",
@@ -559,11 +603,13 @@ export function StudentSpacePage() {
             "La Commission de l'UEMOA",
           ],
           answerIndex: 0,
-          explanation: "La CCJA est l'unique juridiction suprême de cassation pour les contentieux relevant du droit OHADA.",
+          explanation:
+            "La CCJA est l'unique juridiction suprême de cassation pour les contentieux relevant du droit OHADA.",
         },
         {
           id: 3,
-          question: "En droit pénal, quel adage consacre le principe de légalité des délits et des peines ?",
+          question:
+            "En droit pénal, quel adage consacre le principe de légalité des délits et des peines ?",
           options: [
             "Nullum crimen, nulla poena sine lege",
             "Pacta sunt servanda",
@@ -571,7 +617,8 @@ export function StudentSpacePage() {
             "De minimis non curat praetor",
           ],
           answerIndex: 0,
-          explanation: "Ce principe cardinal interdit de punir une infraction qui n'a pas été préalablement définie par un texte de loi clair.",
+          explanation:
+            "Ce principe cardinal interdit de punir une infraction qui n'a pas été préalablement définie par un texte de loi clair.",
         },
       ];
     }
@@ -588,11 +635,13 @@ export function StudentSpacePage() {
             "Le taux d'intérêt directeur fixé par la banque centrale",
           ],
           answerIndex: 0,
-          explanation: "Le point mort correspond à l'équilibre où les revenus totaux couvrent précisément les charges fixes et variables.",
+          explanation:
+            "Le point mort correspond à l'équilibre où les revenus totaux couvrent précisément les charges fixes et variables.",
         },
         {
           id: 2,
-          question: "Quelle institution monétaire émet le Franc CFA (XOF) au sein de la zone UMOA (Afrique de l'Ouest) ?",
+          question:
+            "Quelle institution monétaire émet le Franc CFA (XOF) au sein de la zone UMOA (Afrique de l'Ouest) ?",
           options: [
             "La BCEAO (Banque Centrale des États de l'Afrique de l'Ouest)",
             "La Banque Mondiale",
@@ -600,7 +649,8 @@ export function StudentSpacePage() {
             "La BEAC",
           ],
           answerIndex: 0,
-          explanation: "La BCEAO est la banque centrale commune aux 8 pays de l'Union Monétaire Ouest-Africaine.",
+          explanation:
+            "La BCEAO est la banque centrale commune aux 8 pays de l'Union Monétaire Ouest-Africaine.",
         },
         {
           id: 3,
@@ -612,7 +662,8 @@ export function StudentSpacePage() {
             "La rentabilité financière des actifs liquides",
           ],
           answerIndex: 0,
-          explanation: "Le BFR représente le montant nécessaire au financement du cycle d'exploitation courant de l'entreprise.",
+          explanation:
+            "Le BFR représente le montant nécessaire au financement du cycle d'exploitation courant de l'entreprise.",
         },
       ];
     }
@@ -628,11 +679,13 @@ export function StudentSpacePage() {
           "Les envoyer par retour de SMS pour bloquer un prétendu piratage",
         ],
         answerIndex: 0,
-        explanation: "Le code secret est strictement confidentiel. Tout appel réclamant un code secret constitue une tentative d'escroquerie caractérisée.",
+        explanation:
+          "Le code secret est strictement confidentiel. Tout appel réclamant un code secret constitue une tentative d'escroquerie caractérisée.",
       },
       {
         id: 2,
-        question: "Devant un appel déclarant un dépôt d'argent 'par erreur' et exigeant un renvoi immédiat, que faut-il faire ?",
+        question:
+          "Devant un appel déclarant un dépôt d'argent 'par erreur' et exigeant un renvoi immédiat, que faut-il faire ?",
         options: [
           "Vérifier soi-même son solde réel via le code USSD officiel (*145# ou *155#) sans se fier au SMS reçu",
           "Renvoyer la somme tout de suite pour éviter d'être accusé de vol",
@@ -640,11 +693,13 @@ export function StudentSpacePage() {
           "Donner son numéro de compte bancaire pour vérification",
         ],
         answerIndex: 0,
-        explanation: "Les escrocs simulent de fausses notifications de réception de fonds. Seul le menu USSD officiel de l'opérateur atteste de la réalité du solde.",
+        explanation:
+          "Les escrocs simulent de fausses notifications de réception de fonds. Seul le menu USSD officiel de l'opérateur atteste de la réalité du solde.",
       },
       {
         id: 3,
-        question: "Quel protocole cryptographique garantit le chiffrement de bout en bout des échanges web ?",
+        question:
+          "Quel protocole cryptographique garantit le chiffrement de bout en bout des échanges web ?",
         options: [
           "TLS (Transport Layer Security) via HTTPS",
           "FTP standard sur le port 21",
@@ -652,7 +707,8 @@ export function StudentSpacePage() {
           "Le protocole HTTP 1.0 sans certificat",
         ],
         answerIndex: 0,
-        explanation: "TLS garantit la confidentialité, l'authenticité et l'intégrité des flux de données entre client et serveur.",
+        explanation:
+          "TLS garantit la confidentialité, l'authenticité et l'intégrité des flux de données entre client et serveur.",
       },
       {
         id: 4,
@@ -664,7 +720,8 @@ export function StudentSpacePage() {
           "L'impasse sur les chapitres identifiés comme difficiles",
         ],
         answerIndex: 0,
-        explanation: "La répétition active espacée et le test régulier des connaissances sont validés par les sciences cognitives pour une mémorisation pérenne.",
+        explanation:
+          "La répétition active espacée et le test régulier des connaissances sont validés par les sciences cognitives pour une mémorisation pérenne.",
       },
     ];
   };
@@ -860,11 +917,13 @@ export function StudentSpacePage() {
         mastered: !cards[flashcardIndex]!.mastered,
       };
       const updatedCourses = courses.map((c) =>
-        c.id === activeFlashcardCourse.id ? { ...c, flashcards: cards } : c
+        c.id === activeFlashcardCourse.id ? { ...c, flashcards: cards } : c,
       );
       saveCoursesToStorage(updatedCourses);
       setActiveFlashcardCourse({ ...activeFlashcardCourse, flashcards: cards });
-      toast.success(cards[flashcardIndex]!.mastered ? "Marqué comme maîtrisé !" : "Remis à réviser");
+      toast.success(
+        cards[flashcardIndex]!.mastered ? "Marqué comme maîtrisé !" : "Remis à réviser",
+      );
     }
   };
 
@@ -877,7 +936,7 @@ export function StudentSpacePage() {
         activeFlashcardCourse.title,
         activeFlashcardCourse.subject,
         activeFlashcardCourse.content,
-        lang
+        lang,
       );
       toast.dismiss("fc-gen");
       if (cards && cards.length > 0) {
@@ -906,12 +965,17 @@ export function StudentSpacePage() {
 
   const totalCourses = courses.length;
   const totalQuizzes = quizHistory.length;
-  const avgScore = totalQuizzes > 0 ? Math.round(quizHistory.reduce((acc, q) => acc + q.score, 0) / totalQuizzes) : 0;
-  const upcomingExams = courses.filter((c) => c.examDate).sort((a, b) => a.examDate.localeCompare(b.examDate));
+  const avgScore =
+    totalQuizzes > 0
+      ? Math.round(quizHistory.reduce((acc, q) => acc + q.score, 0) / totalQuizzes)
+      : 0;
+  const upcomingExams = courses
+    .filter((c) => c.examDate)
+    .sort((a, b) => a.examDate.localeCompare(b.examDate));
   const nextExam = upcomingExams[0];
 
   const weakSubjects = Array.from(
-    new Set(quizHistory.filter((q) => q.score < 70).map((q) => q.subject))
+    new Set(quizHistory.filter((q) => q.score < 70).map((q) => q.subject)),
   );
 
   const filteredCourses = courses.filter((c) => {
@@ -936,12 +1000,7 @@ export function StudentSpacePage() {
           <CyberSticker tone="purple" icon={GraduationCap} rotate="none">
             Répétition Espacée
           </CyberSticker>
-          <Button
-            size="sm"
-            variant="neo"
-            onClick={() => setShowAddModal(true)}
-            className="gap-1.5"
-          >
+          <Button size="sm" variant="neo" onClick={() => setShowAddModal(true)} className="gap-1.5">
             <Plus className="size-4" /> Ajouter un cours
           </Button>
           <Button
@@ -975,7 +1034,7 @@ export function StudentSpacePage() {
                 "flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all shrink-0 border-2",
                 active
                   ? "border-foreground bg-primary text-primary-foreground shadow-neo-sm"
-                  : "border-foreground/10 bg-card/60 text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-card"
+                  : "border-foreground/10 bg-card/60 text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-card",
               )}
             >
               <Icon className="size-4" />
@@ -1047,13 +1106,23 @@ export function StudentSpacePage() {
               {weakSubjects.length > 0 ? (
                 <>
                   D'après vos récents quiz, vous avez des lacunes identifiées en{" "}
-                  <strong className="text-destructive font-semibold">{weakSubjects.join(", ")}</strong>.
-                  Nous vous suggérons de générer un plan de renforcement sur 3 jours avec la commande{" "}
-                  <code className="bg-muted px-1.5 py-0.5 rounded text-primary font-mono text-xs">/plan</code> ou de réviser les flashcards associées avant de retenter un examen blanc.
+                  <strong className="text-destructive font-semibold">
+                    {weakSubjects.join(", ")}
+                  </strong>
+                  . Nous vous suggérons de générer un plan de renforcement sur 3 jours avec la
+                  commande{" "}
+                  <code className="bg-muted px-1.5 py-0.5 rounded text-primary font-mono text-xs">
+                    /plan
+                  </code>{" "}
+                  ou de réviser les flashcards associées avant de retenter un examen blanc.
                 </>
               ) : (
                 <>
-                  Excellent rythme de travail ! Vos scores récents sont solides. Pour consolider vos acquis jusqu'à votre prochaine date d'examen ({nextExam?.examDate || "prochainement"}), passez en revue les <strong>flashcards mémo</strong> et testez-vous avec un <strong>examen blanc chronométré</strong>.
+                  Excellent rythme de travail ! Vos scores récents sont solides. Pour consolider vos
+                  acquis jusqu'à votre prochaine date d'examen (
+                  {nextExam?.examDate || "prochainement"}), passez en revue les{" "}
+                  <strong>flashcards mémo</strong> et testez-vous avec un{" "}
+                  <strong>examen blanc chronométré</strong>.
                 </>
               )}
             </p>
@@ -1065,7 +1134,8 @@ export function StudentSpacePage() {
                   onClick={() => startQuiz(nextExam)}
                   className="gap-1.5 text-xs shadow-neo-sm"
                 >
-                  <HelpCircle className="size-3.5" /> Lancer le quiz du jour : {nextExam.title.slice(0, 25)}...
+                  <HelpCircle className="size-3.5" /> Lancer le quiz du jour :{" "}
+                  {nextExam.title.slice(0, 25)}...
                 </Button>
               )}
               <Button
@@ -1162,7 +1232,7 @@ export function StudentSpacePage() {
                     "px-3 py-1.5 text-xs font-bold rounded-lg shrink-0 transition-all border-2",
                     selectedSubject === sub
                       ? "border-foreground bg-primary text-primary-foreground shadow-neo-sm"
-                      : "border-foreground/10 bg-card text-muted-foreground hover:text-foreground hover:border-foreground/30 shadow-sm"
+                      : "border-foreground/10 bg-card text-muted-foreground hover:text-foreground hover:border-foreground/30 shadow-sm",
                   )}
                 >
                   {sub}
@@ -1185,7 +1255,10 @@ export function StudentSpacePage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredCourses.map((c) => (
-                <Panel key={c.id} className="flex flex-col justify-between p-5 space-y-4 border-2 border-foreground/15 shadow-neo-sm hover:shadow-neo hover:-translate-y-1 transition-all">
+                <Panel
+                  key={c.id}
+                  className="flex flex-col justify-between p-5 space-y-4 border-2 border-foreground/15 shadow-neo-sm hover:shadow-neo hover:-translate-y-1 transition-all"
+                >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <CyberSticker tone="cyan" rotate="none">
@@ -1210,7 +1283,8 @@ export function StudentSpacePage() {
                   <div className="space-y-3 pt-3 border-t border-border/60">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-1 font-semibold">
-                        <Calendar className="size-3.5 text-amber-500" /> Examen : {c.examDate || "Non fixée"}
+                        <Calendar className="size-3.5 text-amber-500" /> Examen :{" "}
+                        {c.examDate || "Non fixée"}
                       </span>
                       <span className="flex items-center gap-1 font-semibold">
                         <Layers className="size-3.5 text-electric" /> {c.flashcards.length} cartes
@@ -1259,7 +1333,8 @@ export function StudentSpacePage() {
               <HelpCircle className="size-10 text-primary mx-auto" />
               <h3 className="font-bold text-base">Sélectionnez un cours pour commencer un quiz</h3>
               <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                Testez vos connaissances en conditions d'examen. Gemma génère des explications adaptatives pour chaque proposition.
+                Testez vos connaissances en conditions d'examen. Gemma génère des explications
+                adaptatives pour chaque proposition.
               </p>
               <div className="pt-2 flex flex-wrap justify-center gap-2">
                 {courses.slice(0, 3).map((c) => (
@@ -1304,7 +1379,12 @@ export function StudentSpacePage() {
                 <Button size="sm" variant="neo" onClick={() => startQuiz(activeQuizCourse)}>
                   <RotateCw className="size-4" /> Recommencer ce quiz
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setActiveTab("courses")} className="border-2 border-foreground/15 shadow-neo-sm font-bold">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setActiveTab("courses")}
+                  className="border-2 border-foreground/15 shadow-neo-sm font-bold"
+                >
                   Choisir un autre cours
                 </Button>
               </div>
@@ -1337,12 +1417,15 @@ export function StudentSpacePage() {
                       const isCorrect = idx === quizQuestions[currentQIndex].answerIndex;
                       const hasAnswered = selectedAnswer !== null;
 
-                      let btnStyle = "border-foreground/15 bg-card hover:border-foreground hover:shadow-neo-sm hover:translate-x-0.5";
+                      let btnStyle =
+                        "border-foreground/15 bg-card hover:border-foreground hover:shadow-neo-sm hover:translate-x-0.5";
                       if (hasAnswered) {
                         if (isCorrect) {
-                          btnStyle = "border-emerald-500 bg-emerald-500/15 text-emerald-400 shadow-neo-sm";
+                          btnStyle =
+                            "border-emerald-500 bg-emerald-500/15 text-emerald-400 shadow-neo-sm";
                         } else if (isPicked) {
-                          btnStyle = "border-destructive bg-destructive/15 text-destructive shadow-neo-sm";
+                          btnStyle =
+                            "border-destructive bg-destructive/15 text-destructive shadow-neo-sm";
                         }
                       }
 
@@ -1353,7 +1436,7 @@ export function StudentSpacePage() {
                           onClick={() => handleSelectQuizOption(idx)}
                           className={cn(
                             "w-full text-left p-3.5 rounded-xl border-2 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-3 shadow-sm",
-                            btnStyle
+                            btnStyle,
                           )}
                         >
                           <span>{opt}</span>
@@ -1371,7 +1454,8 @@ export function StudentSpacePage() {
                   {selectedAnswer !== null && (
                     <div className="rounded-xl border-2 border-primary/30 bg-muted/50 p-3.5 text-xs space-y-1 shadow-neo-sm animate-rise">
                       <div className="font-bold text-primary flex items-center gap-1.5">
-                        <Sparkles className="size-3.5 text-electric" /> Explication Pédagogique Gemma :
+                        <Sparkles className="size-3.5 text-electric" /> Explication Pédagogique
+                        Gemma :
                       </div>
                       <p className="text-muted-foreground leading-relaxed font-medium">
                         {quizQuestions[currentQIndex].explanation}
@@ -1387,7 +1471,9 @@ export function StudentSpacePage() {
                       onClick={handleNextQuizQuestion}
                       className="gap-1.5 shadow-neo-sm"
                     >
-                      {currentQIndex === quizQuestions.length - 1 ? "Voir les résultats" : "Question suivante"}{" "}
+                      {currentQIndex === quizQuestions.length - 1
+                        ? "Voir les résultats"
+                        : "Question suivante"}{" "}
                       <ChevronRight className="size-4" />
                     </Button>
                   </div>
@@ -1409,7 +1495,8 @@ export function StudentSpacePage() {
                   : "Aucune carte disponible dans ce cours (0 carte)"}
               </h3>
               <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                La mémorisation active par répétition espacée permet d'ancrer durablement les concepts clés.
+                La mémorisation active par répétition espacée permet d'ancrer durablement les
+                concepts clés.
               </p>
               <div className="pt-2 flex flex-wrap justify-center gap-2">
                 {courses.map((c) => (
@@ -1429,11 +1516,14 @@ export function StudentSpacePage() {
             (() => {
               const currentCard = normalizeFlashcard(
                 activeFlashcardCourse.flashcards[flashcardIndex],
-                flashcardIndex
+                flashcardIndex,
               );
               const totalCards = activeFlashcardCourse.flashcards.length;
-              const masteredCards = activeFlashcardCourse.flashcards.filter((f) => f.mastered).length;
-              const masteryPercent = totalCards > 0 ? Math.round((masteredCards / totalCards) * 100) : 0;
+              const masteredCards = activeFlashcardCourse.flashcards.filter(
+                (f) => f.mastered,
+              ).length;
+              const masteryPercent =
+                totalCards > 0 ? Math.round((masteredCards / totalCards) * 100) : 0;
               const sessionRate =
                 flashcardSessionAttempts > 0
                   ? Math.round((flashcardSessionScore / flashcardSessionAttempts) * 100)
@@ -1482,7 +1572,8 @@ export function StudentSpacePage() {
                           </span>
                         </div>
                         <div className="text-[11px] text-muted-foreground font-medium">
-                          Sélectionnez la bonne réponse parmi les options proposées pour valider la notion
+                          Sélectionnez la bonne réponse parmi les options proposées pour valider la
+                          notion
                         </div>
                       </div>
                     </div>
@@ -1563,7 +1654,10 @@ export function StudentSpacePage() {
                                   isPicked &&
                                   !isRight &&
                                   "border-destructive bg-destructive/20 text-destructive dark:border-red-400 dark:bg-red-950/50 dark:text-red-200 font-bold",
-                                hasAnswered && !isPicked && !isRight && "border-foreground/10 opacity-50 bg-muted/30 dark:opacity-40"
+                                hasAnswered &&
+                                  !isPicked &&
+                                  !isRight &&
+                                  "border-foreground/10 opacity-50 bg-muted/30 dark:opacity-40",
                               )}
                             >
                               <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-foreground/30 font-mono text-[10px] font-black">
@@ -1588,7 +1682,7 @@ export function StudentSpacePage() {
                             "p-4 rounded-2xl border-2 text-xs leading-relaxed space-y-1.5 animate-rise shadow-neo-sm",
                             isAnswerCorrect
                               ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200 dark:border-emerald-500/50"
-                              : "border-destructive/40 bg-destructive/10 text-destructive dark:bg-red-950/40 dark:text-red-200 dark:border-red-500/50"
+                              : "border-destructive/40 bg-destructive/10 text-destructive dark:bg-red-950/40 dark:text-red-200 dark:border-red-500/50",
                           )}
                         >
                           <div className="flex items-center gap-2 font-black text-sm">
@@ -1596,20 +1690,25 @@ export function StudentSpacePage() {
                               <>
                                 <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
                                 <span>
-                                  Bonne réponse ! L'option {String.fromCharCode(65 + (currentCard.mcqAnswerIndex ?? 0))} est la bonne réponse.
+                                  Bonne réponse ! L'option{" "}
+                                  {String.fromCharCode(65 + (currentCard.mcqAnswerIndex ?? 0))} est
+                                  la bonne réponse.
                                 </span>
                               </>
                             ) : (
                               <>
                                 <AlertTriangle className="size-4 text-destructive shrink-0" />
                                 <span>
-                                  Choix incorrect ! La réponse exacte était l'option {String.fromCharCode(65 + (currentCard.mcqAnswerIndex ?? 0))}.
+                                  Choix incorrect ! La réponse exacte était l'option{" "}
+                                  {String.fromCharCode(65 + (currentCard.mcqAnswerIndex ?? 0))}.
                                 </span>
                               </>
                             )}
                           </div>
                           <p className="font-medium text-foreground dark:text-slate-200">
-                            <strong className="font-bold">Explication pédagogique détaillée : </strong>
+                            <strong className="font-bold">
+                              Explication pédagogique détaillée :{" "}
+                            </strong>
                             {currentCard.mcqExplanation}
                           </p>
                         </div>
@@ -1619,7 +1718,13 @@ export function StudentSpacePage() {
                     {/* Card Footer Status */}
                     <div className="border-t border-border/50 pt-2 text-[11px] text-muted-foreground flex items-center justify-between font-semibold">
                       <span>Concept : {currentCard.front}</span>
-                      <span className={cn(currentCard.mastered ? "text-emerald-500 font-bold" : "text-muted-foreground")}>
+                      <span
+                        className={cn(
+                          currentCard.mastered
+                            ? "text-emerald-500 font-bold"
+                            : "text-muted-foreground",
+                        )}
+                      >
                         {currentCard.mastered ? "✓ Notion acquise" : "En cours d'apprentissage"}
                       </span>
                     </div>
@@ -1683,7 +1788,10 @@ export function StudentSpacePage() {
                 <div className="flex justify-between py-1.5 border-b">
                   <span className="text-muted-foreground">Cartes flashcards mémorisées :</span>
                   <span className="font-black text-emerald-400">
-                    {courses.reduce((acc, c) => acc + c.flashcards.filter((f) => f.mastered).length, 0)}
+                    {courses.reduce(
+                      (acc, c) => acc + c.flashcards.filter((f) => f.mastered).length,
+                      0,
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b">
@@ -1730,7 +1838,9 @@ export function StudentSpacePage() {
           <Panel className="space-y-3 border-2 border-foreground/15 shadow-neo-sm">
             <h3 className="font-bold text-sm">Historique Réel des Tentatives</h3>
             {quizHistory.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-4 text-center font-medium">Aucun quiz enregistré.</p>
+              <p className="text-xs text-muted-foreground py-4 text-center font-medium">
+                Aucun quiz enregistré.
+              </p>
             ) : (
               <div className="divide-y divide-border/60">
                 {quizHistory.map((q) => (
@@ -1748,7 +1858,7 @@ export function StudentSpacePage() {
                           ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
                           : q.score >= 50
                             ? "bg-amber-500/15 border-amber-500/40 text-amber-400"
-                            : "bg-destructive/15 border-destructive/40 text-destructive"
+                            : "bg-destructive/15 border-destructive/40 text-destructive",
                       )}
                     >
                       {q.score}%
@@ -1768,7 +1878,12 @@ export function StudentSpacePage() {
               <h3 className="font-bold text-lg flex items-center gap-2">
                 <BookOpen className="size-5 text-primary" /> Ajouter un Cours
               </h3>
-              <Button size="sm" variant="ghost" onClick={() => setShowAddModal(false)} className="font-bold">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowAddModal(false)}
+                className="font-bold"
+              >
                 ✕
               </Button>
             </div>
@@ -1852,7 +1967,12 @@ export function StudentSpacePage() {
               </div>
 
               <div className="pt-2 flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setShowAddModal(false)} className="border-2 border-foreground/15 shadow-neo-sm font-bold">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowAddModal(false)}
+                  className="border-2 border-foreground/15 shadow-neo-sm font-bold"
+                >
                   Annuler
                 </Button>
                 <Button type="submit" variant="neo">

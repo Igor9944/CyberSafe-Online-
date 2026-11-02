@@ -14,7 +14,8 @@ export interface VirusTotalStats {
 export interface VirusTotalUrlReport {
   url: string;
   domain: string;
-  status: "analyzed" | "not_found" | "queued" | "unavailable" | "quota_exceeded" | "skipped_sensitive";
+  status:
+    "analyzed" | "not_found" | "queued" | "unavailable" | "quota_exceeded" | "skipped_sensitive";
   stats?: VirusTotalStats | undefined;
   reputation?: number | undefined;
   categories?: string[] | undefined;
@@ -61,7 +62,8 @@ export interface CombinedSmsAnalysisResult extends GemmaApiAnalysisResult {
   virusTotal?: VirusTotalAnalysisResult | undefined;
   gemmaRisk?: "FAIBLE" | "SUSPECT" | "ÉLEVÉ" | undefined;
   gemmaScore?: number | undefined;
-  technicalRisk?: ("FAIBLE" | "SUSPECT" | "ÉLEVÉ" | "NON_RÉPERTORIÉ" | "INDISPONIBLE" | "AUCUN_LIEN") | undefined;
+  technicalRisk?:
+    ("FAIBLE" | "SUSPECT" | "ÉLEVÉ" | "NON_RÉPERTORIÉ" | "INDISPONIBLE" | "AUCUN_LIEN") | undefined;
 }
 
 export interface StudyPlanItem {
@@ -245,7 +247,11 @@ export async function generateStudyPlanApi(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) {
-    throw new GemmaApiError(data.error || "Erreur lors de la génération du plan par Gemma 4.", res.status === 429, res.status);
+    throw new GemmaApiError(
+      data.error || "Erreur lors de la génération du plan par Gemma 4.",
+      res.status === 429,
+      res.status,
+    );
   }
 
   return {
@@ -277,7 +283,11 @@ export async function generateStudyQuizApi(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) {
-    throw new GemmaApiError(data.error || "Erreur lors de la génération du quiz par Gemma 4.", res.status === 429, res.status);
+    throw new GemmaApiError(
+      data.error || "Erreur lors de la génération du quiz par Gemma 4.",
+      res.status === 429,
+      res.status,
+    );
   }
 
   return {
@@ -293,7 +303,13 @@ export async function extractSmsImageApi(
   imageBase64: string,
   imageMimeType: string,
   lang: Language = "fr",
-): Promise<{ text: string; sender?: string; operator?: string; amounts?: string[]; phones?: string[] }> {
+): Promise<{
+  text: string;
+  sender?: string;
+  operator?: string;
+  amounts?: string[];
+  phones?: string[];
+}> {
   const res = await fetch("/api/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -307,7 +323,11 @@ export async function extractSmsImageApi(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) {
-    throw new GemmaApiError(data.error || "Erreur lors de la lecture OCR du SMS.", res.status === 429, res.status);
+    throw new GemmaApiError(
+      data.error || "Erreur lors de la lecture OCR du SMS.",
+      res.status === 429,
+      res.status,
+    );
   }
 
   return {
@@ -339,7 +359,11 @@ export async function generateFlashcardsApi(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) {
-    throw new GemmaApiError(data.error || "Erreur lors de la génération des flashcards.", res.status === 429, res.status);
+    throw new GemmaApiError(
+      data.error || "Erreur lors de la génération des flashcards.",
+      res.status === 429,
+      res.status,
+    );
   }
 
   return Array.isArray(data.flashcards) ? data.flashcards : [];
@@ -363,7 +387,11 @@ export async function extractCourseImageApi(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) {
-    throw new GemmaApiError(data.error || "Erreur lors de la lecture de la photo de cours par Gemma.", res.status === 429, res.status);
+    throw new GemmaApiError(
+      data.error || "Erreur lors de la lecture de la photo de cours par Gemma.",
+      res.status === 429,
+      res.status,
+    );
   }
 
   return {
@@ -372,4 +400,3 @@ export async function extractCourseImageApi(
     suggestedSubject: data.suggestedSubject || "Cybersécurité & Réseaux",
   };
 }
-

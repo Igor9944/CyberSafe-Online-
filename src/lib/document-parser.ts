@@ -1,4 +1,3 @@
-
 import { extractText } from "unpdf";
 
 export type SupportedDocumentFormat = "pdf" | "docx" | "pptx" | "txt";
@@ -63,8 +62,7 @@ async function parseZipEntries(buffer: ArrayBuffer): Promise<Map<string, string>
     if (decompressed) {
       try {
         entries.set(filename, new TextDecoder("utf-8").decode(decompressed));
-      } catch {
-      }
+      } catch {}
     }
 
     offset = dataStart + compSize;
@@ -136,7 +134,9 @@ export async function extractTextFromPptx(buffer: ArrayBuffer): Promise<string> 
   return slides.join("\n\n");
 }
 
-export async function extractTextFromPdf(fileOrBuffer: File | ArrayBuffer | Uint8Array): Promise<string> {
+export async function extractTextFromPdf(
+  fileOrBuffer: File | ArrayBuffer | Uint8Array,
+): Promise<string> {
   try {
     let uint8: Uint8Array;
     if (fileOrBuffer instanceof File) {
@@ -206,4 +206,3 @@ export async function extractTextFromDocument(
     wordCount: words,
   };
 }
-

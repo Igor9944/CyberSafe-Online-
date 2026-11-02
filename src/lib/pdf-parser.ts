@@ -1,13 +1,12 @@
-import { extractText } from "unpdf";
-export {
-  extractTextFromDocument,
-  extractTextFromDocx,
-  extractTextFromPptx,
-  type ParsedDocumentResult,
-  type SupportedDocumentFormat,
-} from "./document-parser";
+import type { ParsedDocumentResult, SupportedDocumentFormat } from "./document-parser";
+export { extractTextFromDocument, extractTextFromDocx, extractTextFromPptx, type ParsedDocumentResult, type SupportedDocumentFormat } from "./document-parser";
 
-export async function extractTextFromPdf(fileOrBuffer: File | ArrayBuffer | Uint8Array): Promise<string> {
+// Dynamic import for unpdf (code split) - only loaded when PDF processing is needed
+let unpdfModule: typeof import("unpdf") | null = null;
+
+export async function extractTextFromPdf(
+  fileOrBuffer: File | ArrayBuffer | Uint8Array,
+): Promise<string> {
   try {
     let uint8: Uint8Array;
     if (fileOrBuffer instanceof File) {
@@ -19,7 +18,8 @@ export async function extractTextFromPdf(fileOrBuffer: File | ArrayBuffer | Uint
       uint8 = new Uint8Array(fileOrBuffer);
     }
 
-    const result = await extractText(uint8);
+    const mod = await import("unpdf");
+    const result = await mod.extractText(uint8);
     const pages = result.text;
     if (Array.isArray(pages)) {
       return pages.join("\n\n").trim();
@@ -28,7 +28,7 @@ export async function extractTextFromPdf(fileOrBuffer: File | ArrayBuffer | Uint
   } catch (error) {
     console.error("Erreur lors de l'extraction PDF:", error);
     throw new Error(
-      "Impossible d'extraire le texte du fichier PDF. Vérifiez qu'il s'agit d'un PDF valide contenant du texte.",
+      "Impossible d'extraire le texte du fichier PDF. Vérifiez qu'il s'agit d'un PDF valide contenant du texte."
     );
   }
 }

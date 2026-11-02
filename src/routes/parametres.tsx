@@ -9,7 +9,10 @@ export const Route = createFileRoute("/parametres")({
   head: () => ({
     meta: [
       { title: "Paramètres — CyberSafe Online" },
-      { name: "description", content: "Paramètres de langue, sécurité et intégration IA CyberSafe." },
+      {
+        name: "description",
+        content: "Paramètres de langue, sécurité et intégration IA CyberSafe.",
+      },
     ],
   }),
   component: SettingsPage,
@@ -25,11 +28,7 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        icon={Settings}
-        title={t("settings.title")}
-        subtitle={t("settings.subtitle")}
-      >
+      <PageHeader icon={Settings} title={t("settings.title")} subtitle={t("settings.subtitle")}>
         <div className="flex flex-wrap items-center gap-2">
           <CyberSticker tone="cyan" icon={Globe} rotate="none">
             3 Langues Disponibles
@@ -45,7 +44,9 @@ export function SettingsPage() {
           <Globe className="size-5 text-primary stroke-[2.2]" />
           <div>
             <h3 className="font-black text-base">{t("settings.languageSection")}</h3>
-            <p className="text-xs text-muted-foreground font-medium">{t("settings.languageHelp")}</p>
+            <p className="text-xs text-muted-foreground font-medium">
+              {t("settings.languageHelp")}
+            </p>
           </div>
         </div>
 
@@ -95,7 +96,9 @@ export function SettingsPage() {
         <div className="rounded-xl border-2 border-border/80 bg-muted/40 p-4 space-y-2 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground font-semibold">Modèle d'analyse :</span>
-            <span className="font-mono font-black text-foreground">gemma-4-26b-a4b-it (Multilingue)</span>
+            <span className="font-mono font-black text-foreground">
+              gemma-4-26b-a4b-it (Multilingue)
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground font-semibold">Langues gérées :</span>
@@ -113,7 +116,9 @@ export function SettingsPage() {
           <ShieldCheck className="size-5 text-success stroke-[2.2]" />
           <div>
             <h3 className="font-black text-base">{t("settings.verificationSection")}</h3>
-            <p className="text-xs text-muted-foreground font-medium">{t("settings.verificationDesc")}</p>
+            <p className="text-xs text-muted-foreground font-medium">
+              {t("settings.verificationDesc")}
+            </p>
           </div>
         </div>
         <div className="rounded-xl border-2 border-success/40 bg-success/10 p-3 text-xs text-success-foreground flex items-center gap-2 font-semibold">

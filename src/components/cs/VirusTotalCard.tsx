@@ -24,14 +24,11 @@ import {
 interface VirusTotalCardProps {
   virusTotal?: VirusTotalAnalysisResult | undefined;
   gemmaRisk?: "FAIBLE" | "SUSPECT" | "ÉLEVÉ" | undefined;
-  technicalRisk?: ("FAIBLE" | "SUSPECT" | "ÉLEVÉ" | "NON_RÉPERTORIÉ" | "INDISPONIBLE" | "AUCUN_LIEN") | undefined;
+  technicalRisk?:
+    ("FAIBLE" | "SUSPECT" | "ÉLEVÉ" | "NON_RÉPERTORIÉ" | "INDISPONIBLE" | "AUCUN_LIEN") | undefined;
 }
 
-export function VirusTotalCard({
-  virusTotal,
-  gemmaRisk,
-  technicalRisk,
-}: VirusTotalCardProps) {
+export function VirusTotalCard({ virusTotal, gemmaRisk, technicalRisk }: VirusTotalCardProps) {
   if (!virusTotal) return null;
 
   return (
@@ -94,7 +91,8 @@ export function VirusTotalCard({
             <span className="font-black text-foreground">{gemmaRisk || "Analysé"}</span>
           </div>
           <p className="mt-1 text-xs text-muted-foreground font-medium">
-            Examine l'intention, le ton d'urgence, les demandes de PIN/OTP et le scénario d'escroquerie.
+            Examine l'intention, le ton d'urgence, les demandes de PIN/OTP et le scénario
+            d'escroquerie.
           </p>
         </div>
 
@@ -115,7 +113,8 @@ export function VirusTotalCard({
 
       {!virusTotal.hasUrls && (
         <div className="rounded-xl border-2 border-dashed bg-muted/20 p-4 text-center text-xs text-muted-foreground font-medium">
-          Ce SMS ne contient aucun lien hypertexte ou nom de domaine web. L'analyse du risque repose exclusivement sur le contenu contextuel analysé par l'IA CyberSafe.
+          Ce SMS ne contient aucun lien hypertexte ou nom de domaine web. L'analyse du risque repose
+          exclusivement sur le contenu contextuel analysé par l'IA CyberSafe.
         </div>
       )}
 
@@ -140,7 +139,9 @@ export function VirusTotalCard({
             Règle de sécurité essentielle :
           </span>
           <p className="leading-relaxed font-medium">
-            {virusTotal.caution} Les escrocs créent souvent de nouveaux noms de domaine quelques minutes avant de diffuser des SMS frauduleux (Moov Money, T-Money, etc.), avant même que les moteurs antivirus n'aient eu le temps de les classifier.
+            {virusTotal.caution} Les escrocs créent souvent de nouveaux noms de domaine quelques
+            minutes avant de diffuser des SMS frauduleux (Moov Money, T-Money, etc.), avant même que
+            les moteurs antivirus n'aient eu le temps de les classifier.
           </p>
         </div>
       </div>
@@ -194,9 +195,7 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
       {report.status === "analyzed" && report.stats && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 pt-2">
           <div className="rounded-xl border-2 border-destructive/40 bg-card p-3 shadow-neo-sm">
-            <div className="text-[10px] font-black text-destructive uppercase">
-              Malveillants
-            </div>
+            <div className="text-[10px] font-black text-destructive uppercase">Malveillants</div>
             <div className="mt-1 font-display text-xl font-black text-destructive">
               {report.stats.malicious}
             </div>
@@ -204,13 +203,13 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
           </div>
 
           <div className="rounded-xl border-2 border-success/40 bg-card p-3 shadow-neo-sm">
-            <div className="text-[10px] font-black text-success uppercase">
-              Sans détection
-            </div>
+            <div className="text-[10px] font-black text-success uppercase">Sans détection</div>
             <div className="mt-1 font-display text-xl font-black text-success">
               {report.stats.harmless + report.stats.undetected}
             </div>
-            <div className="text-[10px] text-muted-foreground font-medium">moteurs neutres/sûrs</div>
+            <div className="text-[10px] text-muted-foreground font-medium">
+              moteurs neutres/sûrs
+            </div>
           </div>
 
           <div className="rounded-xl border-2 border-warning/50 bg-card p-3 shadow-neo-sm">
@@ -227,9 +226,7 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
             <div className="text-[10px] font-black text-muted-foreground uppercase">
               Score Réputation
             </div>
-            <div className="mt-1 font-display text-xl font-black">
-              {report.reputation ?? 0}
-            </div>
+            <div className="mt-1 font-display text-xl font-black">{report.reputation ?? 0}</div>
             <div className="text-[10px] text-muted-foreground font-medium">
               {report.lastAnalysisDate
                 ? new Date(report.lastAnalysisDate * 1000).toLocaleDateString("fr-FR")
@@ -263,7 +260,8 @@ function UrlReportItem({ report }: { report: VirusTotalUrlReport }) {
             )}
           </div>
           <p className="text-muted-foreground font-medium">
-            L'absence de rapport préalable est fréquente pour les liens de phishing récents conçus pour cibler les utilisateurs togolais.
+            L'absence de rapport préalable est fréquente pour les liens de phishing récents conçus
+            pour cibler les utilisateurs togolais.
           </p>
         </div>
       )}

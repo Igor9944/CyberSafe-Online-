@@ -92,9 +92,11 @@ describe("Challenger 2 Empirical Boundary & Stress Suite", () => {
 
         if (/PitchModal/i.test(content)) violations.push({ file: rel, match: "PitchModal" });
         if (/pitch\s*3\s*min/i.test(content)) violations.push({ file: rel, match: "pitch 3 min" });
-        if (/aide\s*de\s*pitch/i.test(content)) violations.push({ file: rel, match: "aide de pitch" });
+        if (/aide\s*de\s*pitch/i.test(content))
+          violations.push({ file: rel, match: "aide de pitch" });
         if (/20\s*\/\s*20/i.test(content)) violations.push({ file: rel, match: "20/20 rubric" });
-        if (/MLH\s*×\s*LBS\s*2026/i.test(content)) violations.push({ file: rel, match: "MLH × LBS 2026" });
+        if (/MLH\s*×\s*LBS\s*2026/i.test(content))
+          violations.push({ file: rel, match: "MLH × LBS 2026" });
         if (/hackathon/i.test(content)) violations.push({ file: rel, match: "hackathon" });
       }
 
@@ -156,28 +158,43 @@ describe("Challenger 2 Empirical Boundary & Stress Suite", () => {
     it("verifies dual-mode FlashCards interaction, boundaries, and answer locking", () => {
       // Simulate Flashcard state machine logic directly as implemented in apprendre.tsx
       const testCards: Flashcard[] = [
-        normalizeFlashcard({
-          id: "card-1",
-          front: "Q1",
-          binaryStatement: "T-Money demande toujours votre code PIN par SMS.",
-          binaryAnswer: false,
-          binaryExplanation: "T-Money ne demande jamais votre code PIN par SMS.",
-          mcqQuestion: "Quelle est la règle d'or pour votre code secret ?",
-          mcqOptions: ["Le partager à un agent", "Ne jamais le divulguer", "L'écrire sur le téléphone"],
-          mcqAnswerIndex: 1,
-          mcqExplanation: "Le code PIN est strictement confidentiel.",
-        }, 0),
-        normalizeFlashcard({
-          id: "card-2",
-          front: "Q2",
-          binaryStatement: "Les arnaques aux faux transferts utilisent souvent de faux SMS de confirmation.",
-          binaryAnswer: true,
-          binaryExplanation: "Les escrocs envoient de faux SMS imitant l'opérateur.",
-          mcqQuestion: "Comment vérifier un vrai transfert d'argent ?",
-          mcqOptions: ["Consulter son solde via USSD officiel", "Faire confiance au SMS reçu", "Rappeler le numéro"],
-          mcqAnswerIndex: 0,
-          mcqExplanation: "Seul le solde vérifié via le code USSD officiel fait foi.",
-        }, 1),
+        normalizeFlashcard(
+          {
+            id: "card-1",
+            front: "Q1",
+            binaryStatement: "T-Money demande toujours votre code PIN par SMS.",
+            binaryAnswer: false,
+            binaryExplanation: "T-Money ne demande jamais votre code PIN par SMS.",
+            mcqQuestion: "Quelle est la règle d'or pour votre code secret ?",
+            mcqOptions: [
+              "Le partager à un agent",
+              "Ne jamais le divulguer",
+              "L'écrire sur le téléphone",
+            ],
+            mcqAnswerIndex: 1,
+            mcqExplanation: "Le code PIN est strictement confidentiel.",
+          },
+          0,
+        ),
+        normalizeFlashcard(
+          {
+            id: "card-2",
+            front: "Q2",
+            binaryStatement:
+              "Les arnaques aux faux transferts utilisent souvent de faux SMS de confirmation.",
+            binaryAnswer: true,
+            binaryExplanation: "Les escrocs envoient de faux SMS imitant l'opérateur.",
+            mcqQuestion: "Comment vérifier un vrai transfert d'argent ?",
+            mcqOptions: [
+              "Consulter son solde via USSD officiel",
+              "Faire confiance au SMS reçu",
+              "Rappeler le numéro",
+            ],
+            mcqAnswerIndex: 0,
+            mcqExplanation: "Seul le solde vérifié via le code USSD officiel fait foi.",
+          },
+          1,
+        ),
       ];
 
       // State machine variables

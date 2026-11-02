@@ -40,9 +40,17 @@ export const Route = createFileRoute("/sms")({
   head: () => ({
     meta: [
       { title: "Scanner SMS & Capture — CyberSafe Online" },
-      { name: "description", content: "Analyse par Google Gemma 4 & VirusTotal v3 : détection d'arnaques SMS Mobile Money (T-Money / Moov Money) par texte ou capture d'écran." },
+      {
+        name: "description",
+        content:
+          "Analyse par Google Gemma 4 & VirusTotal v3 : détection d'arnaques SMS Mobile Money (T-Money / Moov Money) par texte ou capture d'écran.",
+      },
       { property: "og:title", content: "Scanner SMS & Capture — CyberSafe Online" },
-      { property: "og:description", content: "Vérifiez en quelques secondes si un SMS T-Money ou Moov Money est authentique ou frauduleux." },
+      {
+        property: "og:description",
+        content:
+          "Vérifiez en quelques secondes si un SMS T-Money ou Moov Money est authentique ou frauduleux.",
+      },
     ],
   }),
   component: SmsPage,
@@ -113,7 +121,10 @@ function SmsPage() {
 
       if (!extractedText) {
         try {
-          const localRes = await extractTextWithLocalOcr(screenshot.base64, lang === "en" ? "eng" : "fra");
+          const localRes = await extractTextWithLocalOcr(
+            screenshot.base64,
+            lang === "en" ? "eng" : "fra",
+          );
           if (localRes.text) {
             extractedText = localRes.text;
           }
@@ -125,7 +136,9 @@ function SmsPage() {
       toast.dismiss("ocr-extract");
       if (extractedText) {
         setText(extractedText);
-        toast.success("Texte du SMS transcrit dans l'éditeur ! Vous pouvez maintenant le relire et le corriger avant analyse.");
+        toast.success(
+          "Texte du SMS transcrit dans l'éditeur ! Vous pouvez maintenant le relire et le corriger avant analyse.",
+        );
       } else {
         toast.info("Aucun texte lisible détecté sur la capture.");
       }
@@ -181,7 +194,10 @@ function SmsPage() {
       const amounts = Array.from(new Set([...gemmaAmounts, ...regexAmounts])).filter(Boolean);
 
       const regexPhones = Array.from(
-        new Set(fullSourceText.match(/(?:\+?228[\s-]?)?\b\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{2}\b/g) ?? []),
+        new Set(
+          fullSourceText.match(/(?:\+?228[\s-]?)?\b\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{2}\b/g) ??
+            [],
+        ),
       );
       const gemmaPhones = res.extractedMeta?.phones ?? [];
       const phones = Array.from(new Set([...gemmaPhones, ...regexPhones])).filter(Boolean);
@@ -200,11 +216,11 @@ function SmsPage() {
       const resolvedSender =
         res.extractedMeta?.sender ||
         senderMatch?.[1]?.trim() ||
-        ( /tmoney|t-money|yas/i.test(fullSourceText)
+        (/tmoney|t-money|yas/i.test(fullSourceText)
           ? "T-Money (Mentionné)"
           : /moov|flooz/i.test(fullSourceText)
             ? "Moov Money (Mentionné)"
-            : phones[0] || "Expéditeur non certifié" );
+            : phones[0] || "Expéditeur non certifié");
 
       res.extracted = {
         sender: resolvedSender,
@@ -229,11 +245,7 @@ function SmsPage() {
 
   return (
     <>
-      <PageHeader
-        icon={MessageSquareWarning}
-        title={t("sms.title")}
-        subtitle={t("sms.subtitle")}
-      >
+      <PageHeader icon={MessageSquareWarning} title={t("sms.title")} subtitle={t("sms.subtitle")}>
         <div className="flex flex-wrap items-center gap-2">
           <CyberSticker tone="cyan" icon={Sparkles} rotate="none">
             Google Gemma 4 (Texte & Vision)
@@ -266,7 +278,9 @@ function SmsPage() {
                 onEditText={(t) => {
                   setText(t);
                   setResult(null);
-                  toast.info("Texte transcrit injecté dans l'éditeur. Vous pouvez le corriger et relancer l'analyse.");
+                  toast.info(
+                    "Texte transcrit injecté dans l'éditeur. Vous pouvez le corriger et relancer l'analyse.",
+                  );
                 }}
               />
               {result.virusTotal && (
@@ -315,7 +329,8 @@ function SmsPage() {
                         📸 Capture d'écran : {screenshot.name}
                       </div>
                       <p className="text-[11px] text-muted-foreground font-medium">
-                        Gemma 4 Vision lira la capture et vérifiera la syntaxe officielle T-Money / Moov Money.
+                        Gemma 4 Vision lira la capture et vérifiera la syntaxe officielle T-Money /
+                        Moov Money.
                       </p>
                     </div>
                   </div>
@@ -367,7 +382,8 @@ function SmsPage() {
               />
               <label htmlFor="vt-consent" className="cursor-pointer space-y-0.5">
                 <span className="font-bold text-foreground flex items-center gap-1.5">
-                  <Globe className="size-3.5 text-primary" /> Vérification technique des liens avec VirusTotal v3
+                  <Globe className="size-3.5 text-primary" /> Vérification technique des liens avec
+                  VirusTotal v3
                 </span>
                 <span className="block text-muted-foreground text-[11px] leading-relaxed font-medium">
                   {t("sms.privacyDisclosure")}
@@ -378,8 +394,15 @@ function SmsPage() {
             {progress !== null && <ProgressBar value={progress} />}
 
             <div className="flex flex-wrap gap-3">
-              <Button variant="hero" size="lg" onClick={run} disabled={progress !== null} className="shadow-neo border-2 border-white/20 font-bold">
-                <ScanSearch /> {screenshot ? "Analyser la capture avec Gemma 4" : t("sms.analyzeBtn")}
+              <Button
+                variant="hero"
+                size="lg"
+                onClick={run}
+                disabled={progress !== null}
+                className="shadow-neo border-2 border-white/20 font-bold"
+              >
+                <ScanSearch />{" "}
+                {screenshot ? "Analyser la capture avec Gemma 4" : t("sms.analyzeBtn")}
               </Button>
 
               <Button
@@ -441,7 +464,9 @@ function SmsPage() {
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 line-clamp-2 text-xs text-muted-foreground font-medium">{d.text}</div>
+                  <div className="mt-1 line-clamp-2 text-xs text-muted-foreground font-medium">
+                    {d.text}
+                  </div>
                 </button>
               ))}
             </div>
@@ -461,7 +486,9 @@ function Extracted({
 }) {
   const { t } = useI18n();
   const meta = r.extractedMeta;
-  const conformity = meta?.syntaxConformity || (r.level === "FAIBLE" ? "CONFORME" : r.level === "ÉLEVÉ" ? "NON_CONFORME" : "SUSPECT");
+  const conformity =
+    meta?.syntaxConformity ||
+    (r.level === "FAIBLE" ? "CONFORME" : r.level === "ÉLEVÉ" ? "NON_CONFORME" : "SUSPECT");
   const operator = meta?.operator || "T-Money / Moov Money";
   const syntaxDetail =
     meta?.syntaxDetail ||
@@ -485,7 +512,8 @@ function Extracted({
             {t("sms.extractedTitle")} & Conformité Format Officiel ({operator})
           </h3>
           <p className="text-xs text-muted-foreground font-medium">
-            Vérification par Google Gemma 4 de l'expéditeur, du montant et de la syntaxe officielle T-Money / Moov Money
+            Vérification par Google Gemma 4 de l'expéditeur, du montant et de la syntaxe officielle
+            T-Money / Moov Money
           </p>
         </div>
         <span
@@ -522,7 +550,8 @@ function Extracted({
         <div className="rounded-xl border-2 border-slate-900 bg-muted/40 p-3.5 text-xs space-y-2 shadow-neo-sm dark:border-white/30">
           <div className="flex items-center justify-between gap-2">
             <div className="font-black text-foreground flex items-center gap-1.5">
-              <FileText className="size-3.5 text-electric" /> Texte extrait de la capture d'écran par Gemma 4 Vision :
+              <FileText className="size-3.5 text-electric" /> Texte extrait de la capture d'écran
+              par Gemma 4 Vision :
             </div>
             {onEditText && (
               <Button
@@ -536,7 +565,9 @@ function Extracted({
               </Button>
             )}
           </div>
-          <p className="font-mono text-foreground whitespace-pre-wrap bg-background/70 p-2.5 rounded-lg border-2 border-border/80">{meta.transcribedText}</p>
+          <p className="font-mono text-foreground whitespace-pre-wrap bg-background/70 p-2.5 rounded-lg border-2 border-border/80">
+            {meta.transcribedText}
+          </p>
         </div>
       )}
 
