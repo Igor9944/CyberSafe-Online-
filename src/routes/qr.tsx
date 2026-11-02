@@ -242,30 +242,52 @@ function QrPage() {
   const startContinuousScan = () => {
     if (!videoRef.current) return;
 
+    // Préparer un canvas réutilisable (créé une seule fois)
+    const scanCanvas = document.createElement("canvas");
+    const scanCtx = scanCanvas.getContext("2d");
+
+    // Limite le scan à 10fps (100ms) au lieu de 60fps
+    const MIN_SCAN_INTERVAL = 100;
+    let lastScanTime = 0;
+
     const loop = async () => {
       if (!isCameraActive || cameraPermission !== "granted") return;
 
       const video = videoRef.current;
       if (!video || !video.readyState) return;
 
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      // Mise à jour du temps pour limiter la fréquence de scan
+      const now = performance.now();
+      if (now - lastScanTime < MIN_SCAN_INTERVAL) {
+        scanFrame.current = window.requestAnimationFrame(loop);
+        return;
+      }
+      lastScanTime = now;
 
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      // Downscale la vidéo pour la détection (640x480 au lieu du max 1920x1080)
+      const targetWidth = 640;
+      const targetHeight = 480;
+      if (scanCanvas.width !== targetWidth || scanCanvas.height !== targetHeight) {
+        scanCanvas.width = targetWidth;
+        scanCanvas.height = targetHeight;
+      }
+      if (!scanCtx) return;
 
-      const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
+      // Redimensionner et dessiner
+      const scaleX = targetWidth / video.videoWidth;
+      const scaleY = targetHeight / video.videoHeight;
+      scanCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, targetWidth, targetHeight);
+
+      const imageData = scanCtx.getImageData(0, 0, targetWidth, targetHeight);
+
+      const qrCode = jsQR(imageData.data, targetWidth, targetHeight);
       if (qrCode && qrCode.data) {
         const content = qrCode.data.trim();
         if (content && content !== detectedQr) {
           setDetectedQr(content);
           setQrScanned(true);
           if (!busy) {
-            // Capture l'image du QR depuis le flux vidéo
-            captureAndUploadQrFrame(video, canvas, content);
+            captureAndUploadQrFrame(video, scanCanvas, content);
           }
         }
       }
