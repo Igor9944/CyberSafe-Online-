@@ -136,6 +136,8 @@
     "cameraError": "Impossible d'accéder à la caméra. Vérifiez les autorisations.",
     "stopCamera": "Arrêter la caméra",
     "qrDetected": "QR Code détecté : `{content}`",
+    "capturedAndUploaded": "Image capturée et téléversée. Analyse en cours...",
+    "captureError": "Erreur lors de la capture de l'image.",
     "analyzedTitle": "QR Code analysé",
     "contentExtracted": "Contenu extrait",
     "urlDetected": "URL détectée (non ouverte)",

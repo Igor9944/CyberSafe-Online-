@@ -264,8 +264,8 @@ function QrPage() {
           setDetectedQr(content);
           setQrScanned(true);
           if (!busy) {
-            toast.success(t("qr.qrDetected", content.slice(0, 50)));
-            finish(content);
+            // Capture l'image du QR depuis le flux vidéo
+            captureAndUploadQrFrame(video, canvas, content);
           }
         }
       }
@@ -274,6 +274,51 @@ function QrPage() {
     };
 
     scanFrame.current = window.requestAnimationFrame(loop);
+  };
+
+  const captureAndUploadQrFrame = async (video: HTMLVideoElement, canvas: HTMLCanvasElement, content: string) => {
+    try {
+      // Capture la frame actuelle sur le canvas
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convertir le canvas en blob PNG
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((b) => resolve(b as Blob), "image/png");
+      });
+
+      // Créer un File à partir du blob
+      const file = new File([blob], "qr-scanner-capture.png", { type: "image/png" });
+
+      // Réinitialiser le scan et arrêter la caméra
+      setDetectedQr(null);
+      setQrScanned(false);
+      setIsCameraActive(false);
+      if (scanFrame.current) {
+        cancelAnimationFrame(scanFrame.current);
+        scanFrame.current = 0;
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+
+      // Uploader le fichier comme si l'utilisateur l'avait pris
+      await onFile(file);
+
+      // Réactiver la détection manuelle via la touche espace ou le bouton
+      toast.success(t("qr.capturedAndUploaded"));
+    } catch (err: any) {
+      console.error("Capturing QR frame failed:", err);
+      toast.error(t("qr.captureError"));
+    }
   };
 
   return (
