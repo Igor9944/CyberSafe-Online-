@@ -127,6 +127,7 @@
   "qr": {
     "title": "QR Code Scanner",
     "subtitle": "Upload a QR code image. We inspect its payload safely without opening any links.",
+    "takePhoto": "Take a photo",
     "dropzone": "Drag an image here or click to select",
     "dropzoneHint": "PNG, JPG or WEBP (up to 5 MB)",
     "analyzedTitle": "Analyzed QR Code",

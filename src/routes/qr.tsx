@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   QrCode,
+  Camera,
   Upload,
   Link2,
   FileText,
@@ -13,8 +14,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   Globe,
+  Square,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import jsQR from "jsqr";
 import { Button } from "@/components/ui/button";
@@ -86,6 +88,9 @@ function decode(file: File): Promise<string | null> {
 function QrPage() {
   const { t, lang } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [busy, setBusy] = useState(false);
   const [content, setContent] = useState("");
   const [manualText, setManualText] = useState("");
@@ -93,6 +98,15 @@ function QrPage() {
   const [result, setResult] = useState<CombinedSmsAnalysisResult | null>(null);
   const [apiError, setApiError] = useState<{ message: string; quota: boolean } | null>(null);
   const [activeTab, setActiveTab] = useState<"upload" | "manual">("upload");
+  const [cameraPermission, setCameraPermission] = useState<"granted" | "denied" | "prompt">("prompt");
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraStatus, setCameraStatus] = useState<"idle" | "active" | "denied">("idle");
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const finish = async (c: string, imageSrc?: string) => {
     const cleanContent = c.trim();
@@ -177,6 +191,40 @@ function QrPage() {
     setPreviewUrl(null);
     setManualText(item.content);
     finish(item.content);
+  };
+
+  const requestCameraPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setIsCameraActive(true);
+      setCameraPermission("granted");
+      toast.success(t("qr.cameraPermission"));
+    } catch (err: any) {
+      console.error("Camera permission error:", err);
+      setCameraPermission("denied");
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        toast.error(t("qr.cameraDenied"));
+      } else {
+        toast.error(t("qr.cameraError"));
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+    toast.info(t("qr.cameraStopped"));
   };
 
   return (
@@ -272,7 +320,83 @@ function QrPage() {
 
           {activeTab === "upload" ? (
             <Panel className="space-y-4 border-2 shadow-neo-sm">
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="hero"
+                  disabled={busy}
+                  onClick={() => {
+                    if (cameraPermission === "prompt") requestCameraPermission();
+                    else cameraInputRef.current?.click();
+                  }}
+                  className="border-2 border-white/20 font-bold shadow-neo"
+                >
+                  <Camera className="size-4" />
+                  {t("qr.takePhoto")}
+                </Button>
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept={TYPES.join(",")}
+                  capture="environment"
+                  className="hidden"
+                  aria-label={t("qr.takePhoto")}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    void onFile(file);
+                  }}
+                />
+                {isCameraActive && cameraPermission === "granted" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={stopCamera}
+                    className="border-red-500/50 text-red-500 hover:bg-red-500/10"
+                  >
+                    <Square className="size-4 fill-current" />
+                    {t("qr.stopCamera")}
+                  </Button>
+                )}
+              </div>
+              
+              {/* Aperçu en direct de la caméra */}
+              {isCameraActive && (
+                <div className="relative rounded-xl border-2 border-primary/40 bg-black p-3 overflow-hidden">
+                  <video
+                    ref={videoRef}
+                    className="size-full object-cover"
+                    muted
+                    playsInline
+                    style={{ height: 200 }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="grid grid-cols-2 gap-2 w-32 h-32">
+                      <div className="border-b border-white/50" />
+                      <div className="border-r border-white/50" />
+                      <div className="border-b border-white/50" />
+                      <div className="border-r border-white/50" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-2 left-2 right-2 flex justify-center">
+                    <span className="bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                      {t("qr.livePreview")}
+                    </span>
+                  </div>
+                  {cameraPermission === "denied" && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <p className="text-white text-sm text-center p-4">
+                        {t("qr.cameraDenied")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <button
+                type="button"
+                disabled={busy}
                 onClick={() => inputRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
@@ -313,7 +437,11 @@ function QrPage() {
                 type="file"
                 accept={TYPES.join(",")}
                 className="hidden"
-                onChange={(e) => onFile(e.target.files?.[0])}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  void onFile(file);
+                }}
               />
 
               {busy && (

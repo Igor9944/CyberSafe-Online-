@@ -127,6 +127,7 @@
   "qr": {
     "title": "Kpɔ QR Code gbɔ",
     "subtitle": "Kɔ QR Code ƒe foto vɛ. Míeaɖee afia wò evɔ míemaʋu kadoƒea le internet dzi o.",
+    "takePhoto": "Wɔ foto",
     "dropzone": "Dra foto vɛ afisia alo zii dzi be nàtiae",
     "dropzoneHint": "PNG, JPG alo WEBP (megawu 5 MB o)",
     "analyzedTitle": "QR Code si me míekpɔ",
