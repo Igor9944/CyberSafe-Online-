@@ -1,4 +1,4 @@
-# 🛡️ CyberSafe Online — Les Bugs Busters
+# 🛡️ CyberSafe Online 
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
@@ -6,7 +6,6 @@
 
 **CyberSafe Online** est une plateforme SaaS citoyenne conçue pour sensibiliser et protéger les utilisateurs contre les fraudes et arnaques numériques en Afrique de l'Ouest, notamment au Togo (fraudes Mobile Money : **T-Money** et **Moov Money**).
 
-Développé et maintenu par l'équipe **Les Bugs Busters** (Lomé Business School) pour offrir une protection anti-fraude continue, accessible et pédagogique.
 
 ---
 
