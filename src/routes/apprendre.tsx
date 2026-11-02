@@ -202,18 +202,7 @@ export function StudentSpacePage() {
         }
       }
 
-      const initial: StoredCourseItem[] = DEMO_COURSES.map((c) => ({
-        id: c.id,
-        title: c.title,
-        subject: c.subject,
-        examDate: c.examDate,
-        content: c.content,
-        fileType: "manual",
-        createdAt: new Date().toISOString(),
-        flashcards: c.flashcards && c.flashcards.length > 0
-          ? c.flashcards.map((f, idx) => normalizeFlashcard(f, idx))
-          : generateFlashcardsForContent(c.title, c.content),
-      }));
+      const initial: StoredCourseItem[] = [];
       setCourses(initial);
       localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(initial));
     } catch {
