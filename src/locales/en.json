@@ -1,0 +1,248 @@
+{
+  "common": {
+    "appName": "CyberSafe Online",
+    "tagline": "Your digital safety, our priority.",
+    "slogan": "Mobile Money scam protection in Togo.",
+    "backHome": "Back to Home",
+    "retry": "Try Again",
+    "analyze": "Analyze",
+    "reset": "New Analysis",
+    "loading": "Analyzing...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "viewAll": "View All",
+    "close": "Close",
+    "soon": "soon",
+    "copy": "Copy",
+    "copied": "Copied to clipboard",
+    "languages": {
+      "fr": "Français",
+      "en": "English",
+      "ee": "Eʋegbe"
+    },
+    "riskLevels": {
+      "low": "Low",
+      "suspect": "Suspicious",
+      "high": "High"
+    },
+    "humanVerificationBadge": "Human Linguistic Verification: Verified",
+    "humanVerificationWarning": "Security requirement: Critical warnings on secret codes and money transfers undergo human linguistic review."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "sms": "SMS Scanner",
+    "qr": "QR Code Scanner",
+    "audio": "Audio Scanner",
+    "guide": "Record a Call",
+    "assistant": "CyberSafe Assistant",
+    "learn": "Learning Space",
+    "history": "History",
+    "about": "About",
+    "settings": "Settings",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "home": {
+    "welcome": "Welcome to CyberSafe Online",
+    "heroTitle": "Your digital safety, ",
+    "heroHighlight": "our priority.",
+    "heroSubtitle": "Before you reply, pay, or click: verify. We detect Moov Money and T-Money scams in seconds.",
+    "ctaSms": "Analyze an SMS",
+    "ctaQr": "Scan a QR Code",
+    "ctaAudio": "Analyze an Audio",
+    "stats": {
+      "analyses": "Scans Completed",
+      "threats": "Threats Detected",
+      "safe": "Safe Messages",
+      "storedData": "Raw Data Stored"
+    },
+    "scanners": {
+      "sms": {
+        "title": "SMS Scanner",
+        "desc": "Paste an SMS or screenshot to detect fake bonuses, OTP requests, and impersonated agents.",
+        "cta": "Analyze an SMS"
+      },
+      "qr": {
+        "title": "QR Scanner",
+        "desc": "Decode a QR code safely without opening links and verify malicious domains.",
+        "cta": "Scan a QR Code"
+      },
+      "audio": {
+        "title": "Audio Scanner",
+        "desc": "Analyze the recording or transcript of a suspicious phone call.",
+        "cta": "Analyze an Audio"
+      }
+    },
+    "recentAnalyses": "Recent Analyses",
+    "noAnalyses": "No analyses yet",
+    "startFirst": "Run your first verification.",
+    "dailyTipsTitle": "Tips of the Day",
+    "tips": [
+      "Never share your PIN and OTP codes with anyone, ever.",
+      "An 'accidental transfer'? Verify your real balance via your official USSD menu first.",
+      "Telecom operators never send links to claim a bonus or gift.",
+      "Hang up if pressured: legitimate agents can always wait."
+    ],
+    "howItWorks": "How CyberSafe Online Protects You",
+    "steps": {
+      "step1": {
+        "title": "1. You Submit",
+        "desc": "An SMS, QR code, or audio chosen by you. Nothing is ever captured in the background."
+      },
+      "step2": {
+        "title": "2. We Analyze",
+        "desc": "Local safety heuristics, domain verification, and CyberSafe multilingual AI analysis."
+      },
+      "step3": {
+        "title": "3. You Decide",
+        "desc": "A clear risk score, transparent evidence, and actionable safety tips in your language."
+      }
+    }
+  },
+  "sms": {
+    "title": "SMS Scanner",
+    "subtitle": "Paste a suspicious message. We identify code theft, fake promotions, malicious links, and psychological pressure.",
+    "label": "SMS Content",
+    "placeholder": "Paste the SMS received here… (French, English, or Eʋegbe)",
+    "warningPin": "Never type your real PIN or private codes here.",
+    "analyzeBtn": "Analyze Message",
+    "ocrBtn": "Screenshot",
+    "demoTitle": "Demonstration Examples",
+    "demoSubtitle": "Completely simulated test messages.",
+    "extractedTitle": "Extracted Elements",
+    "sender": "Sender",
+    "amounts": "Amounts",
+    "links": "Links (unopened)",
+    "phones": "Phone Numbers",
+    "tooShort": "Message is too short to be analyzed.",
+    "tooLong": "Message exceeds 2000 characters limit.",
+    "completed": "Analysis completed"
+  },
+  "qr": {
+    "title": "QR Code Scanner",
+    "subtitle": "Upload a QR code image. We inspect its payload safely without opening any links.",
+    "dropzone": "Drag an image here or click to select",
+    "dropzoneHint": "PNG, JPG or WEBP (up to 5 MB)",
+    "analyzedTitle": "Analyzed QR Code",
+    "contentExtracted": "Extracted Content",
+    "urlDetected": "Detected URL (unopened)",
+    "demoTitle": "Demo QR Examples",
+    "demoSubtitle": "Test against real-world scam patterns frequent in Togo.",
+    "formatError": "Format not accepted. Use PNG, JPG or WEBP.",
+    "sizeError": "Image is too large (5 MB maximum).",
+    "noQrFound": "No readable QR Code found in this image.",
+    "decoded": "QR Code successfully decoded."
+  },
+  "audio": {
+    "title": "Audio Scanner",
+    "subtitle": "Analyze a recorded suspicious call that you opted to save. Nothing is recorded automatically.",
+    "guideBtn": "How to record a call?",
+    "fileSection": "1. Audio File",
+    "chooseFile": "Choose audio file",
+    "fileHint": "MP3, WAV, M4A, OGG · 20 MB max",
+    "sttNotice": "Automated Speech-to-Text: not connected yet. Audio stays strictly on your device.",
+    "transcriptSection": "2. Call Transcript or Summary",
+    "placeholder": "E.g.: The caller claimed to be a Moov agent and demanded the SMS validation code… (French, English, or Eʋegbe)",
+    "analyzeBtn": "Analyze Call",
+    "demoBtn": "Simulated Transcript",
+    "resultTitle": "Call Analysis Result",
+    "resultSubtitle": "Social engineering and manipulation signals detected.",
+    "analyzedTranscript": "Analyzed Transcript",
+    "privacyNotice": "CyberSafe Online never eavesdrops and does not run background recording."
+  },
+  "guide": {
+    "title": "Call Recording Guide",
+    "subtitle": "Learn how to safely record suspicious calls in accordance with legal norms in Togo.",
+    "legalNotice": "Legal & Ethical Framework: Only record calls when you suspect fraud to protect yourself. CyberSafe never records anything without your explicit action.",
+    "androidTitle": "On Android",
+    "androidSteps": [
+      "Check if your official Phone app includes a 'Record' button during an active call.",
+      "If not available, put the call on speaker and use the voice recorder of another device.",
+      "Avoid installing untrusted third-party apps demanding dangerous permissions."
+    ],
+    "iosTitle": "On iPhone (iOS)",
+    "iosSteps": [
+      "On iOS 18.1+, tap the call recording icon in the top-left during your phone call.",
+      "Alternatively, use speakerphone and record with the Voice Memos app on another tablet or phone.",
+      "Export the resulting audio file to analyze it in CyberSafe Online."
+    ],
+    "whatNext": "What to do after recording?",
+    "whatNextDesc": "Hang up immediately if the caller demands your PIN or makes threats. Import the audio file or write the summary into our scanner."
+  },
+  "assistant": {
+    "title": "CyberSafe Assistant",
+    "subtitle": "Ask your cybersecurity questions or study with / commands.",
+    "badge": "Powered by CyberSafe Multilingual AI",
+    "placeholder": "Ask a question or type /apprendre, /plan, /quiz... (FR, EN, EE)",
+    "send": "Send",
+    "suggested": "Common Questions",
+    "gemmaStatus": "CyberSafe AI Engine: Active Multilingual Model (French, English, Eʋegbe)",
+    "languageUsed": "Response Language:",
+    "clearChat": "Clear Conversation",
+    "eweWarning": "Éwé Quality: Explanations in Eʋegbe are tailored to Togolese Mobile Money context."
+  },
+  "learn": {
+    "title": "Multilingual Learning Space",
+    "subtitle": "Master anti-fraud reflexes through interactive lessons, summaries, and quizzes in French, English, and Éwé.",
+    "commandsTitle": "Recognized Quick Commands",
+    "commandsDesc": "Type a command or click on it to trigger the corresponding learning module:",
+    "commands": {
+      "learn": "/apprendre or /learn — Start a structured learning lesson",
+      "plan": "/plan — View your customized training curriculum",
+      "quiz": "/quiz — Test your reflexes with a scam simulation quiz",
+      "summary": "/resume or /summary — Get the golden safety rules digest",
+      "stop": "/stop — Stop the current session"
+    },
+    "modulesTitle": "Training Modules",
+    "startQuiz": "Take Security Quiz",
+    "score": "Your Score",
+    "congrats": "Congratulations! You displayed great safety instincts.",
+    "retryQuiz": "Retake Quiz",
+    "quizQuestion": "Question",
+    "quizExplanation": "Explanation:"
+  },
+  "history": {
+    "title": "Analysis History",
+    "subtitle": "Review previous analyses stored locally on your device.",
+    "clearAll": "Clear History",
+    "confirmClear": "Are you sure you want to delete all historical analysis records?",
+    "empty": "No analyses in history",
+    "emptyDesc": "Your past SMS, QR code, and audio scans will be displayed here.",
+    "filterAll": "All",
+    "filterSms": "SMS",
+    "filterQr": "QR Code",
+    "filterAudio": "Audio",
+    "deleted": "History cleared"
+  },
+  "about": {
+    "title": "About CyberSafe Online",
+    "subtitle": "An inclusive anti-fraud digital security platform for Togo.",
+    "missionTitle": "Our Mission",
+    "missionDesc": "CyberSafe Online protects Togolese citizens against pervasive financial fraud targeting T-Money, Moov Money, and digital payment systems.",
+    "multilingualTitle": "Multilingual Commitment",
+    "multilingualDesc": "In full alignment with the CyberSafe Online specification, the platform natively supports French, English, and Éwé (Eʋegbe). The CyberSafe AI analysis engine is calibrated for local linguistic nuances, including code-switching and indigenous terms.",
+    "safetyTitle": "Security & Privacy Guarantee",
+    "safetyDesc": "Your sensitive data stays under your control. No passive listening, no covert logging, and no untrusted links are ever loaded onto servers."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your CyberSafe Online environment.",
+    "languageSection": "Interface & Analysis Language",
+    "languageHelp": "Select the language used across the UI, risk breakdowns, and CyberSafe AI assistant responses.",
+    "gemmaSection": "CyberSafe AI Model",
+    "gemmaHelp": "CyberSafe AI is configured to process multilingual content (FR, EN, EE) and formulate advice in your preferred language.",
+    "verificationSection": "Human Linguistic Verification",
+    "verificationDesc": "All critical security warnings regarding PINs, OTP codes, and funds transfers in Éwé are submitted to human linguistic verification.",
+    "savedSuccess": "Settings saved"
+  },
+  "risk": {
+    "riskLevel": "Risk Level",
+    "localEngineNotice": "Local rule-based safety engine · indicative score",
+    "findingsTitle": "Detection Findings",
+    "noFindings": "No suspicious patterns identified by current rules.",
+    "recommendationsTitle": "Safety Recommendations",
+    "aiNoticeTitle": "CyberSafe AI Multilingual Engine Connected.",
+    "aiNoticeDesc": "Threat detection rules are active for French, English, and Éwé."
+  }
+}

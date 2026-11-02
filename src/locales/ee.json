@@ -1,0 +1,248 @@
+{
+  "common": {
+    "appName": "CyberSafe Online",
+    "tagline": "Wò dedienɔnɔ le nabi mɔ̃ dzi nye míaƒe dɔ vevitɔ.",
+    "slogan": "Dedienɔnɔ tso Mobile Money beble nu le Togo.",
+    "backHome": "Trɔ yi Dɔwɔƒe vevitɔ",
+    "retry": "Gawɔe ake",
+    "analyze": "Kpɔ eme nyuie",
+    "reset": "Dɔ yeye gɔmedzedze",
+    "loading": "Míele eme kpɔm fifia...",
+    "cancel": "Tɔtrɔ megbe",
+    "save": "Dzra ɖo",
+    "delete": "Tutui ɖa",
+    "viewAll": "Kpɔ wo katã",
+    "close": "Tui",
+    "soon": "eteƒe madidi o",
+    "copy": "Kɔpii",
+    "copied": "Wokɔpii ɖe agbalẽvi dzi",
+    "languages": {
+      "fr": "Français",
+      "en": "English",
+      "ee": "Eʋegbe"
+    },
+    "riskLevels": {
+      "low": "Afɔku Mele Eme O",
+      "suspect": "Keɖiɖi Le Eme",
+      "high": "Afɔku Gã Le Eme"
+    },
+    "humanVerificationBadge": "Eʋegbe nyagɔmeɖeɖe si ŋu amegbetɔ kpɔ le : Enyo pɛpɛpɛ",
+    "humanVerificationWarning": "Dedienɔnɔ se: Nyatakaka vevi siwo ku ɖe PIN kɔdi, OTP kple ga ɖoɖo ŋu la, amegbetɔ kpɔ wo gbɔ nyuie hafi woɖo afisia."
+  },
+  "nav": {
+    "dashboard": "Dɔwɔƒe vevitɔ",
+    "sms": "Kpɔ SMS gbɔ",
+    "qr": "Kpɔ QR Code gbɔ",
+    "audio": "Kpɔ Gbeɖiɖi gbɔ",
+    "guide": "Lé gbeɖiɖi mɔfiame",
+    "assistant": "CyberSafe Kpekpedenutɔ",
+    "learn": "Nusrɔ̃ƒe",
+    "history": "Nu xoxotɔwo",
+    "about": "Mía ŋuti nyatakaka",
+    "settings": "Ðoɖowo",
+    "openMenu": "Ʋu mɔ̃ ɖoɖowo",
+    "closeMenu": "Tu mɔ̃ ɖoɖowo"
+  },
+  "home": {
+    "welcome": "Woezɔ va CyberSafe Online",
+    "heroTitle": "Wò dedienɔnɔ le nabi mɔ̃ dzi, ",
+    "heroHighlight": "nye míaƒe dɔ vevitɔ.",
+    "heroSubtitle": "Hafi nàɖo eŋu, nàxe ga, alo nàzi dzesi aɖe dzi la : biae gbã. Míedzea Moov Money kple T-Money beble dzesi le sekend ʋɛ aɖewo ko me.",
+    "ctaSms": "Kpɔ SMS gbɔ",
+    "ctaQr": "Kpɔ QR Code gbɔ",
+    "ctaAudio": "Kpɔ Gbeɖiɖi gbɔ",
+    "stats": {
+      "analyses": "Dodokpɔ siwo wowɔ",
+      "threats": "Afɔku siwo wokpɔ",
+      "safe": "Nyatakaka dedie",
+      "storedData": "Nyatakaka siwo wodzra ɖo"
+    },
+    "scanners": {
+      "sms": {
+        "title": "SMS Dzesimɔ̃",
+        "desc": "Da SMS alo foto aɖe ɖe afisia be nàdze fetu vɔ̃, OTP biabia kple dɔwɔla beblenuwo dzesi.",
+        "cta": "Kpɔ SMS gbɔ"
+      },
+      "qr": {
+        "title": "QR Code Dzesimɔ̃",
+        "desc": "Kpɔ nu si le QR Code me dedie evɔ màʋu link gblẽku aɖeke o.",
+        "cta": "Kpɔ QR Code gbɔ"
+      },
+      "audio": {
+        "title": "Gbeɖiɖi Dzesimɔ̃",
+        "desc": "Kpɔ gbe si wolé alo kaƒoƒo si ŋu keɖiɖi le la ƒe eme dedie.",
+        "cta": "Kpɔ Gbeɖiɖi gbɔ"
+      }
+    },
+    "recentAnalyses": "Dodokpɔ yeyetɔwo",
+    "noAnalyses": "Dodokpɔ aɖeke medzɔ haɖe o",
+    "startFirst": "Dze wò dodokpɔ gbãtɔ gɔme fifia.",
+    "dailyTipsTitle": "Aɖaŋuɖoɖo na egbe",
+    "tips": [
+      "Mègatsɔ wò PIN alo OTP kɔdi gbeɖe na ame aɖeke o, kpɔɖeŋu aɖeke mele eme o.",
+      "Ame aɖe be yedo ga na wò le vodada me? Kpɔ wò akɔnta le USSD se dzi gbã.",
+      "Kɔmpaniwo meɖoa link be woaxɔ nunana alo bonus gbeɖe o.",
+      "Tsi kaƒoƒoa ne wole kaba wɔm na wò : dɔwɔla vavã ate ŋu alala."
+    ],
+    "howItWorks": "Ale si CyberSafe Online kpɔa tawòe",
+    "steps": {
+      "step1": {
+        "title": "1. Wò ŋutɔe tsɔe na",
+        "desc": "SMS, QR Code alo gbeɖiɖi si nètia. Míemeléa naneke le adzãme le wò mɔ̃ dzi o."
+      },
+      "step2": {
+        "title": "2. Míekpɔa eme nyuie",
+        "desc": "Dedienɔnɔ sewo, mɔ̃ dzi kadodowo kple CyberSafe AI kpekpeɖeŋu le Eʋegbe, Fransegbe kple Eŋlisigbe me."
+      },
+      "step3": {
+        "title": "3. Wò ŋutɔe tsoa nya me",
+        "desc": "Afɔku ƒe dzesi kɔtɛ, susu siwo tae kple nusi nàwɔ le wò gbe me kɔtɛ."
+      }
+    }
+  },
+  "sms": {
+    "title": "Kpɔ SMS gbɔ",
+    "subtitle": "Da nyagbɔgblɔ si ŋu keɖiɖi le la ɖe afisia. Míedzea kɔdi biabia, amebeble nunana, kple nya bibi dzesi.",
+    "label": "SMS ƒe nuŋɔŋlɔ",
+    "placeholder": "Da SMS si nèxɔ la ɖe afisia… (Français, English alo Eʋegbe)",
+    "warningPin": "Mègagblɔ wò PIN kɔdi ɣaɣla alo gbedasi kɔdi le afisia gbeɖe o.",
+    "analyzeBtn": "Kpɔ nyagbɔgblɔa me",
+    "ocrBtn": "Mɔ̃ ƒe foto (Capture)",
+    "demoTitle": "Kpɔɖeŋu nyatakakawo",
+    "demoSubtitle": "Nyatakaka siwo míewɔ hena dodokpɔ ko.",
+    "extractedTitle": "Nu vevi siwo míekpɔ le eme",
+    "sender": "Ame si ɖoe",
+    "amounts": "Gaxɔxɔ / Gatsɔtsɔ",
+    "links": "Kadodowo (Míemewɔ wo ŋudɔ o)",
+    "phones": "Kaƒomɔ̃ xexlẽdzesiwo",
+    "tooShort": "Nyatakakaa sɔgbɔ o be míakpɔ eme nyuie.",
+    "tooLong": "Nyatakakaa wu xexlẽdzesi 2000.",
+    "completed": "Dodokpɔa wu enu dedie"
+  },
+  "qr": {
+    "title": "Kpɔ QR Code gbɔ",
+    "subtitle": "Kɔ QR Code ƒe foto vɛ. Míeaɖee afia wò evɔ míemaʋu kadoƒea le internet dzi o.",
+    "dropzone": "Dra foto vɛ afisia alo zii dzi be nàtiae",
+    "dropzoneHint": "PNG, JPG alo WEBP (megawu 5 MB o)",
+    "analyzedTitle": "QR Code si me míekpɔ",
+    "contentExtracted": "Nu si le eme",
+    "urlDetected": "URL Kadodo si míekpɔ (Míemewɔe ŋudɔ o)",
+    "demoTitle": "QR Kpɔɖeŋuwo",
+    "demoSubtitle": "Dodokpɔ kple nuteƒekpɔkpɔ siwo dzɔna zi geɖe le Togo.",
+    "formatError": "Foto sia mesɔ o. Zã PNG, JPG alo WEBP.",
+    "sizeError": "Fotonu la lolo akpa (megawu 5 MB o).",
+    "noQrFound": "Míemekpɔ QR Code aɖeke le foto sia me o.",
+    "decoded": "Wokpɔ QR Code la me nyuie."
+  },
+  "audio": {
+    "title": "Kpɔ Gbeɖiɖi gbɔ",
+    "subtitle": "Kpɔ kaƒoƒo si ŋu keɖiɖi le si nèlé la me. Míemeléa gbeɖiɖi aɖeke le eɖokui si o.",
+    "guideBtn": "Aleke woalée?",
+    "fileSection": "1. Gbeɖiɖi ƒe agbalẽvi",
+    "chooseFile": "Tia gbeɖiɖi agbalẽvi",
+    "fileHint": "MP3, WAV, M4A, OGG · megawu 20 MB o",
+    "sttNotice": "Gbeɖiɖi tɔtrɔ va nuŋɔŋlɔ me le eɖokui si: Medze egɔme haɖe o. Gbea le wò mɔ̃ dzi dedie.",
+    "transcriptSection": "2. Nu si wogblɔ le kaƒoƒoa me",
+    "placeholder": "Kpɔɖeŋu: Ebe ye nye Moov dɔwɔla eye wòbia be matsɔ SMS kɔdi na ye… (Français, English alo Eʋegbe)",
+    "analyzeBtn": "Kpɔ kaƒoƒoa me",
+    "demoBtn": "Kpɔɖeŋu gbegbɔgblɔ",
+    "resultTitle": "Kaƒoƒoa ƒe emetsonu",
+    "resultSubtitle": "Amebeble dzesi siwo míekpɔ le nya si wogblɔ me.",
+    "analyzedTranscript": "Nyagbɔgblɔ si me míekpɔ",
+    "privacyNotice": "CyberSafe Online meɖoa to wò kaƒoƒowo gbeɖe o eye dɔ aɖeke mewɔna le megbe o."
+  },
+  "guide": {
+    "title": "Gbeɖiɖi Léle Mɔfiame",
+    "subtitle": "Srɔ̃ ale si nàlé kaƒoƒo vɔ̃ɖiwo dedie le Togo sewo nu.",
+    "legalNotice": "Se kple Agbenyuinɔnɔ Mɔnu: Lé kaƒoƒo ne èle beble vɔ̃ɖi aɖe dzesi kpɔm ko be nàkpɔ ɖokuiwò ta. CyberSafe meléa naneke ne mèɖe mɔ o.",
+    "androidTitle": "Le Android kaƒomɔ̃ dzi",
+    "androidSteps": [
+      "Kpɔe ɖa ne wò kaƒomɔ̃ teƒe kpɔ 'Lé gbe' dzesi esime nèle ka ƒom.",
+      "Ne mele eme o la, do gbea ɖe gblɔ eye nàzã kaƒomɔ̃ bubu ƒe gbelemɔ̃.",
+      "Mègaɖo mɔ̃ bubu madzemadzewo siwo bia mɔɖeɖe vɔ̃ɖiwo ɖe wò mɔ̃ dzi o."
+    ],
+    "iosTitle": "Le iPhone (iOS) dzi",
+    "iosSteps": [
+      "Le iOS 18.1+ dzi la, zi gbeɖiɖi léle dzesi si le etame miame esime kaƒoƒoa le edzi.",
+      "Alo do gbea ɖe gblɔ eye nàzã tablet alo xɔlɔ̃ aɖe ƒe Dictaphone.",
+      "Kɔ gbea vɛ afisia be nàkpɔ eme le CyberSafe Online me."
+    ],
+    "whatNext": "Nu ka nàwɔ le gbea léle megbe?",
+    "whatNextDesc": "Tsi kaƒoƒoa kaba ne amea bia wò PIN alo do vɔvɔ̃ na wò. Kɔ gbea vɛ alo ŋlɔ nya si wogblɔ ɖe míaƒe mɔ̃a me."
+  },
+  "assistant": {
+    "title": "CyberSafe Kpekpedenutɔ",
+    "subtitle": "Bia wò dedienɔnɔ biabiawo alo srɔ̃ nu kple / sewo.",
+    "badge": "CyberSafe Gbe Geɖe AI le dɔ wɔm",
+    "placeholder": "Bia wò nyabiabia alo zã /apprendre, /plan, /quiz... (FR, EN, EE)",
+    "send": "Ɖoe ɖa",
+    "suggested": "Biabia siwo amewo biana zi geɖe",
+    "gemmaStatus": "CyberSafe AI Mɔ̃: Gbe Geɖe Dɔwɔwɔ le edzi (Français, English, Eʋegbe)",
+    "languageUsed": "Gbe si wozã hena eŋuɖoɖo :",
+    "clearChat": "Tutu dzeɖoɖoa ɖa",
+    "eweWarning": "Eʋegbe Nyonyo: Eʋegbe gɔmeɖeɖe kple nufiame sɔ pɛpɛpɛ na Togo Mobile Money dɔwɔwɔ."
+  },
+  "learn": {
+    "title": "Eʋegbe Nusrɔ̃ƒe Multilingue",
+    "subtitle": "Srɔ̃ aɖaŋu nyuiwo hena beble nu tsitsri le Eʋegbe, Fransegbe kple Eŋlisigbe me.",
+    "commandsTitle": "Mɔdodo Kaba siwo mɔ̃a nyana",
+    "commandsDesc": "Ŋlɔ se siawo alo zi wo dzi be nàdze nusrɔ̃ƒea gɔme :",
+    "commands": {
+      "learn": "/apprendre alo /learn — Dze nusrɔ̃ƒe yeye aɖe gɔme",
+      "plan": "/plan — Kpɔ wò nusrɔ̃ɖoɖo blibo",
+      "quiz": "/quiz — Do wò ŋutete kpɔ le nyateƒe dodokpɔ me",
+      "summary": "/resume alo /summary — Xɔ dedienɔnɔ ƒe se veviwo",
+      "stop": "/stop — Tɔ nusrɔ̃dɔ si le edzi fifia"
+    },
+    "modulesTitle": "Nusrɔ̃wɔnawo",
+    "startQuiz": "Dze Dedienɔnɔ Dodokpɔ gɔme",
+    "score": "Wò akɔnta",
+    "congrats": "Akpe na wò! Èkpɔ dzesi nyuiwo nyuie.",
+    "retryQuiz": "Gawɔ dodokpɔa ake",
+    "quizQuestion": "Biabia",
+    "quizExplanation": "Eme kɔkɔ :"
+  },
+  "history": {
+    "title": "Nu xoxotɔwo ƒe agbalẽ",
+    "subtitle": "Kpɔ wò dodokpɔ xoxotɔwo siwo le wò mɔ̃ dzi afisia.",
+    "clearAll": "Tutu nu katã ɖa",
+    "confirmClear": "Èka ɖe edzi be yeatutu dodokpɔ xoxotɔwo katã ɖaa?",
+    "empty": "Dodokpɔ xoxo aɖeke mele afisia o",
+    "emptyDesc": "SMS, QR Code kple gbeɖiɖi siwo nàdo kpɔ la adze afisia.",
+    "filterAll": "Wo katã",
+    "filterSms": "SMS",
+    "filterQr": "QR Code",
+    "filterAudio": "Gbeɖiɖi",
+    "deleted": "Wotutu xoxotɔwo katã ɖa"
+  },
+  "about": {
+    "title": "CyberSafe Online Ŋuti Nyatakaka",
+    "subtitle": "Mɔ̃ vovovo zãlawo katã ƒe dedienɔnɔ mɔ̃ le Togo.",
+    "missionTitle": "Míaƒe Taɖodzinu",
+    "missionDesc": "Wowɔ CyberSafe Online be wòakpɔ Togo dukɔmevi ɖesiaɖe ta tso T-Money, Moov Money kple asitsamɔ̃ dzi beble vɔ̃ɖiwo nu.",
+    "multilingualTitle": "Gbe Geɖe Zazã ƒe Nyaɖoɖo",
+    "multilingualDesc": "Le CyberSafe Online sedede nu la, míezã Fransegbe, Eŋlisigbe kple Eʋegbe tso gɔmedzedzea me ke. CyberSafe AI mɔ̃ kple dɔwɔnuwo nyana ale si Togo dukɔmeviwo fona gbe vovovowo tsakana (code-switching).",
+    "safetyTitle": "Dedienɔnɔ kple Adzãmenyawo Ŋu Kakaɖedzi",
+    "safetyDesc": "Wò nyatakakawo tsi wò ŋutɔ si. Míemeɖoa to ame adzãe o, míemeléa gbe le adzãme o, eye link vɔ̃ɖi aɖeke meʋuna le míaƒe mɔ̃ dzi o."
+  },
+  "settings": {
+    "title": "Ðoɖowo",
+    "subtitle": "Trɔ CyberSafe Online ɖoɖowo le ale si nèdi nu.",
+    "languageSection": "Mɔ̃a kple dodokpɔwo ƒe Gbe",
+    "languageHelp": "Tia gbe si me nèdi be mɔ̃a, afɔkudzesi kɔkɔwo kple CyberSafe AI naɖo eŋu na wò le.",
+    "gemmaSection": "CyberSafe AI Mɔ̃",
+    "gemmaHelp": "CyberSafe AI le klalo be wòakpɔ nya siwo le gbe geɖe me (FR, EN, EE) hena kpekpeɖeŋu nam le wò gbe me.",
+    "verificationSection": "Eʋegbe Nyagɔmeɖeɖe Dzidzenu",
+    "verificationDesc": "Nyatakaka vevi siwo ku ɖe PIN, OTP kple ga ɖoɖo ŋu le Eʋegbe me la, amegbetɔ kpɔ wo gbɔ nyuie hafi woɖo afisia.",
+    "savedSuccess": "Wodzra ɖoɖowo ɖo nyuie"
+  },
+  "risk": {
+    "riskLevel": "Afɔku ƒe dzesi",
+    "localEngineNotice": "Wò mɔ̃ dzi sewo ko ŋue dodokpɔ sia tso · dzesidekɔkɔ",
+    "findingsTitle": "Nu siwo tae míedze eŋu",
+    "noFindings": "Míemekpɔ nu vɔ̃ɖi aɖeke le nya sia me o.",
+    "recommendationsTitle": "Aɖaŋuɖoɖowo",
+    "aiNoticeTitle": "CyberSafe AI Gbe Geɖe Mɔ̃ le Dɔwɔm.",
+    "aiNoticeDesc": "Afɔku dzesiɖenuwo le dɔ wɔm le Fransegbe, Eŋlisigbe kple Eʋegbe me."
+  }
+}

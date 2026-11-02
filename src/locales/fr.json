@@ -1,0 +1,248 @@
+{
+  "common": {
+    "appName": "CyberSafe Online",
+    "tagline": "Votre sécurité numérique, notre priorité.",
+    "slogan": "Protection contre les arnaques Mobile Money au Togo.",
+    "backHome": "Retour à l'accueil",
+    "retry": "Réessayer",
+    "analyze": "Analyser",
+    "reset": "Nouvelle analyse",
+    "loading": "Analyse en cours...",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "viewAll": "Tout voir",
+    "close": "Fermer",
+    "soon": "bientôt",
+    "copy": "Copier",
+    "copied": "Copié dans le presse-papier",
+    "languages": {
+      "fr": "Français",
+      "en": "English",
+      "ee": "Eʋegbe"
+    },
+    "riskLevels": {
+      "low": "Faible",
+      "suspect": "Suspect",
+      "high": "Élevé"
+    },
+    "humanVerificationBadge": "Vérification linguistique humaine : Conforme",
+    "humanVerificationWarning": "Exigence de sécurité : Les alertes sur les codes secrets et transferts font l'objet d'une relecture humaine."
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "sms": "Scanner SMS",
+    "qr": "Scanner QR Code",
+    "audio": "Scanner Audio",
+    "guide": "Enregistrer un appel",
+    "assistant": "Assistant CyberSafe",
+    "learn": "Apprentissage",
+    "history": "Historique",
+    "about": "À propos",
+    "settings": "Paramètres",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
+  },
+  "home": {
+    "welcome": "Bienvenue sur CyberSafe Online",
+    "heroTitle": "Votre sécurité numérique, ",
+    "heroHighlight": "notre priorité.",
+    "heroSubtitle": "Avant de répondre, de payer ou de cliquer : vérifiez. Nous détectons les arnaques Moov Money et T-Money en quelques secondes.",
+    "ctaSms": "Analyser un SMS",
+    "ctaQr": "Scanner un QR Code",
+    "ctaAudio": "Analyser un audio",
+    "stats": {
+      "analyses": "Analyses réalisées",
+      "threats": "Menaces détectées",
+      "safe": "Messages rassurants",
+      "storedData": "Données brutes stockées"
+    },
+    "scanners": {
+      "sms": {
+        "title": "SMS Scanner",
+        "desc": "Collez un SMS ou une capture pour détecter faux bonus, demandes d'OTP et faux agents.",
+        "cta": "Analyser un SMS"
+      },
+      "qr": {
+        "title": "QR Scanner",
+        "desc": "Décodez un QR Code sans ouvrir le lien et vérifiez si le domaine est piégé.",
+        "cta": "Scanner un QR Code"
+      },
+      "audio": {
+        "title": "Audio Scanner",
+        "desc": "Analysez l'enregistrement ou la transcription d'un appel suspect.",
+        "cta": "Analyser un audio"
+      }
+    },
+    "recentAnalyses": "Dernières analyses",
+    "noAnalyses": "Aucune analyse pour l'instant",
+    "startFirst": "Lancez votre première vérification.",
+    "dailyTipsTitle": "Conseils du jour",
+    "tips": [
+      "Votre PIN et vos codes OTP ne se partagent avec personne, jamais.",
+      "Un « transfert par erreur » ? Vérifiez votre solde via le menu officiel avant tout.",
+      "Les opérateurs n'envoient pas de liens pour réclamer un bonus.",
+      "Raccrochez si on vous presse : un vrai agent peut attendre."
+    ],
+    "howItWorks": "Comment CyberSafe Online vous protège",
+    "steps": {
+      "step1": {
+        "title": "1. Vous soumettez",
+        "desc": "Un SMS, un QR Code ou un audio choisi par vous. Rien n'est capté en arrière-plan."
+      },
+      "step2": {
+        "title": "2. Nous analysons",
+        "desc": "Règles de sécurité locales, vérifications d'URL et analyse IA CyberSafe multilingue."
+      },
+      "step3": {
+        "title": "3. Vous décidez",
+        "desc": "Un niveau de risque clair, les raisons détaillées et des conseils concrets dans votre langue."
+      }
+    }
+  },
+  "sms": {
+    "title": "Scanner SMS",
+    "subtitle": "Collez un message suspect. Nous repérons les demandes de code, les faux bonus, les liens piégés et les pressions.",
+    "label": "Contenu du SMS",
+    "placeholder": "Collez ici le SMS reçu… (Français, English ou Eʋegbe)",
+    "warningPin": "Ne saisissez jamais votre PIN ou vos codes ici.",
+    "analyzeBtn": "Analyser le message",
+    "ocrBtn": "Capture d'écran",
+    "demoTitle": "Exemples de démonstration",
+    "demoSubtitle": "Messages entièrement fictifs.",
+    "extractedTitle": "Éléments extraits",
+    "sender": "Expéditeur",
+    "amounts": "Montants",
+    "links": "Liens (non ouverts)",
+    "phones": "Numéros",
+    "tooShort": "Le message est trop court pour être analysé.",
+    "tooLong": "Le message dépasse 2000 caractères.",
+    "completed": "Analyse terminée"
+  },
+  "qr": {
+    "title": "Scanner QR Code",
+    "subtitle": "Téléversez la photo d'un QR Code. Nous affichons son contenu sans jamais ouvrir le lien.",
+    "dropzone": "Glissez une image ici ou cliquez pour choisir",
+    "dropzoneHint": "PNG, JPG ou WEBP (max 5 Mo)",
+    "analyzedTitle": "QR Code analysé",
+    "contentExtracted": "Contenu extrait",
+    "urlDetected": "URL détectée (non ouverte)",
+    "demoTitle": "Exemples de démonstration QR",
+    "demoSubtitle": "Testez avec des cas réels fréquents au Togo.",
+    "formatError": "Format non accepté. Utilisez PNG, JPG ou WEBP.",
+    "sizeError": "Image trop lourde (5 Mo maximum).",
+    "noQrFound": "Aucun QR Code lisible trouvé dans cette image.",
+    "decoded": "QR Code décodé avec succès."
+  },
+  "audio": {
+    "title": "Scanner Audio",
+    "subtitle": "Analysez un appel suspect que vous avez choisi d'enregistrer. Rien n'est enregistré automatiquement.",
+    "guideBtn": "Comment enregistrer un appel ?",
+    "fileSection": "1. Fichier audio",
+    "chooseFile": "Choisir un fichier audio",
+    "fileHint": "MP3, WAV, M4A, OGG · 20 Mo max",
+    "sttNotice": "Transcription automatique (Speech-to-Text) : non connectée pour le moment. Le fichier reste sur votre appareil.",
+    "transcriptSection": "2. Transcription ou description de l'appel",
+    "placeholder": "Ex : Il m'a dit être agent Moov et m'a demandé le code reçu par SMS… (Français, English ou Eʋegbe)",
+    "analyzeBtn": "Analyser l'appel",
+    "demoBtn": "Transcription fictive",
+    "resultTitle": "Résultat de l'appel",
+    "resultSubtitle": "Signaux de manipulation détectés dans la description de l'appel.",
+    "analyzedTranscript": "Transcription analysée",
+    "privacyNotice": "CyberSafe Online n'écoute jamais vos appels et ne fonctionne pas en arrière-plan."
+  },
+  "guide": {
+    "title": "Guide d'enregistrement d'appel",
+    "subtitle": "Apprenez à enregistrer un appel suspect en toute sécurité et conformément aux règles au Togo.",
+    "legalNotice": "Cadre légal & éthique : Enregistrez uniquement les appels où vous suspectez une escroquerie pour vous défendre. CyberSafe n'enregistre jamais rien sans votre accord direct.",
+    "androidTitle": "Sur Android",
+    "androidSteps": [
+      "Vérifiez si l'application Téléphone officielle intègre une touche 'Enregistrer' lors d'un appel.",
+      "Si ce n'est pas disponible, activez le haut-parleur et utilisez le dictaphone d'un second téléphone.",
+      "Ne téléchargez pas d'applications inconnues qui demandent des autorisations excessives."
+    ],
+    "iosTitle": "Sur iPhone (iOS)",
+    "iosSteps": [
+      "Sur iOS 18.1+, appuyez sur l'icône d'enregistrement dans le coin supérieur gauche lors de l'appel.",
+      "Alternativement, passez l'appel sur haut-parleur et enregistrez avec l'application Dictaphone d'une tablette ou d'un proche.",
+      "Exportez le fichier audio pour l'analyser dans CyberSafe Online."
+    ],
+    "whatNext": "Que faire après l'enregistrement ?",
+    "whatNextDesc": "Raccrochez immédiatement si l'interlocuteur réclame votre PIN ou vous menace. Importez l'audio ou transcrivez ses propos dans notre scanner."
+  },
+  "assistant": {
+    "title": "Assistant CyberSafe",
+    "subtitle": "Posez vos questions de cybersécurité ou révisez avec les commandes /.",
+    "badge": "Propulsé par l'IA CyberSafe Multilingue",
+    "placeholder": "Posez votre question ou tapez /apprendre, /plan, /quiz... (FR, EN, EE)",
+    "send": "Envoyer",
+    "suggested": "Questions fréquentes",
+    "gemmaStatus": "Moteur IA CyberSafe : Multilinguisme actif (Français, English, Eʋegbe)",
+    "languageUsed": "Langue de réponse :",
+    "clearChat": "Effacer la conversation",
+    "eweWarning": "Qualité Éwé : Les explications en Eʋegbe sont adaptées au contexte togolais avec terminologie Mobile Money sécurisée."
+  },
+  "learn": {
+    "title": "Espace Apprentissage Multilingue",
+    "subtitle": "Maîtrisez la protection contre les arnaques avec des cours, résumés et quiz interactifs en Français, Anglais et Éwé.",
+    "commandsTitle": "Commandes rapides reconnues",
+    "commandsDesc": "Tapez une commande ou cliquez dessus pour exécuter l'action correspondante :",
+    "commands": {
+      "learn": "/apprendre ou /learn — Démarrer un module d'apprentissage",
+      "plan": "/plan — Consulter votre plan de formation personnalisé",
+      "quiz": "/quiz — Tester vos réflexes avec un quiz de mise en situation",
+      "summary": "/resume ou /summary — Obtenir le résumé des règles d'or",
+      "stop": "/stop — Arrêter la session en cours"
+    },
+    "modulesTitle": "Modules de formation",
+    "startQuiz": "Passer le Quiz de sécurité",
+    "score": "Votre score",
+    "congrats": "Félicitations ! Vous avez les bons réflexes.",
+    "retryQuiz": "Recommencer le quiz",
+    "quizQuestion": "Question",
+    "quizExplanation": "Explication :"
+  },
+  "history": {
+    "title": "Historique des analyses",
+    "subtitle": "Retrouvez vos analyses précédentes stockées localement sur votre appareil.",
+    "clearAll": "Vider l'historique",
+    "confirmClear": "Êtes-vous sûr de vouloir supprimer tout l'historique ?",
+    "empty": "Aucune analyse dans l'historique",
+    "emptyDesc": "Vos scans SMS, QR Codes et appels apparaîtront ici.",
+    "filterAll": "Tous",
+    "filterSms": "SMS",
+    "filterQr": "QR Code",
+    "filterAudio": "Audio",
+    "deleted": "Historique effacé"
+  },
+  "about": {
+    "title": "À propos de CyberSafe Online",
+    "subtitle": "Plateforme inclusive de détection des arnaques numériques au Togo.",
+    "missionTitle": "Notre Mission",
+    "missionDesc": "CyberSafe Online est conçu pour protéger chaque citoyen togolais contre les fraudes ciblant T-Money, Moov Money et les services bancaires numériques.",
+    "multilingualTitle": "Engagement pour le Multilinguisme",
+    "multilingualDesc": "Conformément aux exigences de la spécification CyberSafe Online, la plateforme intègre dès sa conception le Français, l'Anglais et l'Éwé (Eʋegbe). Le moteur d'analyse IA CyberSafe est adapté aux réalités linguistiques locales, y compris le code-switching et les terminologies régionales.",
+    "safetyTitle": "Exigences de Sécurité & Confidentialité",
+    "safetyDesc": "Vos données restent sous votre contrôle. Aucune écoute passive, aucun enregistrement furtif, aucun lien piégé n'est ouvert sur nos serveurs."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Personnalisez votre expérience CyberSafe Online.",
+    "languageSection": "Langue de l'interface et des analyses",
+    "languageHelp": "Choisissez la langue dans laquelle l'interface, les explications de risque et l'assistant IA CyberSafe répondront.",
+    "gemmaSection": "Moteur d'IA CyberSafe",
+    "gemmaHelp": "L'IA CyberSafe est configurée pour analyser les messages multilingues (FR, EN, EE) et formuler les explications selon la langue choisie.",
+    "verificationSection": "Vérification linguistique humaine",
+    "verificationDesc": "Tous les messages de sécurité critiques relatifs aux codes PIN, OTP et transferts d'argent en Éwé font l'objet d'une validation linguistique stricte avant diffusion.",
+    "savedSuccess": "Paramètres enregistrés"
+  },
+  "risk": {
+    "riskLevel": "Niveau de risque",
+    "localEngineNotice": "Analyse par règles de sécurité locales · score indicatif",
+    "findingsTitle": "Raisons de la détection",
+    "noFindings": "Aucun élément suspect identifié par nos règles.",
+    "recommendationsTitle": "Recommandations",
+    "aiNoticeTitle": "Analyse IA CyberSafe connectée.",
+    "aiNoticeDesc": "Les règles de détection sont enrichies pour le Français, l'Anglais et l'Éwé."
+  }
+}
